@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "725343694902",
+    "project_id": "overcloud-f3f45",
+    "storage_bucket": "overcloud-f3f45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:725343694902:android:eca82b5705f83514c86897",
+        "android_client_info": {
+          "package_name": "com.example.overcloud"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1bPHf-JELSnZaVveje9PvvPYP68fOouA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
