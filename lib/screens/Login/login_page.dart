@@ -17,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool obscure = true;
   bool isChecked = false;
+  int tabIndex = 0;
 
   @override
   void dispose() {
@@ -31,323 +32,412 @@ class _LoginPageState extends State<LoginPage> {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Color.fromRGBO(15, 15, 15, 1),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: 330,
-            child: Stack(
-              children: [
-                Transform.translate(
-                  offset: const Offset(40, 10),
-                  child: Image.asset(
-                    "assets/images/background_login4.png",
-                    width: width,
-                    height: 500,
-                  ),
-                ),
-
-                Positioned(
-                  top: 70,
-                  left: 20,
-                  bottom: 0,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Step Into,",
-                        style: GoogleFonts.playfairDisplay(
-                          shadows: [
-                            Shadow(
-                              color: Colors.white.withOpacity(1),
-                              offset: Offset(0, 0),
-                              blurRadius: 100,
-                            ),
-                          ],
-                          color: Colors.white,
-                          fontSize: 35,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "OverCloud",
-                        style: GoogleFonts.playfairDisplay(
-                          shadows: [
-                            Shadow(
-                              color: Colors.deepOrange.withOpacity(1),
-                              offset: const Offset(0, 0),
-                              blurRadius: 100,
-                            ),
-                          ],
-                          color: Colors.deepOrange,
-                          fontSize: 35,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                      Container(
-                        height: 0.5,
-                        width: 200,
-                        color: Colors.deepOrange,
-                      ),
-                      SizedBox(height: 15),
-                      Text(
-                        "The Cloud, Reimagined",
-                        style: GoogleFonts.playfairDisplay(
-                          shadows: [
-                            Shadow(
-                              color: Colors.white.withOpacity(0.8),
-                              offset: Offset(0, 0),
-                              blurRadius: 100,
-                            ),
-                          ],
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      Text(
-                        "Secure. Scalable. Limitless.",
-                        style: GoogleFonts.urbanist(
-                          color: Colors.white70,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      Text(
-                        "Everything in one cloud.",
-                        style: GoogleFonts.urbanist(
-                          color: Colors.white70,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          //   child: Container(
-          //     height: 110,
-          //     width: width,
-          //     decoration: BoxDecoration(
-          //       color: Color.fromRGBO(29, 29, 29, 0.8235294117647058),
-          //       boxShadow: [
-          //         BoxShadow(
-          //           blurStyle: BlurStyle.outer,
-          //           color: Colors.black.withOpacity(0.3),
-          //
-          //           blurRadius: 10,
-          //         ),
-          //       ],
-          //       borderRadius: BorderRadius.circular(20),
-          //     ),
-          //     child: Padding(
-          //       padding: const EdgeInsets.symmetric(vertical: 15.0),
-          //       child: Row(
-          //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //         children: [
-          //           SizedBox(),
-          //           InfoTabs(Icons.cloud_done_outlined, 35, "Secure"),
-          //           VerticalDivider(
-          //             color: Colors.white38,
-          //             thickness: 0.5,
-          //             width: 20,
-          //           ),
-          //           InfoTabs(Icons.widgets_outlined, 28, "Scalable"),
-          //           VerticalDivider(
-          //             color: Colors.white38,
-          //             thickness: 0.5,
-          //             width: 20,
-          //           ),
-          //           InfoTabs(Icons.bolt_outlined, 32, "Fast"),
-          //           VerticalDivider(
-          //             color: Colors.white38,
-          //             thickness: 0.5,
-          //             width: 20,
-          //           ),
-          //           InfoTabs(Icons.verified_user_outlined, 30, "Reliable"),
-          //           SizedBox(),
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Container(
-              width: width,
-              height: 400,
-
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
-                    blurRadius: 10,
-                    offset: Offset(0, 5),
-                  ),
-                ],
-                color: Color.fromRGBO(29, 29, 29, 0.8235294117647058),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-
+      body: SingleChildScrollView(
+        // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 330,
+              child: Stack(
                 children: [
-                  SizedBox(height: 20),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Text(
-                      "Sign In to Continue to OverCloud",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.urbanist(
-                        color: Colors.white54,
-
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  Transform.translate(
+                    offset: const Offset(40, 10),
+                    child: Image.asset(
+                      "assets/images/background_login4.png",
+                      width: width,
+                      height: 500,
                     ),
                   ),
-                  SizedBox(height: 30),
-                  customTextField(
-                    "Email",
-                    emailController,
-                    false,
-                    Icons.email_outlined,
-                  ),
-                  SizedBox(height: 20),
-                  customTextField(
-                    "Password",
-                    passwordController,
-                    obscure,
-                    Icons.lock_outline_rounded,
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                  Positioned(
+                    top: 70,
+                    left: 20,
+                    bottom: 0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              checkColor: Colors.white,
-                              activeColor: Colors.deepOrange,
-                              value: isChecked,
-                              onChanged: ((value) => setState(() {
-                                isChecked = value!;
-                              })),
-                            ),
-                            Text(
-                              "Remember Me",
-                              style: GoogleFonts.urbanist(
-                                color: Colors.white54,
-                                fontSize: 14,
+                        Text(
+                          "Step Into,",
+                          style: GoogleFonts.playfairDisplay(
+                            shadows: [
+                              Shadow(
+                                color: Colors.white.withOpacity(1),
+                                offset: Offset(0, 0),
+                                blurRadius: 100,
                               ),
-                            ),
-                          ],
+                            ],
+                            color: Colors.white,
+                            fontSize: 35,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Text(
-                            "Forgot Password?",
-                            style: GoogleFonts.urbanist(
-                              color: Colors.deepOrange,
-                            ),
+                        Text(
+                          "OverCloud",
+                          style: GoogleFonts.playfairDisplay(
+                            shadows: [
+                              Shadow(
+                                color: Colors.deepOrange.withOpacity(1),
+                                offset: const Offset(0, 0),
+                                blurRadius: 100,
+                              ),
+                            ],
+                            color: Colors.deepOrange,
+                            fontSize: 35,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 15),
+                        Container(
+                          height: 0.5,
+                          width: 200,
+                          color: Colors.deepOrange,
+                        ),
+                        SizedBox(height: 15),
+                        Text(
+                          "The Cloud, Reimagined",
+                          style: GoogleFonts.playfairDisplay(
+                            shadows: [
+                              Shadow(
+                                color: Colors.white.withOpacity(0.8),
+                                offset: Offset(0, 0),
+                                blurRadius: 100,
+                              ),
+                            ],
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        Text(
+                          "Secure. Scalable. Limitless.",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        Text(
+                          "Everything in one cloud.",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Container(
-                      width: double.infinity,
-                      height: 45,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.6),
-                            blurRadius: 10,
-                            offset: Offset(0, 5),
-                          ),
-                          BoxShadow(
-                            color: Colors.deepOrange.withOpacity(0.4),
-                            blurRadius: 10,
-                            offset: Offset(0, -5),
-                          ),
-                        ],
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFFFF7A00),
-                            Color(0xFFFF3D00),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                                            ),
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          minimumSize: Size(width, 45),
-
-
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SizedBox(),
-                            Text(
-                              "Sign In",
-                              style: GoogleFonts.urbanist(
-                                color: Colors.white70,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold
-                              ),
-                            ),
-                            FaIcon(FontAwesomeIcons.arrowRight,color: Colors.white70,)
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 30,),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                      Expanded(child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Container(height: 0.5,color: Colors.white60,),
-                      )),
-                      Text("Or Continue With",style: GoogleFonts.urbanist(color: Colors.white70),),
-                      Expanded(child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Container(height: 0.5,width: double.infinity,color: Colors.white60,),
-                      )),
-                    ],),
-                  )
 
 
                 ],
               ),
             ),
-          ),
 
-        ],
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            //   child: Container(
+            //     height: 110,
+            //     width: width,
+            //     decoration: BoxDecoration(
+            //       color: Color.fromRGBO(29, 29, 29, 0.8235294117647058),
+            //       boxShadow: [
+            //         BoxShadow(
+            //           blurStyle: BlurStyle.outer,
+            //           color: Colors.black.withOpacity(0.3),
+            //
+            //           blurRadius: 10,
+            //         ),
+            //       ],
+            //       borderRadius: BorderRadius.circular(20),
+            //     ),
+            //     child: Padding(
+            //       padding: const EdgeInsets.symmetric(vertical: 15.0),
+            //       child: Row(
+            //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //         children: [
+            //           SizedBox(),
+            //           InfoTabs(Icons.cloud_done_outlined, 35, "Secure"),
+            //           VerticalDivider(
+            //             color: Colors.white38,
+            //             thickness: 0.5,
+            //             width: 20,
+            //           ),
+            //           InfoTabs(Icons.widgets_outlined, 28, "Scalable"),
+            //           VerticalDivider(
+            //             color: Colors.white38,
+            //             thickness: 0.5,
+            //             width: 20,
+            //           ),
+            //           InfoTabs(Icons.bolt_outlined, 32, "Fast"),
+            //           VerticalDivider(
+            //             color: Colors.white38,
+            //             thickness: 0.5,
+            //             width: 20,
+            //           ),
+            //           InfoTabs(Icons.verified_user_outlined, 30, "Reliable"),
+            //           SizedBox(),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Container(
+                width: width,
+
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                  color: Color.fromRGBO(29, 29, 29, 0.8235294117647058),
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+
+                  children: [
+                    SizedBox(height: 20),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 150.0),
+                      child: Divider(color: Colors.white24,height: 5,thickness: 5,radius: BorderRadius.circular(20),)
+                    ),
+                    SizedBox(height: 30),
+                    customTextField(
+                      "Email",
+                      emailController,
+                      false,
+                      Icons.email_outlined,
+                    ),
+                    SizedBox(height: 20),
+                    customTextField(
+                      "Password",
+                      passwordController,
+                      obscure,
+                      Icons.lock_outline_rounded,
+                    ),
+                    SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox(
+                                checkColor: Colors.white,
+                                activeColor: Colors.deepOrange,
+                                value: isChecked,
+                                onChanged: ((value) => setState(() {
+                                  isChecked = value!;
+                                })),
+                              ),
+                              Text(
+                                "Remember Me",
+                                style: GoogleFonts.urbanist(
+                                  color: Colors.white54,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () {},
+                            child: Text(
+                              "Forgot Password?",
+                              style: GoogleFonts.urbanist(
+                                color: Colors.deepOrange,
+                                fontWeight: FontWeight.bold
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Container(
+                        width: double.infinity,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.6),
+                              blurRadius: 10,
+                              offset: Offset(0, 5),
+                            ),
+                            BoxShadow(
+                              color: Colors.deepOrange.withOpacity(0.4),
+                              blurRadius: 10,
+                              offset: Offset(0, -5),
+                            ),
+                          ],
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFF7A00), Color(0xFFFF3D00)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            minimumSize: Size(width, 45),
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(),
+                              Text(
+                                "Sign In",
+                                style: GoogleFonts.urbanist(
+                                  color: Colors.white70,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              FaIcon(
+                                FontAwesomeIcons.arrowRight,
+                                color: Colors.white70,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0,
+                              ),
+                              child: Container(
+                                height: 0.5,
+                                color: Colors.white60,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "Or Continue With",
+                            style: GoogleFonts.urbanist(color: Colors.white70),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0,
+                              ),
+                              child: Container(
+                                height: 0.5,
+                                width: double.infinity,
+                                color: Colors.white60,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Container(
+                        height: 45,
+                        width: 150,
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.4),
+                              blurRadius: 10,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                          border: Border.all(color: Colors.white24,width: 0.5),
+                          borderRadius: BorderRadius.circular(20),
+                          color:Color.fromRGBO(29, 29, 29, 1),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset("assets/logos/google_logo.png",width: 20,height: 20,),
+                              SizedBox(width: 10,),
+                              Text(
+                                "Google",
+                                style: GoogleFonts.urbanist(
+                                  color: Colors.white70,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white54,
+                            fontSize: 15,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            // Navigate to Sign Up
+                          },
+                          child: Text(
+                            "Sign Up",
+                            style: GoogleFonts.urbanist(
+                              color: Colors.deepOrange,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ),
+
+          ],
+        ),
       ),
     );
   }
@@ -402,7 +492,6 @@ class _LoginPageState extends State<LoginPage> {
               blurRadius: 10,
               offset: Offset(0, 5),
             ),
-
           ],
           color: Color.fromRGBO(29, 29, 29, 1),
           borderRadius: BorderRadius.circular(18),
@@ -419,6 +508,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: controller,
                 obscureText: obscure,
                 style: GoogleFonts.urbanist(color: Colors.white, fontSize: 16),
+
 
                 decoration: InputDecoration(
                   border: InputBorder.none,
