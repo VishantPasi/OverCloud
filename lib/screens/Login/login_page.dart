@@ -1,8 +1,13 @@
 import 'dart:ui';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
+
+
+import '../home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,14 +26,10 @@ class _LoginPageState extends State<LoginPage> {
   FocusNode emailFocus = FocusNode();
   FocusNode passwordFocus = FocusNode();
 
-
   @override
   void initState() {
-
     super.initState();
   }
-
-
 
   @override
   void dispose() {
@@ -37,6 +38,81 @@ class _LoginPageState extends State<LoginPage> {
     emailFocus.dispose();
     passwordFocus.dispose();
     super.dispose();
+  }
+
+  void ErrorMessage(String title, String message) {
+    showDialog(context: context, builder: (BuildContext context){
+      return AlertDialog(
+
+        backgroundColor: const Color.fromRGBO(29, 29, 29, 1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        constraints: BoxConstraints(maxWidth: 200),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Lottie.asset("assets/animations/error.json", width: 100, height: 100),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              style: GoogleFonts.urbanist(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.urbanist(
+                color: Colors.white70,
+                fontSize: 14,
+                fontWeight: FontWeight.w600
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                "OK",
+                style: GoogleFonts.urbanist(
+                  color: Colors.deepOrange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Future<void> login() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage()));
+    } on FirebaseAuthException catch (e) {
+      debugPrint(e.code);
+      if (e.code == "invalid-email") {
+        ErrorMessage("Invalid Email Format", "The Email Id is badly formatted.");
+      }
+      else if(e.code == "invalid-credential"){
+        ErrorMessage("Invalid Email/Password", "Please Enter Correct Email or Password");
+      }
+      else if(e.code == "user-disabled"){
+        ErrorMessage("Account Disabled", "This user account has been disabled.");
+      }
+      else if(e.code == "too-many-requests"){
+        ErrorMessage("Too Many Requests", "Too many unsuccessful login attempts. Please try again later.");
+      }
+      else {
+        ErrorMessage("Login Error", e.message ?? "An unknown error occurred.");
+      }
+    }
   }
 
   @override
@@ -52,7 +128,6 @@ class _LoginPageState extends State<LoginPage> {
             emailFocus.unfocus();
             passwordFocus.unfocus();
           });
-
         },
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -151,70 +226,17 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                     ),
-
-
                   ],
                 ),
               ),
-
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              //   child: Container(
-              //     height: 110,
-              //     width: width,
-              //     decoration: BoxDecoration(
-              //       color: Color.fromRGBO(29, 29, 29, 0.8235294117647058),
-              //       boxShadow: [
-              //         BoxShadow(
-              //           blurStyle: BlurStyle.outer,
-              //           color: Colors.black.withOpacity(0.3),
-              //
-              //           blurRadius: 10,
-              //         ),
-              //       ],
-              //       borderRadius: BorderRadius.circular(20),
-              //     ),
-              //     child: Padding(
-              //       padding: const EdgeInsets.symmetric(vertical: 15.0),
-              //       child: Row(
-              //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //         children: [
-              //           SizedBox(),
-              //           InfoTabs(Icons.cloud_done_outlined, 35, "Secure"),
-              //           VerticalDivider(
-              //             color: Colors.white38,
-              //             thickness: 0.5,
-              //             width: 20,
-              //           ),
-              //           InfoTabs(Icons.widgets_outlined, 28, "Scalable"),
-              //           VerticalDivider(
-              //             color: Colors.white38,
-              //             thickness: 0.5,
-              //             width: 20,
-              //           ),
-              //           InfoTabs(Icons.bolt_outlined, 32, "Fast"),
-              //           VerticalDivider(
-              //             color: Colors.white38,
-              //             thickness: 0.5,
-              //             width: 20,
-              //           ),
-              //           InfoTabs(Icons.verified_user_outlined, 30, "Reliable"),
-              //           SizedBox(),
-              //         ],
-              //       ),
-              //     ),
-              //   ),
-              // ),
               SizedBox(height: 20),
               AnimatedContainer(
                 duration: Duration(milliseconds: 350),
-                curve: Curves.easeInOut,
+                curve: Curves.easeInBack,
                 margin: const EdgeInsets.symmetric(horizontal: 8),
                 transform: Matrix4.translationValues(
                   0,
-                  MediaQuery.of(context).viewInsets.bottom > 0
-                      ? -280
-                      : 0,
+                  MediaQuery.of(context).viewInsets.bottom > 0 ? -280 : 0,
                   0,
                 ),
                 child: Container(
@@ -234,7 +256,10 @@ class _LoginPageState extends State<LoginPage> {
                       start: BorderSide(color: Colors.white24, width: 0.5),
                       end: BorderSide(color: Colors.white24, width: 0.5),
                     ),
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -244,7 +269,12 @@ class _LoginPageState extends State<LoginPage> {
 
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 150.0),
-                        child: Divider(color: Colors.white24,height: 5,thickness: 5,radius: BorderRadius.circular(20),)
+                        child: Divider(
+                          color: Colors.white24,
+                          height: 5,
+                          thickness: 5,
+                          radius: BorderRadius.circular(20),
+                        ),
                       ),
                       SizedBox(height: 30),
                       customTextField(
@@ -293,7 +323,7 @@ class _LoginPageState extends State<LoginPage> {
                                 "Forgot Password?",
                                 style: GoogleFonts.urbanist(
                                   color: Colors.deepOrange,
-                                  fontWeight: FontWeight.bold
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
@@ -327,7 +357,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: login,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               minimumSize: Size(width, 45),
@@ -376,7 +406,9 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             Text(
                               "Or Continue With",
-                              style: GoogleFonts.urbanist(color: Colors.white70),
+                              style: GoogleFonts.urbanist(
+                                color: Colors.white70,
+                              ),
                             ),
                             Expanded(
                               child: Padding(
@@ -407,15 +439,17 @@ class _LoginPageState extends State<LoginPage> {
                                 offset: Offset(0, 5),
                               ),
                             ],
-                            border: Border.all(color: Colors.white24,width: 0.5),
+                            border: Border.all(
+                              color: Colors.white24,
+                              width: 0.5,
+                            ),
                             borderRadius: BorderRadius.circular(20),
-                            color:Color.fromRGBO(29, 29, 29, 1),
+                            color: Color.fromRGBO(29, 29, 29, 1),
                           ),
                           child: ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
-
 
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15),
@@ -424,8 +458,12 @@ class _LoginPageState extends State<LoginPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image.asset("assets/logos/google_logo.png",width: 20,height: 20,),
-                                SizedBox(width: 10,),
+                                Image.asset(
+                                  "assets/logos/google_logo.png",
+                                  width: 20,
+                                  height: 20,
+                                ),
+                                SizedBox(width: 10),
                                 Text(
                                   "Google",
                                   style: GoogleFonts.urbanist(
@@ -470,7 +508,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
             ],
           ),
         ),
@@ -561,57 +598,6 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget InfoTabs(IconData? icon, double size, String text) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          height: 50,
-          width: 50,
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                blurStyle: BlurStyle.outer,
-                color: const Color.fromARGB(195, 255, 86, 34).withOpacity(0.5),
-                offset: const Offset(0, 0),
-                blurRadius: 15,
-              ),
-            ],
-            // border: Border.all(color: Colors.deepOrange, width: 1),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Icon(
-              icon,
-              color: Colors.deepOrange,
-              size: size,
-              shadows: [
-                Shadow(
-                  color: const Color.fromARGB(195, 255, 86, 34),
-                  offset: Offset(0, 0),
-                  blurRadius: 40,
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2.0),
-          child: Text(
-            text,
-            style: GoogleFonts.urbanist(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
