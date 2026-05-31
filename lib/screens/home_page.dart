@@ -55,74 +55,77 @@ class _HomePageState extends State<HomePage> {
         extendBody: true,
         bottomNavigationBar: (bottomBarPages.length <= maxCount)
             ? AnimatedNotchBottomBar(
-                notchBottomBarController: _controller,
-                showLabel: true,
-                shadowElevation: 5,
-                bottomBarHeight: 80,
-                showShadow: false,
+          notchBottomBarController: _controller,
 
-                color: const Color.fromRGBO(40, 40, 40, 1),
+          bottomBarHeight: 62,
+          circleMargin: 3,
+          kIconSize: 22,
 
-                notchColor: Colors.deepOrange,
-                itemLabelStyle: GoogleFonts.urbanist(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-                bottomBarItems: const [
-                  BottomBarItem(
-                    inActiveItem: FaIcon(
-                      FontAwesomeIcons.house,
-                      color: Colors.white,
-                    ),
-                    activeItem: FaIcon(
-                      FontAwesomeIcons.solidHouse,
-                      color: Colors.white,
-                    ),
-                    itemLabel: 'Home',
-                  ),
-                  BottomBarItem(
-                    inActiveItem: FaIcon(
-                      FontAwesomeIcons.folder,
-                      color: Colors.white,
-                    ),
-                    activeItem: FaIcon(
-                      FontAwesomeIcons.solidFolder,
-                      color: Colors.white,
-                    ),
-                    itemLabel: 'Files',
-                  ),
-                  BottomBarItem(
-                    inActiveItem: FaIcon(
-                      FontAwesomeIcons.bell,
-                      color: Colors.white,
-                    ),
-                    activeItem: FaIcon(
-                      FontAwesomeIcons.solidBell,
-                      color: Colors.white,
-                    ),
-                    itemLabel: 'Updates',
-                  ),
-                  BottomBarItem(
-                    inActiveItem: FaIcon(
-                      FontAwesomeIcons.plus,
-                      color: Colors.white,
-                    ),
-                    activeItem: FaIcon(
-                      FontAwesomeIcons.plus,
-                      color: Colors.white,
-                    ),
-                    itemLabel: 'Upload',
-                  ),
-                ],
+          showLabel: true,
 
-                onTap: (index) {
-                  debugPrint("index $index");
-                  _pageController.jumpToPage(index);
-                },
-                kIconSize: 24,
-                kBottomRadius: 28,
-              )
+          color: Color.fromRGBO(40, 40, 40, 1),
+          notchColor: Colors.deepOrange,
+
+          itemLabelStyle: GoogleFonts.urbanist(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+
+          bottomBarItems: const [
+            BottomBarItem(
+              inActiveItem: FaIcon(
+                FontAwesomeIcons.house,
+                color: Colors.white,
+              ),
+              activeItem: FaIcon(
+                FontAwesomeIcons.house,
+                color: Colors.white,
+              ),
+              itemLabel: 'Home',
+            ),
+
+            BottomBarItem(
+              inActiveItem: FaIcon(
+                FontAwesomeIcons.folder,
+                color: Colors.white,
+              ),
+              activeItem: FaIcon(
+                FontAwesomeIcons.solidFolder,
+                color: Colors.white,
+              ),
+              itemLabel: 'Files',
+            ),
+
+            BottomBarItem(
+              inActiveItem: FaIcon(
+                FontAwesomeIcons.bell,
+                color: Colors.white,
+              ),
+              activeItem: FaIcon(
+                FontAwesomeIcons.solidBell,
+                color: Colors.white,
+              ),
+              itemLabel: 'Updates',
+            ),
+
+            BottomBarItem(
+              inActiveItem: FaIcon(
+                FontAwesomeIcons.plus,
+                color: Colors.white,
+              ),
+              activeItem: FaIcon(
+                FontAwesomeIcons.plus,
+                color: Colors.white,
+              ),
+              itemLabel: 'Upload',
+            ),
+          ],
+
+          onTap: (index) {
+            _pageController.jumpToPage(index);
+          }, kBottomRadius: 28,
+        )
             : null,
       ),
     );
@@ -134,22 +137,106 @@ class HomeContent extends StatelessWidget {
 
   const HomeContent({Key? key, this.controller}) : super(key: key);
 
+  Widget greetingText() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return Row(
+        children: [
+          Text(
+            "Good Morning ",
+            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 16),
+          ),
+          FaIcon(FontAwesomeIcons.sun, color: Colors.deepOrange),
+        ],
+      );
+    } else if (hour < 17) {
+      return Row(
+        children: [
+          Text(
+            "Good Afternoon ",
+            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 16),
+          ),
+          FaIcon(FontAwesomeIcons.cloudSun, color: Colors.deepOrange),
+        ],
+      );
+    } else {
+      return Row(
+        children: [
+          Text(
+            "Good Evening ",
+            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 16),
+          ),
+          FaIcon(FontAwesomeIcons.cloudSun, color: Colors.deepOrange),
+        ],
+      );
+    }
+  }
+
+  Widget InitialsAvatar() {
+    return CircleAvatar(
+      radius: 26,
+      backgroundColor: Colors.deepOrange,
+      child: Text(
+        "VP",
+        style: GoogleFonts.robotoMono(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Container(
       height: size.height,
       width: size.width,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50),
       decoration: BoxDecoration(color: Color.fromRGBO(15, 15, 15, 1)),
       child: Column(
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  greetingText(),
+                  Text(
+                    'User Name',
+                    style: GoogleFonts.urbanist(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              InitialsAvatar(),
+            ],
+          ),
           const SizedBox(height: 50),
-          const Text(
-            'Home Page',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          Container(
+            height: 200,
+            width: size.width,
+            decoration: BoxDecoration(
+              color: Colors.deepOrange.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.deepOrange.withOpacity(0.3),width: 0.5)
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      "CLOUD STORAGE",
+                      style: GoogleFonts.urbanist(color: Colors.white24),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -164,7 +251,7 @@ class Page2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.green,
+      color: Color.fromRGBO(15, 15, 15, 1),
       child: const Center(child: Text('Files Screen')),
     );
   }
@@ -176,7 +263,7 @@ class Page3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.red,
+      color: Color.fromRGBO(15, 15, 15, 1),
       child: const Center(child: Text('Notifications')),
     );
   }
@@ -188,20 +275,8 @@ class Page4 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue,
+      color: Color.fromRGBO(15, 15, 15, 1),
       child: const Center(child: Text('Upload Screen')),
-    );
-  }
-}
-
-class Page5 extends StatelessWidget {
-  const Page5({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.lightGreenAccent,
-      child: const Center(child: Text('Page 5')),
     );
   }
 }
