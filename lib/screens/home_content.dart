@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 class HomeContent extends StatelessWidget {
   final NotchBottomBarController? controller;
 
-  const HomeContent({Key? key, this.controller}) : super(key: key);
+  const HomeContent({super.key, this.controller});
 
   Widget greetingText() {
     final hour = DateTime.now().hour;
@@ -15,8 +14,8 @@ class HomeContent extends StatelessWidget {
       return Row(
         children: [
           Text(
-            "Good Morning  ",
-            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 14),
+            "GOOD MORNING  ",
+            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 14,fontWeight: FontWeight.w500,letterSpacing: 1),
           ),
           FaIcon(FontAwesomeIcons.sun, color: Colors.deepOrange, size: 20),
         ],
@@ -25,9 +24,9 @@ class HomeContent extends StatelessWidget {
       return Row(
         children: [
           Text(
-            "Good Afternoon  ",
-            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 14),
-          ),
+            "GOOD AFTERNOON  ",
+            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 14,fontWeight: FontWeight.w500,letterSpacing: 1)),
+          
           FaIcon(FontAwesomeIcons.cloudSun, color: Colors.deepOrange, size: 20),
         ],
       );
@@ -35,8 +34,8 @@ class HomeContent extends StatelessWidget {
       return Row(
         children: [
           Text(
-            "Good Evening  ",
-            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 14),
+            "GOOD EVENING  ",
+            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 14,fontWeight: FontWeight.w500,letterSpacing: 1),
           ),
           FaIcon(FontAwesomeIcons.cloudSun, color: Colors.deepOrange, size: 20),
         ],
@@ -124,7 +123,7 @@ class HomeContent extends StatelessWidget {
                         color: Color.fromRGBO(40, 40, 40, 1),
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           width: 0.5,
                         ),
                       ),
@@ -135,7 +134,7 @@ class HomeContent extends StatelessWidget {
                         ),
                         decoration: InputDecoration(
                           isDense: true,
-              
+
                           contentPadding: EdgeInsets.symmetric(vertical: 10),
                           hintText: "Search your files, folders...",
                           hintStyle: GoogleFonts.urbanist(
@@ -143,7 +142,7 @@ class HomeContent extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                           prefixIcon: Icon(Icons.search, color: Colors.white38),
-              
+
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -155,13 +154,13 @@ class HomeContent extends StatelessWidget {
                   Container(
                     height: 40,
                     width: 40,
-              
+
                     margin: EdgeInsets.only(left: 10),
                     decoration: BoxDecoration(
                       color: Color.fromRGBO(40, 40, 40, 1),
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         width: 0.5,
                       ),
                     ),
@@ -175,19 +174,19 @@ class HomeContent extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 25),
-              
+
               Container(
                 height: 150,
                 width: size.width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     width: 1,
                   ),
-              
+
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -197,7 +196,7 @@ class HomeContent extends StatelessWidget {
                       Color.fromRGBO(120, 35, 0, 1),
                     ],
                   ),
-              
+
                   boxShadow: [
                     BoxShadow(
                       color: Color.fromRGBO(255, 98, 0, 0.35),
@@ -250,7 +249,7 @@ class HomeContent extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-              
+
                           FractionallySizedBox(
                             widthFactor: 0.3,
                             child: Container(
@@ -264,7 +263,7 @@ class HomeContent extends StatelessWidget {
                                     Color.fromRGBO(255, 128, 0, 1),
                                   ],
                                 ),
-              
+
                                 boxShadow: [
                                   BoxShadow(
                                     color: Color.fromRGBO(255, 120, 30, 0.5),
@@ -290,7 +289,7 @@ class HomeContent extends StatelessWidget {
                       Colors.deepOrange,
                       "Photos",
                       FontAwesomeIcons.photoFilm,
-              
+
                       "120",
                     ),
                     SizedBox(width: 10),
@@ -298,7 +297,7 @@ class HomeContent extends StatelessWidget {
                       const Color.fromRGBO(255, 196, 87, 1),
                       "Docs",
                       FontAwesomeIcons.solidFileLines,
-              
+
                       "45",
                     ),
                     SizedBox(width: 10),
@@ -306,7 +305,7 @@ class HomeContent extends StatelessWidget {
                       const Color.fromARGB(255, 244, 54, 92),
                       "Videos",
                       FontAwesomeIcons.solidCirclePlay,
-              
+
                       "23",
                     ),
                     SizedBox(width: 10),
@@ -314,7 +313,7 @@ class HomeContent extends StatelessWidget {
                       const Color.fromARGB(226, 64, 251, 189),
                       "Audio",
                       FontAwesomeIcons.music,
-              
+
                       "15",
                     ),
                     SizedBox(width: 10),
@@ -322,7 +321,7 @@ class HomeContent extends StatelessWidget {
                       const Color.fromARGB(255, 64, 170, 251),
                       "More",
                       FontAwesomeIcons.ellipsis,
-              
+
                       "",
                     ),
                   ],
@@ -330,11 +329,12 @@ class HomeContent extends StatelessWidget {
               ),
               SizedBox(height: 20),
               Text(
-                "Quick Access",
+                "QUICK ACCESS",
                 style: GoogleFonts.urbanist(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 3,
                 ),
               ),
               SizedBox(height: 10),
@@ -343,39 +343,40 @@ class HomeContent extends StatelessWidget {
                   quickAccess(
                     "1.2K",
                     "Files",
-                  
+
                     FontAwesomeIcons.solidFolderOpen,
                     const Color.fromRGBO(255, 196, 87, 1),
                   ),
                   quickAccess(
                     "24",
                     "Private",
-                   
+
                     FontAwesomeIcons.userLock,
                     const Color.fromRGBO(255, 120, 80, 1),
                   ),
                   quickAccess(
                     "87",
                     "Starred",
-                    
+
                     FontAwesomeIcons.solidStar,
                     const Color.fromRGBO(255, 170, 60, 1),
                   ),
                 ],
               ),
               SizedBox(height: 30),
-              
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Recent Files",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                        "RECENT FILES",
+                        style: GoogleFonts.urbanist(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 3
+                        ),
+                      ),
                   Text(
                     "View All",
                     style: GoogleFonts.urbanist(
@@ -394,7 +395,7 @@ class HomeContent extends StatelessWidget {
                   color: Color.fromRGBO(25, 25, 25, 1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     width: 1,
                   ),
                 ),
@@ -426,18 +427,12 @@ Widget quickAccess(
 ) {
   return Expanded(
     child: Container(
-      height: 125,
-      padding: const EdgeInsets.symmetric(
-        vertical: 12,
-        horizontal: 15,
-      ),
+      height: 110,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.08),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -448,7 +443,7 @@ Widget quickAccess(
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -464,16 +459,10 @@ Widget quickAccess(
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.15),
+                  color: iconColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Center(
-                  child: FaIcon(
-                    icon,
-                    color: iconColor,
-                    size: 18,
-                  ),
-                ),
+                child: Center(child: FaIcon(icon, color: iconColor, size: 18)),
               ),
 
               FaIcon(
@@ -490,7 +479,7 @@ Widget quickAccess(
             title,
             style: GoogleFonts.urbanist(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: 16,
               fontWeight: FontWeight.w700,
               height: 1,
             ),
@@ -502,7 +491,7 @@ Widget quickAccess(
             subTitle,
             style: GoogleFonts.urbanist(
               color: Colors.white60,
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -524,9 +513,9 @@ Widget infoChips(Color color, String text, FaIconData icon, String subText) {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          color.withOpacity(0.200),
-          color.withOpacity(0.020),
-          Color.fromRGBO(40, 40, 40, 1).withOpacity(0.110),
+          color.withValues(alpha: 0.125),
+          color.withValues(alpha: 0.020),
+          Color.fromRGBO(40, 40, 40, 1).withValues(alpha: 0.110),
         ],
       ),
     ),

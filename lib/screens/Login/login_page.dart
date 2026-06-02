@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -198,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: GoogleFonts.playfairDisplay(
                                 shadows: [
                                   Shadow(
-                                    color: Colors.white.withOpacity(1),
+                                    color: Colors.white.withValues(alpha: 1),
                                     offset: Offset(0, 0),
                                     blurRadius: 100,
                                   ),
@@ -213,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: GoogleFonts.playfairDisplay(
                                 shadows: [
                                   Shadow(
-                                    color: Colors.deepOrange.withOpacity(1),
+                                    color: Colors.deepOrange.withValues(alpha: 1),
                                     offset: const Offset(0, 0),
                                     blurRadius: 100,
                                   ),
@@ -235,7 +234,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: GoogleFonts.playfairDisplay(
                                 shadows: [
                                   Shadow(
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withValues(alpha: 0.8),
                                     offset: Offset(0, 0),
                                     blurRadius: 100,
                                   ),
@@ -285,7 +284,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withValues(alpha: 0.5),
                           blurRadius: 10,
                           offset: Offset(0, 5),
                         ),
@@ -312,7 +311,7 @@ class _LoginPageState extends State<LoginPage> {
                             horizontal: 150.0,
                           ),
                           child: Divider(
-                            color: Colors.deepOrange.withOpacity(0.7),
+                            color: Colors.deepOrange.withValues(alpha: 0.7),
                             height: 5,
                             thickness: 5,
                             radius: BorderRadius.circular(20),
@@ -382,12 +381,12 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.6),
+                                  color: Colors.black.withValues(alpha: 0.6),
                                   blurRadius: 10,
                                   offset: Offset(0, 5),
                                 ),
                                 BoxShadow(
-                                  color: Colors.deepOrange.withOpacity(0.4),
+                                  color: Colors.deepOrange.withValues(alpha: 0.4),
                                   blurRadius: 10,
                                   offset: Offset(0, -5),
                                 ),
@@ -479,7 +478,7 @@ class _LoginPageState extends State<LoginPage> {
                             decoration: BoxDecoration(
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.4),
+                                  color: Colors.black.withValues(alpha: 0.4),
                                   blurRadius: 10,
                                   offset: Offset(0, 5),
                                 ),
@@ -608,7 +607,7 @@ class _LoginPageState extends State<LoginPage> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               blurRadius: 10,
               offset: Offset(0, 5),
             ),
