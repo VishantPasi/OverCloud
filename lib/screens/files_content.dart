@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:overcloud/screens/folders_page.dart';
 
 
 class FilesContent extends StatefulWidget {
@@ -279,37 +280,43 @@ shape: BoxShape.circle
     );
   }
 
-  Widget folderStructure(String title, String date){
+  Widget folderStructure(String folderName, String date){
     return Column(
       children: [
         Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 5.0,vertical: 10),
-                            child: Container(decoration: BoxDecoration(
-                              
-                            ),child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                 FaIcon(FontAwesomeIcons.solidFolder,color: const Color.fromRGBO(255, 196, 87, 1),size: 30,),
-                                 SizedBox(width: 20,),
-                                 Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                  Text(title, style: GoogleFonts.urbanist(color: Colors.white,fontSize: 14),),
-                                  Text(date, style: GoogleFonts.urbanist(color: Colors.white70,fontSize: 12),),
-                                 ],)
-        
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => FoldersPage(folderName: folderName,)));
+                              },
+
+                              child: Container(decoration: BoxDecoration(
                                 
-                                  ]
-                                 
-                                ),
-                                
-                                
-                                FaIcon(FontAwesomeIcons.ellipsisVertical,color: Colors.white38,size: 16,)
-                              ],
-                            ),),
+                              ),child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                   FaIcon(FontAwesomeIcons.solidFolder,color: const Color.fromRGBO(255, 196, 87, 1),size: 30,),
+                                   SizedBox(width: 20,),
+                                   Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                    Text(folderName, style: GoogleFonts.urbanist(color: Colors.white,fontSize: 14),),
+                                    Text(date, style: GoogleFonts.urbanist(color: Colors.white70,fontSize: 12),),
+                                   ],)
+                                      
+                                  
+                                    ]
+                                   
+                                  ),
+                                  
+                                  
+                                  FaIcon(FontAwesomeIcons.ellipsisVertical,color: Colors.white38,size: 16,)
+                                ],
+                              ),),
+                            ),
                           ),
                           Divider(color: Colors.white.withValues(alpha: 0.1),height: 2,thickness: 2,),
 
@@ -366,39 +373,45 @@ shape: BoxShape.circle
   }
 
   Widget gridContainerForCountTwo(FaIconData icon, String title, String subTitle){
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
-          width: 1,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => FoldersPage(folderName: title,)));
+      },
+
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.08),
+            width: 1,
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.fromRGBO(45, 45, 45, 0.95),
+              Color.fromRGBO(25, 25, 25, 0.95),
+            ],
+          ),
         ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color.fromRGBO(45, 45, 45, 0.95),
-            Color.fromRGBO(25, 25, 25, 0.95),
-          ],
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                FaIcon(icon,color: Colors.deepOrange,size: 23,),
-                FaIcon(FontAwesomeIcons.chevronRight,color: Colors.white30,size: 14,)
-              ],
-            ),
-            SizedBox(height: 15,),
-            Text(title,style: GoogleFonts.urbanist(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold)),
-          SizedBox(height: 3,),
-            Text(subTitle,style: GoogleFonts.urbanist(color: Colors.white70,fontSize: 12 )),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FaIcon(icon,color: Colors.deepOrange,size: 23,),
+                  FaIcon(FontAwesomeIcons.chevronRight,color: Colors.white30,size: 14,)
+                ],
+              ),
+              SizedBox(height: 15,),
+              Text(title,style: GoogleFonts.urbanist(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold)),
+            SizedBox(height: 3,),
+              Text(subTitle,style: GoogleFonts.urbanist(color: Colors.white70,fontSize: 12 )),
+            ],
+          ),
         ),
       ),
     );

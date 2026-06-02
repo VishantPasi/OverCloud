@@ -2,6 +2,7 @@ import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_not
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:overcloud/screens/folders_page.dart';
 
 class HomeContent extends StatelessWidget {
   final NotchBottomBarController? controller;
@@ -15,7 +16,12 @@ class HomeContent extends StatelessWidget {
         children: [
           Text(
             "GOOD MORNING  ",
-            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 14,fontWeight: FontWeight.w500,letterSpacing: 1),
+            style: GoogleFonts.urbanist(
+              color: Colors.grey,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 1,
+            ),
           ),
           FaIcon(FontAwesomeIcons.sun, color: Colors.deepOrange, size: 20),
         ],
@@ -25,8 +31,14 @@ class HomeContent extends StatelessWidget {
         children: [
           Text(
             "GOOD AFTERNOON  ",
-            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 14,fontWeight: FontWeight.w500,letterSpacing: 1)),
-          
+            style: GoogleFonts.urbanist(
+              color: Colors.grey,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 1,
+            ),
+          ),
+
           FaIcon(FontAwesomeIcons.cloudSun, color: Colors.deepOrange, size: 20),
         ],
       );
@@ -35,7 +47,12 @@ class HomeContent extends StatelessWidget {
         children: [
           Text(
             "GOOD EVENING  ",
-            style: GoogleFonts.urbanist(color: Colors.grey, fontSize: 14,fontWeight: FontWeight.w500,letterSpacing: 1),
+            style: GoogleFonts.urbanist(
+              color: Colors.grey,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 1,
+            ),
           ),
           FaIcon(FontAwesomeIcons.cloudSun, color: Colors.deepOrange, size: 20),
         ],
@@ -291,6 +308,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.photoFilm,
 
                       "120",
+                      context
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -299,6 +317,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.solidFileLines,
 
                       "45",
+                      context
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -307,6 +326,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.solidCirclePlay,
 
                       "23",
+                      context
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -315,6 +335,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.music,
 
                       "15",
+                      context
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -323,6 +344,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.ellipsis,
 
                       "",
+                      context
                     ),
                   ],
                 ),
@@ -346,6 +368,7 @@ class HomeContent extends StatelessWidget {
 
                     FontAwesomeIcons.solidFolderOpen,
                     const Color.fromRGBO(255, 196, 87, 1),
+                    context
                   ),
                   quickAccess(
                     "24",
@@ -353,6 +376,7 @@ class HomeContent extends StatelessWidget {
 
                     FontAwesomeIcons.userLock,
                     const Color.fromRGBO(255, 120, 80, 1),
+                    context
                   ),
                   quickAccess(
                     "87",
@@ -360,6 +384,7 @@ class HomeContent extends StatelessWidget {
 
                     FontAwesomeIcons.solidStar,
                     const Color.fromRGBO(255, 170, 60, 1),
+                    context
                   ),
                 ],
               ),
@@ -369,14 +394,14 @@ class HomeContent extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                        "RECENT FILES",
-                        style: GoogleFonts.urbanist(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 3
-                        ),
-                      ),
+                    "RECENT FILES",
+                    style: GoogleFonts.urbanist(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 3,
+                    ),
+                  ),
                   Text(
                     "View All",
                     style: GoogleFonts.urbanist(
@@ -424,124 +449,143 @@ Widget quickAccess(
   String subTitle,
   FaIconData icon,
   Color iconColor,
+  BuildContext context
 ) {
   return Expanded(
-    child: Container(
-      height: 110,
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color.fromRGBO(45, 45, 45, 0.95),
-            const Color.fromRGBO(25, 25, 25, 0.95),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+    child: GestureDetector(
+      onTap: () => MaterialPageRoute(builder: (context) => FoldersPage(folderName: title)),
+      child: Container(
+        height: 110,
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.08),
+            width: 1,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(child: FaIcon(icon, color: iconColor, size: 18)),
-              ),
-
-              FaIcon(
-                FontAwesomeIcons.chevronRight,
-                color: Colors.white30,
-                size: 12,
-              ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color.fromRGBO(45, 45, 45, 0.95),
+              const Color.fromRGBO(25, 25, 25, 0.95),
             ],
           ),
-
-          const Spacer(),
-
-          Text(
-            title,
-            style: GoogleFonts.urbanist(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              height: 1,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            subTitle,
-            style: GoogleFonts.urbanist(
-              color: Colors.white60,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(child: FaIcon(icon, color: iconColor, size: 18)),
+                ),
+      
+                FaIcon(
+                  FontAwesomeIcons.chevronRight,
+                  color: Colors.white30,
+                  size: 12,
+                ),
+              ],
             ),
-          ),
-        ],
+      
+            const Spacer(),
+      
+            Text(
+              title,
+              style: GoogleFonts.urbanist(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                height: 1,
+              ),
+            ),
+      
+            const SizedBox(height: 6),
+      
+            Text(
+              subTitle,
+              style: GoogleFonts.urbanist(
+                color: Colors.white60,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     ),
   );
 }
 
-Widget infoChips(Color color, String text, FaIconData icon, String subText) {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-    width: 75,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(15),
-      border: Border.all(color: Colors.white24, width: 0.5),
+Widget infoChips(
+  Color color,
+  String text,
+  FaIconData icon,
+  String subText,
+  BuildContext context,
+) {
+  return GestureDetector(
+    onTap: () => Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => FoldersPage(folderName: text)),
+    ),
+    child: Container(
+      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+      width: 75,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.white24, width: 0.5),
 
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          color.withValues(alpha: 0.125),
-          color.withValues(alpha: 0.020),
-          Color.fromRGBO(40, 40, 40, 1).withValues(alpha: 0.110),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            color.withValues(alpha: 0.125),
+            color.withValues(alpha: 0.020),
+            Color.fromRGBO(40, 40, 40, 1).withValues(alpha: 0.110),
+          ],
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FaIcon(icon, color: color, size: 23),
+          SizedBox(height: 8),
+          Text(
+            text,
+            style: GoogleFonts.urbanist(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          Text(
+            subText,
+            style: GoogleFonts.urbanist(
+              color: Colors.white60,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        FaIcon(icon, color: color, size: 23),
-        SizedBox(height: 8),
-        Text(
-          text,
-          style: GoogleFonts.urbanist(
-            color: color,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-
-        Text(
-          subText,
-          style: GoogleFonts.urbanist(
-            color: Colors.white60,
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     ),
   );
 }
