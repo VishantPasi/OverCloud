@@ -169,6 +169,7 @@ class _LoginPageState extends State<LoginPage> {
           },
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
+           
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -272,6 +273,7 @@ class _LoginPageState extends State<LoginPage> {
                   duration: Duration(milliseconds: 350),
                   curve: Curves.easeInBack,
                   margin: const EdgeInsets.symmetric(horizontal: 8),
+                  
                   transform: Matrix4.translationValues(
                     0,
                     MediaQuery.of(context).viewInsets.bottom > 0 ? -280 : 0,
@@ -310,7 +312,7 @@ class _LoginPageState extends State<LoginPage> {
                             horizontal: 150.0,
                           ),
                           child: Divider(
-                            color: Colors.white24,
+                            color: Colors.deepOrange.withOpacity(0.7),
                             height: 5,
                             thickness: 5,
                             radius: BorderRadius.circular(20),
@@ -391,9 +393,11 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ],
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFFF7A00), Color(0xFFFF3D00)],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
+                                colors: [Color.fromRGBO(255, 132, 61, 0.89),
+                      Color.fromRGBO(233, 89, 17, 1),
+                      Color.fromRGBO(205, 61, 0, 1),],
+                              begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                               ),
                             ),
                             child: ElevatedButton(
