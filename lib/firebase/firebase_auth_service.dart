@@ -5,6 +5,7 @@ import 'package:overcloud/helper/error_dialog.dart';
 import 'package:overcloud/screens/home_page.dart';
 
 class FirebaseAuthService {
+  
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   Future<void> signIn(
