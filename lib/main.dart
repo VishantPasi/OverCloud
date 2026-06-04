@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:overcloud/screens/Login/sign_in_page.dart';
+import 'package:overcloud/screens/login/sign_in_page.dart';
 
 
 
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'OverCloud',
-      home: LoginPage(),
+      home: SignInPage(),
     );
   }
 }

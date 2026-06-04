@@ -1,21 +1,19 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
-import 'package:overcloud/screens/Login/sign_up_page.dart';
+import 'package:overcloud/firebase/firebase_auth_service.dart';
 
-import '../home_page.dart';
+import 'package:overcloud/screens/login/sign_up_page.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignInPage extends StatefulWidget {
+  const SignInPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignInPage> createState() => _SignInPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignInPageState extends State<SignInPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
@@ -24,6 +22,8 @@ class _LoginPageState extends State<LoginPage> {
 
   FocusNode emailFocus = FocusNode();
   FocusNode passwordFocus = FocusNode();
+
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
 
   @override
   void initState() {
@@ -37,111 +37,6 @@ class _LoginPageState extends State<LoginPage> {
     emailFocus.dispose();
     passwordFocus.dispose();
     super.dispose();
-  }
-
-  void errorMessage(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color.fromRGBO(29, 29, 29, 1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          constraints: BoxConstraints(minWidth: 300),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Lottie.asset(
-                "assets/animations/error.json",
-                width: 100,
-                height: 100,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                title,
-                style: GoogleFonts.urbanist(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.urbanist(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  "OK",
-                  style: GoogleFonts.urbanist(
-                    color: Colors.deepOrange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> login() async {
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    } on FirebaseAuthException catch (e) {
-      debugPrint(e.code);
-
-      if (emailController.text.trim().isEmpty &&
-          passwordController.text.trim().isEmpty) {
-        errorMessage(
-          "Credentials are required",
-          "Please enter your email id and password",
-        );
-      } else if (emailController.text.trim().isEmpty) {
-        errorMessage("Email is required", "Please enter your email id.");
-      } else if (passwordController.text.trim().isEmpty) {
-        errorMessage("Password is required", "Please enter your password.");
-      } else if (e.code == "invalid-email") {
-        errorMessage(
-          "Invalid Email Format",
-          "The email id is badly formatted.",
-        );
-      } else if (e.code == "invalid-credential") {
-        errorMessage(
-          "Invalid Email/Password",
-          "Please enter correct email or password",
-        );
-      } else if (e.code == "user-disabled") {
-        errorMessage(
-          "Account Disabled",
-          "This user account has been disabled.",
-        );
-      } else if (e.code == "too-many-requests") {
-        errorMessage(
-          "Too Many Requests",
-          "Too many unsuccessful login attempts. Please try again later.",
-        );
-      } else {
-        errorMessage("Login Error", e.message ?? "An unknown error occurred.");
-      }
-    }
   }
 
   @override
@@ -512,7 +407,11 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               child: ElevatedButton(
-                                onPressed: login,
+                                onPressed: () => _firebaseAuthService.signIn(
+                                  emailController,
+                                  passwordController,
+                                  context,
+                                ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   minimumSize: Size(width, 45),
@@ -757,7 +656,7 @@ class _LoginPageState extends State<LoginPage> {
                   if (emailFocus.hasFocus) {
                     FocusScope.of(context).requestFocus(passwordFocus);
                   } else {
-                    login();
+                    _firebaseAuthService.signIn(emailController, passwordController, context);
                   }
                 },
                 cursorColor: Colors.deepOrange.withValues(alpha: 0.6),

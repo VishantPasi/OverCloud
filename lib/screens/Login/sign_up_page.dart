@@ -1,8 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:overcloud/firebase/firebase_auth_service.dart';
+
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -23,6 +24,25 @@ class _SignUpPageState extends State<SignUpPage> {
   FocusNode emailFocus = FocusNode();
   FocusNode passwordFocus = FocusNode();
   FocusNode confirmPasswordFocus = FocusNode();
+
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+
+    nameFocus.dispose();
+    phoneFocus.dispose();
+    emailFocus.dispose();
+    passwordFocus.dispose();
+    confirmPasswordFocus.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +244,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Container(
                     width: width,
-                  
+
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
@@ -256,9 +276,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       children: [
                         SizedBox(height: 30),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 23.0,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 23.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -270,7 +288,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                  
+
                               SizedBox(height: 5),
                               Text(
                                 "Get started with your OverCloud Account",
@@ -285,9 +303,9 @@ class _SignUpPageState extends State<SignUpPage> {
                             ],
                           ),
                         ),
-                  
+
                         SizedBox(height: 20),
-                  
+
                         customTextField(
                           "Full Name",
                           "Enter your full name",
@@ -315,7 +333,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           true,
                         ),
                         SizedBox(height: 20),
-                  
+
                         customTextField(
                           "Password",
                           "Enter your password",
@@ -325,7 +343,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           true,
                         ),
                         SizedBox(height: 20),
-                  
+
                         customTextField(
                           "Confirm Password",
                           "Enter your confirm password",
@@ -347,9 +365,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(
-                                      alpha: 0.6,
-                                    ),
+                                    color: Colors.black.withValues(alpha: 0.6),
                                     blurRadius: 10,
                                     offset: Offset(0, 5),
                                   ),
@@ -372,11 +388,18 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ),
                               ),
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () => _firebaseAuthService.signUp(
+                                  nameController,
+                                  phoneController,
+                                  emailController,
+                                  passwordController,
+                                  confirmPasswordController,
+                                  context,
+                                ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   minimumSize: Size(width, 45),
-                  
+
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15),
                                   ),
@@ -405,134 +428,132 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                         ),
                         SizedBox(height: 35),
-                         Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10.0,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0,
+                                  ),
+                                  child: Container(
+                                    height: 0.3,
+                                    color: Colors.white60,
+                                  ),
                                 ),
-                                child: Container(
-                                  height: 0.3,
-                                  color: Colors.white60,
+                              ),
+                              Text(
+                                "Or Continue With",
+                                style: GoogleFonts.urbanist(
+                                  color: Colors.white54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0,
+                                  ),
+                                  child: Container(
+                                    height: 0.3,
+                                    width: double.infinity,
+                                    color: Colors.white60,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0,
+                            ),
+                            child: Container(
+                              height: 45,
+                              width: 150,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.4),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 5),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: Colors.white24,
+                                  width: 0.5,
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                color: Color.fromRGBO(29, 29, 29, 1),
+                              ),
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      "assets/logos/google_logo.png",
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      "Google",
+                                      style: GoogleFonts.urbanist(
+                                        color: Colors.white70,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
+                          ),
+                        ),
+
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
                             Text(
-                              "Or Continue With",
+                              "Already have an account?  ",
                               style: GoogleFonts.urbanist(
                                 color: Colors.white54,
-                                fontSize: 12,
+                                fontSize: 14,
                               ),
                             ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10.0,
-                                ),
-                                child: Container(
-                                  height: 0.3,
-                                  width: double.infinity,
-                                  color: Colors.white60,
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                "Sign In",
+                                style: GoogleFonts.urbanist(
+                                  color: Colors.deepOrange,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      SizedBox(height: 20),
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0,
-                          ),
-                          child: Container(
-                            height: 45,
-                            width: 150,
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.4),
-                                  blurRadius: 10,
-                                  offset: Offset(0, 5),
-                                ),
-                              ],
-                              border: Border.all(
-                                color: Colors.white24,
-                                width: 0.5,
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              color: Color.fromRGBO(29, 29, 29, 1),
-                            ),
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                  
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    "assets/logos/google_logo.png",
-                                    width: 20,
-                                    height: 20,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    "Google",
-                                    style: GoogleFonts.urbanist(
-                                      color: Colors.white70,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  
-                  SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Already have an account?  ",
-                            style: GoogleFonts.urbanist(
-                              color: Colors.white54,
-                              fontSize: 14,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              "Sign In",
-                              style: GoogleFonts.urbanist(
-                                color: Colors.deepOrange,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 40),
-                  
+                        SizedBox(height: 40),
                       ],
                     ),
                   ),
                 ),
-          
               ],
             ),
           ),
@@ -599,11 +620,7 @@ class _SignUpPageState extends State<SignUpPage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Icon(
-                    icon,
-                    color: Colors.white54,
-                    size: 25,
-                  ),
+                  child: Icon(icon, color: Colors.white54, size: 25),
                 ),
                 Expanded(
                   child: TextField(
@@ -619,6 +636,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ? [
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(10),
+                            
                           ]
                         : [],
                     focusNode: focusNode,
