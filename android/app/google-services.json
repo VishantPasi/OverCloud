@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "725343694902",
+    "firebase_url": "https://overcloud-f3f45-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "overcloud-f3f45",
     "storage_bucket": "overcloud-f3f45.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.overcloud"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "725343694902-3k40109f5ugmu9s5lkiign4spdp37tbm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.overcloud",
+            "certificate_hash": "87d0d219f2c07658dcc986e843de24bba8facf33"
+          }
+        },
+        {
+          "client_id": "725343694902-ok4rab3baj2u0k1efvtkqleqes5jaej7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD1bPHf-JELSnZaVveje9PvvPYP68fOouA"
@@ -20,7 +34,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "725343694902-ok4rab3baj2u0k1efvtkqleqes5jaej7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "725343694902-659tsbjj01b0ta7gmt17idki5lljr6vl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.overcloud"
+              }
+            }
+          ]
         }
       }
     }

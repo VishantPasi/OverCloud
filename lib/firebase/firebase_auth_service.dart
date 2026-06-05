@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:overcloud/helper/error_dialog.dart';
 import 'package:overcloud/screens/home_page.dart';
 
 class FirebaseAuthService {
-  
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  final String _webSdkClientId =
+      "725343694902-ok4rab3baj2u0k1efvtkqleqes5jaej7.apps.googleusercontent.com";
 
   Future<void> signIn(
     TextEditingController emailController,
@@ -14,7 +17,7 @@ class FirebaseAuthService {
     BuildContext context,
   ) async {
     try {
-      await auth.signInWithEmailAndPassword(
+      await _auth.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -81,6 +84,48 @@ class FirebaseAuthService {
     }
   }
 
+  Future<void> signInWithGoogle(BuildContext context) async {
+    try {
+      await _googleSignIn.initialize(serverClientId: _webSdkClientId);
+
+      await _googleSignIn.signOut();
+
+      final GoogleSignInAccount? userAccount = await _googleSignIn
+          .authenticate();
+
+      if (userAccount == null) {
+        throw Exception("Google Sign-in aborted by user");
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await userAccount.authentication;
+
+      final credentials = GoogleAuthProvider.credential(
+
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredentials = await _auth.signInWithCredential(
+        credentials,
+      );
+
+      final user = userCredentials.user;
+
+      print("Success");
+
+      if (!context.mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+
+
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
   Future<void> signUp(
     TextEditingController nameController,
     TextEditingController phoneController,
@@ -90,12 +135,12 @@ class FirebaseAuthService {
     BuildContext context,
   ) async {
     try {
-      await auth.createUserWithEmailAndPassword(
+      await _auth.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      String uid = auth.currentUser!.uid;
+      String uid = _auth.currentUser!.uid;
       await FirebaseFirestore.instance.collection("users").doc(uid).set({
         "fullName": nameController.text.trim(),
         "phoneNumber": "+91${phoneController.text.trim()}",

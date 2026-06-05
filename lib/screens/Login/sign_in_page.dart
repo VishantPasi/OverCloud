@@ -507,7 +507,7 @@ class _SignInPageState extends State<SignInPage> {
                                 color: Color.fromRGBO(29, 29, 29, 1),
                               ),
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () => _firebaseAuthService.signInWithGoogle(context),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
 
