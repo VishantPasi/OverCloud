@@ -3,11 +3,42 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/screens/folders_page.dart';
+import 'package:overcloud/services/secure_storage_service.dart';
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
   final NotchBottomBarController? controller;
 
   const HomeContent({super.key, this.controller});
+
+  @override
+  State<HomeContent> createState() => _HomeContentState();
+
+
+
+
+}
+
+class _HomeContentState extends State<HomeContent> {
+
+  String? fullName;
+  String? uid;
+
+  @override
+  void initState() {
+    loadUserData();
+    super.initState();
+
+    
+  }
+
+  Future<void> loadUserData() async {
+    fullName = await SecureStorageService.getFullName();
+    uid = await SecureStorageService.getUID();
+
+    setState(() {});
+  }
+
+
 
   Widget greetingText() {
     final hour = DateTime.now().hour;
@@ -61,37 +92,41 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget initialsAvatar() {
-    return Stack(
-      children: [
-        CircleAvatar(
-          radius: 23,
-          backgroundColor: Colors.deepOrange,
-          child: Text(
-            "VP",
-            style: GoogleFonts.robotoMono(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: Container(
-            height: 12,
-            width: 12,
-            decoration: BoxDecoration(
-              color: Colors.greenAccent,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Color.fromRGBO(15, 15, 15, 1),
-                width: 2,
+    return GestureDetector(
+      onTap: ()=> Scaffold.of(context).openDrawer(),
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 23,
+            backgroundColor: Colors.deepOrange,
+            child: Text(
+      
+              fullName != null ? "${fullName!.split(" ").first[0]}${fullName!.split(" ").last[0]}": "?",
+              style: GoogleFonts.robotoMono(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
           ),
-        ),
-      ],
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              height: 12,
+              width: 12,
+              decoration: BoxDecoration(
+                color: Colors.greenAccent,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Color.fromRGBO(15, 15, 15, 1),
+                  width: 2,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -118,7 +153,7 @@ class HomeContent extends StatelessWidget {
                       greetingText(),
                       SizedBox(height: 5),
                       Text(
-                        'Vishant Pasi',
+                        fullName ?? "No Name",
                         style: GoogleFonts.urbanist(
                           color: Colors.white,
                           fontSize: 18,
@@ -308,7 +343,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.photoFilm,
 
                       "120",
-                      context
+                      context,
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -317,7 +352,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.solidFileLines,
 
                       "45",
-                      context
+                      context,
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -326,7 +361,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.solidCirclePlay,
 
                       "23",
-                      context
+                      context,
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -335,7 +370,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.music,
 
                       "15",
-                      context
+                      context,
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -344,7 +379,7 @@ class HomeContent extends StatelessWidget {
                       FontAwesomeIcons.ellipsis,
 
                       "",
-                      context
+                      context,
                     ),
                   ],
                 ),
@@ -368,7 +403,7 @@ class HomeContent extends StatelessWidget {
 
                     FontAwesomeIcons.solidFolderOpen,
                     const Color.fromRGBO(255, 196, 87, 1),
-                    context
+                    context,
                   ),
                   quickAccess(
                     "24",
@@ -376,7 +411,7 @@ class HomeContent extends StatelessWidget {
 
                     FontAwesomeIcons.userLock,
                     const Color.fromRGBO(255, 120, 80, 1),
-                    context
+                    context,
                   ),
                   quickAccess(
                     "87",
@@ -384,7 +419,7 @@ class HomeContent extends StatelessWidget {
 
                     FontAwesomeIcons.solidStar,
                     const Color.fromRGBO(255, 170, 60, 1),
-                    context
+                    context,
                   ),
                 ],
               ),
@@ -449,11 +484,13 @@ Widget quickAccess(
   String subTitle,
   FaIconData icon,
   Color iconColor,
-  BuildContext context
+  BuildContext context,
 ) {
   return Expanded(
     child: GestureDetector(
-      onTap: () => MaterialPageRoute(builder: (context) => FoldersPage(folderName: title)),
+      onTap: () => MaterialPageRoute(
+        builder: (context) => FoldersPage(folderName: title),
+      ),
       child: Container(
         height: 110,
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -493,9 +530,11 @@ Widget quickAccess(
                     color: iconColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Center(child: FaIcon(icon, color: iconColor, size: 18)),
+                  child: Center(
+                    child: FaIcon(icon, color: iconColor, size: 18),
+                  ),
                 ),
-      
+
                 FaIcon(
                   FontAwesomeIcons.chevronRight,
                   color: Colors.white30,
@@ -503,9 +542,9 @@ Widget quickAccess(
                 ),
               ],
             ),
-      
+
             const Spacer(),
-      
+
             Text(
               title,
               style: GoogleFonts.urbanist(
@@ -515,9 +554,9 @@ Widget quickAccess(
                 height: 1,
               ),
             ),
-      
+
             const SizedBox(height: 6),
-      
+
             Text(
               subTitle,
               style: GoogleFonts.urbanist(

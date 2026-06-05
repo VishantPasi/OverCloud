@@ -352,7 +352,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           Icons.verified_user_outlined,
                           true,
                         ),
-                        SizedBox(height: 50),
+                        SizedBox(height: 40),
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -427,101 +427,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 35),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0,
-                                  ),
-                                  child: Container(
-                                    height: 0.3,
-                                    color: Colors.white60,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                "Or Continue With",
-                                style: GoogleFonts.urbanist(
-                                  color: Colors.white54,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0,
-                                  ),
-                                  child: Container(
-                                    height: 0.3,
-                                    width: double.infinity,
-                                    color: Colors.white60,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20.0,
-                            ),
-                            child: Container(
-                              height: 45,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.4),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 5),
-                                  ),
-                                ],
-                                border: Border.all(
-                                  color: Colors.white24,
-                                  width: 0.5,
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                                color: Color.fromRGBO(29, 29, 29, 1),
-                              ),
-                              child: ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Image.asset(
-                                      "assets/logos/google_logo.png",
-                                      width: 20,
-                                      height: 20,
-                                    ),
-                                    SizedBox(width: 10),
-                                    Text(
-                                      "Google",
-                                      style: GoogleFonts.urbanist(
-                                        color: Colors.white70,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        
+                       
 
                         SizedBox(height: 20),
                         Row(

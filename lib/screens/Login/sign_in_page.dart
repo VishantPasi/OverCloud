@@ -650,7 +650,7 @@ class _SignInPageState extends State<SignInPage> {
               child: TextField(
                 controller: controller,
                 obscureText: obscure,
-                style: GoogleFonts.urbanist(color: Colors.white, fontSize: 14),
+                style: GoogleFonts.urbanist(color: Colors.white, fontSize: 14,fontWeight: FontWeight.w500),
                 focusNode: focusNode,
                 onSubmitted: (value) {
                   if (emailFocus.hasFocus) {

@@ -1,8 +1,11 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:overcloud/helper/error_dialog.dart';
+import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/services/secure_storage_service.dart';
+import 'package:overcloud/utils/error_dialog.dart';
 import 'package:overcloud/screens/home_page.dart';
 
 class FirebaseAuthService {
@@ -10,6 +13,11 @@ class FirebaseAuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   final String _webSdkClientId =
       "725343694902-ok4rab3baj2u0k1efvtkqleqes5jaej7.apps.googleusercontent.com";
+
+  final FirebaseFirestoreService _firestoreService = FirebaseFirestoreService();
+
+
+  late String uid = _auth.currentUser!.uid;
 
   Future<void> signIn(
     TextEditingController emailController,
@@ -22,12 +30,20 @@ class FirebaseAuthService {
         password: passwordController.text.trim(),
       );
 
+      
+
+
+   await _firestoreService.storeUserDetails(uid);
+
+
       if (!context.mounted) return;
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
+
+  
     } on FirebaseAuthException catch (e) {
       debugPrint(e.code);
 
@@ -84,34 +100,35 @@ class FirebaseAuthService {
     }
   }
 
+
   Future<void> signInWithGoogle(BuildContext context) async {
     try {
       await _googleSignIn.initialize(serverClientId: _webSdkClientId);
 
       await _googleSignIn.signOut();
 
-      final GoogleSignInAccount? userAccount = await _googleSignIn
+      final GoogleSignInAccount userAccount = await _googleSignIn
           .authenticate();
 
-      if (userAccount == null) {
-        throw Exception("Google Sign-in aborted by user");
-      }
-
-      final GoogleSignInAuthentication googleAuth =
-          await userAccount.authentication;
+      final GoogleSignInAuthentication googleAuth = userAccount.authentication;
 
       final credentials = GoogleAuthProvider.credential(
-
         idToken: googleAuth.idToken,
       );
 
-      final userCredentials = await _auth.signInWithCredential(
-        credentials,
-      );
+      final userCredentials = await _auth.signInWithCredential(credentials);
 
-      final user = userCredentials.user;
+      await SecureStorageService.setFullName(_auth.currentUser!.displayName.toString());
+      await SecureStorageService.setEmail(_auth.currentUser!.email.toString());
+      await SecureStorageService.setUID(_auth.currentUser!.uid.toString());
 
-      print("Success");
+      String uid = _auth.currentUser!.uid;
+      await FirebaseFirestore.instance.collection("users").doc(uid).set({
+        "fullName": userCredentials.user!.displayName.toString(),
+        "phoneNumber": userCredentials.user!.phoneNumber.toString(),
+        "email": userCredentials.user!.email.toString(),
+      });
+
 
       if (!context.mounted) return;
 
@@ -120,7 +137,7 @@ class FirebaseAuthService {
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
 
-
+      
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message);
     }
@@ -147,7 +164,11 @@ class FirebaseAuthService {
         "email": emailController.text.trim(),
       });
 
+     await _firestoreService.storeUserDetails(uid);
+      
       if (!context.mounted) return;
+
+
 
       Navigator.pop(context);
       Navigator.pushReplacement(
@@ -210,5 +231,12 @@ class FirebaseAuthService {
         );
       }
     }
+  }
+
+
+  Future<void> signOut() async{
+    await _auth.signOut();
+    await GoogleSignIn.instance.signOut();
+    await SecureStorageService.clearStorageData();
   }
 }
