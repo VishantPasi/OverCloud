@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -16,37 +15,35 @@ class FirebaseAuthService {
 
   final FirebaseFirestoreService _firestoreService = FirebaseFirestoreService();
 
-
   late String uid = _auth.currentUser!.uid;
+
+  final ValueNotifier<bool> isLoading = ValueNotifier(false);
 
   Future<void> signIn(
     TextEditingController emailController,
     TextEditingController passwordController,
     BuildContext context,
   ) async {
+   isLoading.value = true;
     try {
+      
       await _auth.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      
-
-
-   await _firestoreService.storeUserDetails(uid);
-
+      await _firestoreService.storeUserDetails(uid);
 
       if (!context.mounted) return;
+      isLoading.value = false;
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
-
-  
     } on FirebaseAuthException catch (e) {
       debugPrint(e.code);
-
+      isLoading.value = false;
       if (emailController.text.trim().isEmpty &&
           passwordController.text.trim().isEmpty) {
         errorMessage(
@@ -97,11 +94,13 @@ class FirebaseAuthService {
           context,
         );
       }
+    }finally{
+      isLoading.value = false;
     }
   }
 
-
   Future<void> signInWithGoogle(BuildContext context) async {
+    isLoading.value = true;
     try {
       await _googleSignIn.initialize(serverClientId: _webSdkClientId);
 
@@ -118,7 +117,9 @@ class FirebaseAuthService {
 
       final userCredentials = await _auth.signInWithCredential(credentials);
 
-      await SecureStorageService.setFullName(_auth.currentUser!.displayName.toString());
+      await SecureStorageService.setFullName(
+        _auth.currentUser!.displayName.toString(),
+      );
       await SecureStorageService.setEmail(_auth.currentUser!.email.toString());
       await SecureStorageService.setUID(_auth.currentUser!.uid.toString());
 
@@ -129,17 +130,19 @@ class FirebaseAuthService {
         "email": userCredentials.user!.email.toString(),
       });
 
-
       if (!context.mounted) return;
+
+      isLoading.value = false;
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
-
-      
     } on FirebaseAuthException catch (e) {
+      isLoading.value = false;
       throw Exception(e.message);
+    }finally{
+      isLoading.value = false;
     }
   }
 
@@ -151,6 +154,7 @@ class FirebaseAuthService {
     TextEditingController confirmPasswordController,
     BuildContext context,
   ) async {
+    isLoading.value = true;
     try {
       await _auth.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -164,11 +168,11 @@ class FirebaseAuthService {
         "email": emailController.text.trim(),
       });
 
-     await _firestoreService.storeUserDetails(uid);
-      
+      await _firestoreService.storeUserDetails(uid);
+
       if (!context.mounted) return;
 
-
+      isLoading.value = false;
 
       Navigator.pop(context);
       Navigator.pushReplacement(
@@ -176,6 +180,7 @@ class FirebaseAuthService {
         MaterialPageRoute(builder: (context) => HomePage()),
       );
     } on FirebaseException catch (e) {
+      isLoading.value = false;
       debugPrint(e.code);
       if (nameController.text.trim().isEmpty &&
           emailController.text.trim().isEmpty &&
@@ -230,13 +235,16 @@ class FirebaseAuthService {
           context,
         );
       }
+    }finally{
+      isLoading.value = false;
     }
   }
 
-
-  Future<void> signOut() async{
+  Future<void> signOut() async {
+    isLoading.value = true;
     await _auth.signOut();
     await GoogleSignIn.instance.signOut();
     await SecureStorageService.clearStorageData();
+    isLoading.value = false;
   }
 }

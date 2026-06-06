@@ -33,12 +33,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final List<Widget> bottomBarPages = [
       HomeContent(controller: _controller),
@@ -62,7 +56,9 @@ class _HomePageState extends State<HomePage> {
               children: [
                 ElevatedButton(onPressed: () async {
                   await SecureStorageService.clearStorageData();
-                 await  FirebaseAuthService().signOut();
+                  await  FirebaseAuthService().signOut();
+
+                  if(!context.mounted) return;
 
                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> SignInPage()));
 
