@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:overcloud/services/secure_storage_service.dart';
 
 class FirebaseFirestoreService {
@@ -10,10 +13,24 @@ class FirebaseFirestoreService {
         .doc(uid)
         .get();
 
-    final userData = data.data();
-
-    await SecureStorageService.setFullName(userData?["fullName"]);
-    await SecureStorageService.setEmail(userData?["email"]);
+    await SecureStorageService.setFullName(data.data()?["fullName"]);
+    await SecureStorageService.setEmail(data.data()?["email"]);
     await SecureStorageService.setUID(uid);
+  }
+
+  void getUserData(String uid) async {
+    StreamSubscription<QuerySnapshot<Map<String, dynamic>>> files =
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('folders')
+            .doc('folderData')
+            .collection('videos')
+            .snapshots()
+            .listen((snapshot) {
+              for (var doc in snapshot.docs) {
+                print(doc.data());
+              }
+            });
   }
 }

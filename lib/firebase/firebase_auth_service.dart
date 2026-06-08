@@ -24,9 +24,8 @@ class FirebaseAuthService {
     TextEditingController passwordController,
     BuildContext context,
   ) async {
-   isLoading.value = true;
+    isLoading.value = true;
     try {
-      
       await _auth.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
@@ -94,7 +93,7 @@ class FirebaseAuthService {
           context,
         );
       }
-    }finally{
+    } finally {
       isLoading.value = false;
     }
   }
@@ -141,7 +140,7 @@ class FirebaseAuthService {
     } on FirebaseAuthException catch (e) {
       isLoading.value = false;
       throw Exception(e.message);
-    }finally{
+    } finally {
       isLoading.value = false;
     }
   }
@@ -235,7 +234,7 @@ class FirebaseAuthService {
           context,
         );
       }
-    }finally{
+    } finally {
       isLoading.value = false;
     }
   }

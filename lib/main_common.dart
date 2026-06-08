@@ -4,11 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:overcloud/env_config.dart';
 import 'package:overcloud/screens/login/sign_in_page.dart';
 
-
-
 void mainCommon() async {
   WidgetsFlutterBinding.ensureInitialized();
-  debugPrint("----------------------  Environment: ${AppEnvironment.environmentName}  ----------------------");
+  debugPrint(
+    "----------------------  Environment: ${AppEnvironment.environmentName}  ----------------------",
+  );
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   await Firebase.initializeApp();

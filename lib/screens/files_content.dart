@@ -1,8 +1,12 @@
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:overcloud/firebase/firebase_auth_service.dart';
+import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
 
 
@@ -17,6 +21,16 @@ class FilesContent extends StatefulWidget {
 
 class _FilesContentState extends State<FilesContent> {
   final ValueNotifier<int> _tabIndexIconButton = ValueNotifier(0);
+
+  final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late String uid = _auth.currentUser!.uid;
+
+ @override
+  void initState() {
+    _firestore.getUserData(uid);
+    super.initState();
+  }
 
 
       List<DataTab> get _listIconTabToggle => [
@@ -268,6 +282,9 @@ shape: BoxShape.circle
                   ),
 
                   SizedBox(height: 10,),
+
+                  
+               
                   folderStructure("Paw Patrol", "28 Oct 2022"),
                   folderStructure("Paw Patrol", "28 Oct 2022"),
                   folderStructure("Paw Patrol", "28 Oct 2022"),
