@@ -18,19 +18,38 @@ class FirebaseFirestoreService {
     await SecureStorageService.setUID(uid);
   }
 
-  void getUserData(String uid) async {
-    StreamSubscription<QuerySnapshot<Map<String, dynamic>>> files =
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('folders')
-            .doc('folderData')
-            .collection('videos')
-            .snapshots()
-            .listen((snapshot) {
-              for (var doc in snapshot.docs) {
-                print(doc.data());
-              }
-            });
+  Stream<QuerySnapshot<Map<String, dynamic>>> getFolderList(String uid) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('folders')
+        .snapshots();
   }
+
+  void createFolder(String uid, String folderName) async {
+    try {
+      DateTime dateTime = DateTime.now();
+
+      print(dateTime);
+
+      DocumentReference folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(folderName);
+
+      await folder.set({"createdOn": dateTime.toString()});
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+Stream<QuerySnapshot<Map<String, dynamic>>> getFolderFiles(String uid,String docId) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('folders').doc(docId).collection("files")
+        .snapshots();
+  }
+
 }
