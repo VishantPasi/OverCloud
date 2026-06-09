@@ -16,7 +16,14 @@ class FirebaseFirestoreService {
     await SecureStorageService.setFullName(data.data()?["fullName"]);
     await SecureStorageService.setEmail(data.data()?["email"]);
     await SecureStorageService.setUID(uid);
+
+    createDefaultFolders(uid,"photos");
+    createDefaultFolders(uid,"documents");
+    createDefaultFolders(uid,"videos");
+    createDefaultFolders(uid,"music");
   }
+
+  //FOLDER RELATED CRUD
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getFolderList(String uid) {
     return FirebaseFirestore.instance
@@ -26,30 +33,75 @@ class FirebaseFirestoreService {
         .snapshots();
   }
 
-  void createFolder(String uid, String folderName) async {
+  void createDefaultFolders(String uid, String folderName) async {
     try {
       DateTime dateTime = DateTime.now();
-
-      print(dateTime);
-
       DocumentReference folder = _firebaseFirestore
           .collection('users')
           .doc(uid)
           .collection("folders")
           .doc(folderName);
 
-      await folder.set({"createdOn": dateTime.toString()});
+      await folder.set({"folderName": folderName,"createdOn": dateTime.toString()});
+      
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+  
+
+  void createFolder(String uid, String folderName) async {
+    try {
+      DateTime dateTime = DateTime.now();
+      DocumentReference folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc();
+
+      await folder.set({"folderName": folderName,"createdOn": dateTime.toString()});
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
-Stream<QuerySnapshot<Map<String, dynamic>>> getFolderFiles(String uid,String docId) {
+  void renameFolder(String uid, String folderId, String newFolderName) async {
+    try {
+      DateTime dateTime = DateTime.now();
+      await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(folderId).update({"folderName": newFolderName, "createdOn": dateTime.toString()});
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void deleteFolder(String uid, String folderName) async {
+    try {
+      DocumentReference folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(folderName);
+
+      await folder.delete();
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getFolderFiles(
+    String uid,
+    String docId,
+  ) {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
-        .collection('folders').doc(docId).collection("files")
+        .collection('folders')
+        .doc(docId)
+        .collection("files")
         .snapshots();
   }
-
 }

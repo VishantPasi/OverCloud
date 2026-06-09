@@ -122,12 +122,19 @@ class FirebaseAuthService {
       await SecureStorageService.setEmail(_auth.currentUser!.email.toString());
       await SecureStorageService.setUID(_auth.currentUser!.uid.toString());
 
+
+
       String uid = _auth.currentUser!.uid;
       await FirebaseFirestore.instance.collection("users").doc(uid).set({
         "fullName": userCredentials.user!.displayName.toString(),
         "phoneNumber": userCredentials.user!.phoneNumber.toString(),
         "email": userCredentials.user!.email.toString(),
       });
+
+      _firestoreService.createDefaultFolders(uid,"photos");
+      _firestoreService.createDefaultFolders(uid,"documents");
+      _firestoreService.createDefaultFolders(uid,"videos");
+      _firestoreService.createDefaultFolders(uid,"music");
 
       if (!context.mounted) return;
 

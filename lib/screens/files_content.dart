@@ -7,6 +7,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
+import 'package:overcloud/utils/create_folder_bottomsheet.dart';
+import 'package:overcloud/utils/folder_actions_bottomsheet.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 
 class FilesContent extends StatefulWidget {
@@ -27,8 +29,8 @@ class _FilesContentState extends State<FilesContent> {
 
   @override
   void initState() {
-    // _firestore.getFolderList(uid).asStream();
-    _firestore.createFolder(uid, "Custom Folder6");
+    // // _firestore.getFolderList(uid).asStream();
+    // _firestore.createFolder(uid, "Custom Folder6");
     super.initState();
   }
 
@@ -36,8 +38,6 @@ class _FilesContentState extends State<FilesContent> {
     DataTab(icon: Icons.grid_view_rounded),
     DataTab(icon: Icons.menu_rounded),
   ];
-  
- 
 
   Widget _iconButton() => Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -114,268 +114,277 @@ class _FilesContentState extends State<FilesContent> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Container(
-        color: Color.fromRGBO(15, 15, 15, 1),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "My Cloud",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Container(
+          color: Color.fromRGBO(15, 15, 15, 1),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "My Cloud",
+                      style: GoogleFonts.urbanist(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  initialsAvatar(),
-                ],
-              ),
-              SizedBox(height: 30),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
+                    initialsAvatar(),
+                  ],
+                ),
+                SizedBox(height: 30),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Color.fromRGBO(40, 40, 40, 1),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: TextField(
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            isDense: true,
+
+                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            hintText: "Search your files, folders...",
+                            hintStyle: GoogleFonts.urbanist(
+                              color: Colors.white38,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Colors.white38,
+                            ),
+
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
                       height: 40,
+                      width: 40,
+
+                      margin: EdgeInsets.only(left: 10),
                       decoration: BoxDecoration(
                         color: Color.fromRGBO(40, 40, 40, 1),
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(30),
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.2),
                           width: 0.5,
                         ),
                       ),
-                      child: TextField(
-                        style: GoogleFonts.urbanist(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                        decoration: InputDecoration(
-                          isDense: true,
-
-                          contentPadding: EdgeInsets.symmetric(vertical: 10),
-                          hintText: "Search your files, folders...",
-                          hintStyle: GoogleFonts.urbanist(
-                            color: Colors.white38,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          prefixIcon: Icon(Icons.search, color: Colors.white38),
-
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide.none,
-                          ),
+                      child: Center(
+                        child: FaIcon(
+                          FontAwesomeIcons.bell,
+                          color: Colors.white70,
+                          size: 18,
                         ),
                       ),
                     ),
-                  ),
-                  Container(
-                    height: 40,
-                    width: 40,
-
-                    margin: EdgeInsets.only(left: 10),
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(40, 40, 40, 1),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        width: 0.5,
-                      ),
-                    ),
-                    child: Center(
-                      child: FaIcon(
-                        FontAwesomeIcons.bell,
+                  ],
+                ),
+                SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "QUICK ACCESS",
+                      style: GoogleFonts.urbanist(
                         color: Colors.white70,
-                        size: 18,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 3,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "QUICK ACCESS",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 3,
+                    _iconButton(),
+                  ],
+                ),
+                //1.5 for 2 and 3 for 1
+                SizedBox(height: 20),
+                GridView.count(
+                  crossAxisCount: _tabIndexIconButton.value == 0 ? 2 : 1,
+                  shrinkWrap: true,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: _tabIndexIconButton.value == 0 ? 1.5 : 4.75,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: _tabIndexIconButton.value == 0
+                      ? [
+                          gridContainerForCountTwo(
+                            FontAwesomeIcons.photoFilm,
+                            "Photos",
+                            "243 items",
+                          ),
+
+                          gridContainerForCountTwo(
+                            FontAwesomeIcons.solidFileLines,
+                            "Documents",
+                            "126 items",
+                          ),
+                          gridContainerForCountTwo(
+                            FontAwesomeIcons.clapperboard,
+                            "Videos",
+                            "43 items",
+                          ),
+                          gridContainerForCountTwo(
+                            FontAwesomeIcons.music,
+                            "Music",
+                            "152 items",
+                          ),
+                        ]
+                      : [
+                          gridContainerForCountOne(
+                            FontAwesomeIcons.photoFilm,
+                            "Photos",
+                            "243 items",
+                          ),
+
+                          gridContainerForCountOne(
+                            FontAwesomeIcons.solidFileLines,
+                            "Documents",
+                            "126 items",
+                          ),
+                          gridContainerForCountOne(
+                            FontAwesomeIcons.clapperboard,
+                            "Videos",
+                            "43 items",
+                          ),
+                          gridContainerForCountOne(
+                            FontAwesomeIcons.music,
+                            "Music",
+                            "152 items",
+                          ),
+                        ],
+                ),
+                SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "FOLDERS",
+                      style: GoogleFonts.urbanist(
+                        color: Colors.white70,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 3,
+                      ),
                     ),
-                  ),
-                  _iconButton(),
-                ],
-              ),
-              //1.5 for 2 and 3 for 1
-              SizedBox(height: 20),
-              GridView.count(
-                crossAxisCount: _tabIndexIconButton.value == 0 ? 2 : 1,
-                shrinkWrap: true,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: _tabIndexIconButton.value == 0 ? 1.5 : 4.75,
-                physics: NeverScrollableScrollPhysics(),
-                children: _tabIndexIconButton.value == 0
-                    ? [
-                        gridContainerForCountTwo(
-                          FontAwesomeIcons.photoFilm,
-                          "Photos",
-                          "243 items",
-                        ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
 
-                        gridContainerForCountTwo(
-                          FontAwesomeIcons.solidFileLines,
-                          "Documents",
-                          "126 items",
+                          decoration: BoxDecoration(
+                            color: Colors.white10,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: FaIcon(
+                              FontAwesomeIcons.sliders,
+                              color: Colors.white70,
+                              size: 18,
+                            ),
+                          ),
                         ),
-                        gridContainerForCountTwo(
-                          FontAwesomeIcons.clapperboard,
-                          "Videos",
-                          "43 items",
-                        ),
-                        gridContainerForCountTwo(
-                          FontAwesomeIcons.music,
-                          "Music",
-                          "152 items",
-                        ),
-                      ]
-                    : [
-                        gridContainerForCountOne(
-                          FontAwesomeIcons.photoFilm,
-                          "Photos",
-                          "243 items",
-                        ),
+                        SizedBox(width: 10),
+                        GestureDetector(
+                          onTap: () => createFolderBottomSheet(context, uid),
+                          child: Container(
+                            width: 35,
+                            height: 35,
 
-                        gridContainerForCountOne(
-                          FontAwesomeIcons.solidFileLines,
-                          "Documents",
-                          "126 items",
-                        ),
-                        gridContainerForCountOne(
-                          FontAwesomeIcons.clapperboard,
-                          "Videos",
-                          "43 items",
-                        ),
-                        gridContainerForCountOne(
-                          FontAwesomeIcons.music,
-                          "Music",
-                          "152 items",
+                            decoration: BoxDecoration(
+                              color: Colors.deepOrange,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: FaIcon(
+                                FontAwesomeIcons.plus,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
-              ),
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "FOLDERS",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 3,
                     ),
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
+                  ],
+                ),
 
-                        decoration: BoxDecoration(
-                          color: Colors.white10,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: FaIcon(
-                            FontAwesomeIcons.sliders,
-                            color: Colors.white70,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      Container(
-                        width: 35,
-                        height: 35,
+                SizedBox(height: 10),
 
-                        decoration: BoxDecoration(
-                          color: Colors.deepOrange,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: FaIcon(
-                            FontAwesomeIcons.plus,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: _firestore.getFolderList(uid),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-              SizedBox(height: 10),
+                    if (snapshot.hasError) {
+                      return Center(child: Text(snapshot.error.toString()));
+                    }
 
-              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: _firestore.getFolderList(uid),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(child: Text("No Folders Found"));
+                    }
 
-                  if (snapshot.hasError) {
-                    return Center(child: Text(snapshot.error.toString()));
-                  }
+                    final excludedFolders = [
+                      "photos",
+                      "documents",
+                      "videos",
+                      "music",
+                    ];
 
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text("No Folders Found"));
-                  }
+                    final folders = snapshot.data!.docs.where((doc) {
+                      return !excludedFolders.contains(doc.data()['folderName']);
+                    }).toList();
 
-                  final excludedFolders = [
-                    "photos",
-                    "documents",
-                    "videos",
-                    "music",
-                  ];
-
-                  final folders = snapshot.data!.docs.where((doc) {
-                    return !excludedFolders.contains(doc.id);
-                  }).toList();
-
-
-
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: folders.length,
-                    itemBuilder: (context, index) {
-                      return folderStructure(
-                        folders[index].id,
-                        formatDateTime( folders[index].data()['createdOn']).toString()
-                       ,
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: folders.length,
+                      itemBuilder: (context, index) {
+                        return folderStructure(
+                          folders[index].id,
+                          folders[index].data()['folderName'],
+                          formatDateTime(
+                            folders[index].data()['createdOn'],
+                          ).toString(),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget folderStructure(String folderName, String date) {
+  Widget folderStructure(String folderId, String folderName, String date) {
     return Column(
       children: [
         Padding(
@@ -426,10 +435,13 @@ class _FilesContentState extends State<FilesContent> {
                     ],
                   ),
 
-                  FaIcon(
-                    FontAwesomeIcons.ellipsisVertical,
-                    color: Colors.white38,
-                    size: 16,
+                  IconButton(
+                    onPressed: () => folderActionsBottomSheet(context, uid, folderId, folderName),
+                    icon: FaIcon(
+                      FontAwesomeIcons.ellipsisVertical,
+                      color: Colors.white38,
+                      size: 16,
+                    ),
                   ),
                 ],
               ),

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
-import 'package:overcloud/utils/format_date_time.dart';
 
 class FoldersPage extends StatefulWidget {
   final String folderName;
@@ -142,12 +141,7 @@ class _FoldersPageState extends State<FoldersPage> {
 
   
                   final files = snapshot.data!.docs;
-                 
-
-      
-
-                  print(files);
-                 
+    
 
                   return ListView.builder(
 
