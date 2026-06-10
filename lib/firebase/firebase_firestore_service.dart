@@ -26,7 +26,7 @@ class FirebaseFirestoreService {
   //FOLDER RELATED CRUD
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getFolderList(String uid) {
-    return FirebaseFirestore.instance
+    return _firebaseFirestore
         .collection('users')
         .doc(uid)
         .collection('folders')
@@ -35,6 +35,19 @@ class FirebaseFirestoreService {
 
   void createDefaultFolders(String uid, String folderName) async {
     try {
+      DocumentSnapshot existingFolders = await _firebaseFirestore
+      .collection("users")
+      .doc(uid)
+      .collection("folders")
+      .doc(folderName)
+      .get();
+
+      if (existingFolders.exists){
+        return;
+      }
+
+
+
       DateTime dateTime = DateTime.now();
       DocumentReference folder = _firebaseFirestore
           .collection('users')
@@ -87,6 +100,24 @@ class FirebaseFirestoreService {
           .doc(folderName);
 
       await folder.delete();
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  //Files Crud
+   void createFile(String uid,String folderId, String fileName, String fileType, String fileSize) async {
+    try {
+      DateTime dateTime = DateTime.now();
+      DocumentReference folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(folderId)
+          .collection("files")
+          .doc();
+
+      await folder.set({"fileName": fileName,"createdOn": dateTime.toString(), "fileType" : fileType, "fileSize": fileSize});
     } catch (e) {
       debugPrint(e.toString());
     }

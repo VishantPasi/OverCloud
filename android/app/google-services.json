@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "725343694902-3k40109f5ugmu9s5lkiign4spdp37tbm.apps.googleusercontent.com",
+          "client_id": "725343694902-fjk2gn2ucdkrgfms18ein51la5bqf8ti.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.overcloud",
-            "certificate_hash": "87d0d219f2c07658dcc986e843de24bba8facf33"
+            "certificate_hash": "bb1c5a12080483db8bd428a2a8e22424831323fd"
           }
         },
         {

@@ -1,13 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_arc_speed_dial/flutter_speed_dial_menu_button.dart';
+import 'package:flutter_arc_speed_dial/main_menu_floating_action_button.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/utils/format_date_time.dart';
+import 'package:overcloud/utils/pick_files.dart';
 
 class FoldersPage extends StatefulWidget {
   final String folderName;
-  const FoldersPage({super.key, required this.folderName});
+  final String folderId;
+  const FoldersPage({super.key, required this.folderName, required this.folderId});
 
   @override
   State<FoldersPage> createState() => _FoldersPageState();
@@ -22,6 +27,10 @@ class _FoldersPageState extends State<FoldersPage> {
 
 
   int fileCount = 0;
+
+  final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
+
+  final FilePickingService _pickingService = FilePickingService();
 
 
   @override
@@ -125,7 +134,7 @@ class _FoldersPageState extends State<FoldersPage> {
               SizedBox(height: 20),
 
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: _firestore.getFolderFiles(uid,widget.folderName),
+                stream: _firestore.getFolderFiles(uid,widget.folderId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -136,7 +145,7 @@ class _FoldersPageState extends State<FoldersPage> {
                   }
 
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text("No Folders Found"));
+                    return const Center(child: Text("No Files Found"));
                   }
 
   
@@ -156,7 +165,7 @@ class _FoldersPageState extends State<FoldersPage> {
                       return fileStructure(
                         files[index]['fileName'],
                         
-                          files[index].data()['createdOn'],
+                          formatDateTime(files[index].data()['createdOn']),
                           files[index].data()['fileType'],
                        files[index].data()['fileSize'],
                       );
@@ -171,12 +180,58 @@ class _FoldersPageState extends State<FoldersPage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-        backgroundColor: Colors.deepOrange,
-        child: FaIcon(FontAwesomeIcons.plus, color: Colors.white, size: 20),
-      ),
+      floatingActionButton: _getFloatingActionButton()
+    );
+  }
+
+  Widget _getFloatingActionButton() {
+    return SpeedDialMenuButton(
+      //if needed to close the menu after clicking sub-FAB
+      isShowSpeedDial: _isShowDial.value,
+       updateSpeedDialStatus: (isShow) {
+        //return any open or close change within the widget
+        _isShowDial.value = isShow;
+        
+      },
+      isEnableAnimation: true,
+      //general init
+
+      isMainFABMini: false,
+      mainMenuFloatingActionButton: MainMenuFloatingActionButton(
+          mini: false,
+          child: FaIcon(FontAwesomeIcons.plus,size: 18,color: Colors.white,),
+          backgroundColor: Colors.deepOrange,
+          onPressed: () {},
+          shape:CircleBorder(),
+          closeMenuChild: Icon(Icons.close),
+          closeMenuForegroundColor: Colors.deepOrange,
+          closeMenuBackgroundColor: Colors.white),
+      floatingActionButtonWidgetChildren: <FloatingActionButton>[
+        
+        FloatingActionButton(
+          shape: CircleBorder(),
+          mini: false,
+          onPressed: () {
+           
+            _pickingService.pickAFile();
+            
+          },
+          backgroundColor: Colors.deepOrange,
+          child: FaIcon(FontAwesomeIcons.fileArrowUp,color: Colors.white,),
+        ),
+        FloatingActionButton(
+          shape: CircleBorder(),
+          mini: false,
+          onPressed: () {
+            //if no need to change the menu status
+            _isShowDial.value = false;
+          },
+          backgroundColor: Colors.deepOrange,
+          child: FaIcon(FontAwesomeIcons.folderPlus,color: Colors.white,),
+        ),
+      ],
+      isSpeedDialFABsMini: false,
+      paddingBtwSpeedDialButton: 100.0,
     );
   }
 

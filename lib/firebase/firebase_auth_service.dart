@@ -12,6 +12,7 @@ class FirebaseAuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   final String _webSdkClientId =
       "725343694902-ok4rab3baj2u0k1efvtkqleqes5jaej7.apps.googleusercontent.com";
+      
 
   final FirebaseFirestoreService _firestoreService = FirebaseFirestoreService();
 
@@ -101,18 +102,21 @@ class FirebaseAuthService {
   Future<void> signInWithGoogle(BuildContext context) async {
     isLoading.value = true;
     try {
-      await _googleSignIn.initialize(serverClientId: _webSdkClientId);
 
-      await _googleSignIn.signOut();
+      await _googleSignIn.initialize(serverClientId: _webSdkClientId);
 
       final GoogleSignInAccount userAccount = await _googleSignIn
           .authenticate();
+
+          
 
       final GoogleSignInAuthentication googleAuth = userAccount.authentication;
 
       final credentials = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
+
+    
 
       final userCredentials = await _auth.signInWithCredential(credentials);
 
@@ -144,10 +148,11 @@ class FirebaseAuthService {
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
-    } on FirebaseAuthException catch (e) {
-      isLoading.value = false;
-      throw Exception(e.message);
-    } finally {
+    }  catch (e, stackTrace) {
+  debugPrint("Google Sign In Error: $e");
+  debugPrintStack(stackTrace: stackTrace);
+  rethrow;
+} finally {
       isLoading.value = false;
     }
   }

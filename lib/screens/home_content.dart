@@ -344,6 +344,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "120",
                       context,
+                      "photos"
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -353,6 +354,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "45",
                       context,
+                      "documents"
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -362,6 +364,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "23",
                       context,
+                      "videos"
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -371,6 +374,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "15",
                       context,
+                      "music"
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -380,6 +384,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "",
                       context,
+                      "others"
                     ),
                   ],
                 ),
@@ -404,6 +409,7 @@ class _HomeContentState extends State<HomeContent> {
                     FontAwesomeIcons.solidFolderOpen,
                     const Color.fromRGBO(255, 196, 87, 1),
                     context,
+                    "OverAllFiles"
                   ),
                   quickAccess(
                     "24",
@@ -412,6 +418,7 @@ class _HomeContentState extends State<HomeContent> {
                     FontAwesomeIcons.userLock,
                     const Color.fromRGBO(255, 120, 80, 1),
                     context,
+                    "private"
                   ),
                   quickAccess(
                     "87",
@@ -420,6 +427,7 @@ class _HomeContentState extends State<HomeContent> {
                     FontAwesomeIcons.solidStar,
                     const Color.fromRGBO(255, 170, 60, 1),
                     context,
+                    "favourites"
                   ),
                 ],
               ),
@@ -485,11 +493,12 @@ Widget quickAccess(
   FaIconData icon,
   Color iconColor,
   BuildContext context,
+  String folderId
 ) {
   return Expanded(
     child: GestureDetector(
       onTap: () => MaterialPageRoute(
-        builder: (context) => FoldersPage(folderName: title),
+        builder: (context) => FoldersPage(folderName: title, folderId: folderId,),
       ),
       child: Container(
         height: 110,
@@ -578,11 +587,12 @@ Widget infoChips(
   FaIconData icon,
   String subText,
   BuildContext context,
+  String folderId,
 ) {
   return GestureDetector(
     onTap: () => Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => FoldersPage(folderName: text)),
+      MaterialPageRoute(builder: (context) => FoldersPage(folderName: text, folderId: folderId,)),
     ),
     child: Container(
       padding: EdgeInsets.symmetric(horizontal: 5, vertical: 12),
