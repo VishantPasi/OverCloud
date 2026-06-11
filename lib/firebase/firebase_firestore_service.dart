@@ -105,9 +105,10 @@ class FirebaseFirestoreService {
     }
   }
 
-  //Files Crud
-   void createFile(String uid,String folderId, String fileName, String fileType, String fileSize) async {
+  //Files Metadata Crud
+   void createFileMetaData(String uid,String folderId) async {
     try {
+
       DateTime dateTime = DateTime.now();
       DocumentReference folder = _firebaseFirestore
           .collection('users')
@@ -117,7 +118,7 @@ class FirebaseFirestoreService {
           .collection("files")
           .doc();
 
-      await folder.set({"fileName": fileName,"createdOn": dateTime.toString(), "fileType" : fileType, "fileSize": fileSize});
+      // await folder.set({"fileName": file?.name,"createdOn": dateTime.toString(), "fileType" : file?.mimeType, "fileSize": "${sizeInMB.toStringAsFixed(2)} KB"});
     } catch (e) {
       debugPrint(e.toString());
     }

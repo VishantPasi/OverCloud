@@ -31,7 +31,7 @@ class _FoldersPageState extends State<FoldersPage> {
 
   final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
 
-  SelectOneFile _selectOneFile = SelectOneFile();
+  // SelectOneFile _selectOneFile = SelectOneFile();
 
 
 
@@ -182,11 +182,11 @@ class _FoldersPageState extends State<FoldersPage> {
           ),
         ),
       ),
-      floatingActionButton: _getFloatingActionButton()
+      floatingActionButton: _getFloatingActionButton(widget.folderId)
     );
   }
 
-  Widget _getFloatingActionButton() {
+  Widget _getFloatingActionButton(String folderId) {
     return SpeedDialMenuButton(
       mainFABPosX: 5,
       //if needed to close the menu after clicking sub-FAB
@@ -216,9 +216,9 @@ class _FoldersPageState extends State<FoldersPage> {
           shape: CircleBorder(),
           mini: false,
           heroTag: "file_upload",
-          onPressed: () {
+          onPressed: () async {
            
-          _selectOneFile.openSingleFile();
+          // _firestore.createFileMetaData(uid, widget.folderId);
           _isShowDial.value = false;
 
             
