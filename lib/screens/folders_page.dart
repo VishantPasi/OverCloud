@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/utils/format_date_time.dart';
+import 'package:overcloud/utils/select_one_file.dart';
 
 
 class FoldersPage extends StatefulWidget {
@@ -29,6 +30,8 @@ class _FoldersPageState extends State<FoldersPage> {
   int fileCount = 0;
 
   final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
+
+  SelectOneFile _selectOneFile = SelectOneFile();
 
 
 
@@ -185,6 +188,7 @@ class _FoldersPageState extends State<FoldersPage> {
 
   Widget _getFloatingActionButton() {
     return SpeedDialMenuButton(
+      mainFABPosX: 5,
       //if needed to close the menu after clicking sub-FAB
       isShowSpeedDial: _isShowDial.value,
        updateSpeedDialStatus: (isShow) {
@@ -200,6 +204,7 @@ class _FoldersPageState extends State<FoldersPage> {
           mini: false,
           child: FaIcon(FontAwesomeIcons.plus,size: 18,color: Colors.white,),
           backgroundColor: Colors.deepOrange,
+          heroTag: "main_fab",
           onPressed: () {},
           shape:CircleBorder(),
           closeMenuChild: Icon(Icons.close),
@@ -210,8 +215,11 @@ class _FoldersPageState extends State<FoldersPage> {
         FloatingActionButton(
           shape: CircleBorder(),
           mini: false,
+          heroTag: "file_upload",
           onPressed: () {
            
+          _selectOneFile.openSingleFile();
+          _isShowDial.value = false;
 
             
           },
@@ -221,6 +229,18 @@ class _FoldersPageState extends State<FoldersPage> {
         FloatingActionButton(
           shape: CircleBorder(),
           mini: false,
+          heroTag: "camera",
+          onPressed: () {
+
+
+          },
+          backgroundColor: Colors.deepOrange,
+          child: FaIcon(FontAwesomeIcons.cameraRetro,color: Colors.white,),
+        ),
+        FloatingActionButton(
+          shape: CircleBorder(),
+          mini: false,
+          heroTag: "create_folder",
           onPressed: () {
             //if no need to change the menu status
             _isShowDial.value = false;
@@ -230,7 +250,7 @@ class _FoldersPageState extends State<FoldersPage> {
         ),
       ],
       isSpeedDialFABsMini: false,
-      paddingBtwSpeedDialButton: 100.0,
+      paddingBtwSpeedDialButton: 20.0,
     );
   }
 
