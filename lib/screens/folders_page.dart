@@ -7,7 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/utils/format_date_time.dart';
-import 'package:overcloud/utils/pick_files.dart';
+
 
 class FoldersPage extends StatefulWidget {
   final String folderName;
@@ -30,7 +30,6 @@ class _FoldersPageState extends State<FoldersPage> {
 
   final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
 
-  final FilePickingService _pickingService = FilePickingService();
 
 
   @override
@@ -213,7 +212,7 @@ class _FoldersPageState extends State<FoldersPage> {
           mini: false,
           onPressed: () {
            
-            _pickingService.pickAFile();
+
             
           },
           backgroundColor: Colors.deepOrange,

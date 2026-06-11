@@ -426,7 +426,7 @@ class _SignInPageState extends State<SignInPage> {
                                   child: ElevatedButton(
                                     onPressed: () {
                                       FocusScope.of(context).unfocus();
-                                      
+
                                       _firebaseAuthService.signIn(
                                         emailController,
                                         passwordController,
