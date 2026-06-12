@@ -1,0 +1,20 @@
+<svg width="46" height="56" viewBox="8 2 46 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body -->
+  <rect x="12" y="6" width="38" height="48" rx="9" fill="#FF6B00"/>
+  <!-- Dark fold bg -->
+  <path d="M38 6 L50 6 L50 20 L38 20 Z" fill="#8B3800"/>
+  <!-- Fold highlight -->
+  <path d="M38 6 L50 20 L38 20 Z" fill="#FFA055"/>
+  <!-- Crease -->
+  <line x1="38" y1="6" x2="38" y2="20" stroke="rgba(0,0,0,0.18)" stroke-width="0.8"/>
+  <!-- Top sheen -->
+  <rect x="12" y="6" width="38" height="4" rx="9" fill="rgba(255,255,255,0.1)"/>
+  <!-- Waveform bars centered at y=36 -->
+  <rect x="14" y="33" width="3.5" height="6"  rx="1.8" fill="rgba(255,255,255,0.38)"/>
+  <rect x="19" y="29" width="3.5" height="14" rx="1.8" fill="rgba(255,255,255,0.55)"/>
+  <rect x="24" y="25" width="3.5" height="22" rx="1.8" fill="rgba(255,255,255,0.75)"/>
+  <rect x="29" y="22" width="3.5" height="28" rx="1.8" fill="rgba(255,255,255,0.95)"/>
+  <rect x="34" y="26" width="3.5" height="20" rx="1.8" fill="rgba(255,255,255,0.82)"/>
+  <rect x="39" y="29" width="3.5" height="14" rx="1.8" fill="rgba(255,255,255,0.62)"/>
+  <rect x="44" y="32" width="3.5" height="8"  rx="1.8" fill="rgba(255,255,255,0.42)"/>
+</svg>

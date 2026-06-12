@@ -1,0 +1,18 @@
+<svg width="46" height="56" viewBox="8 2 46 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="12" y="6" width="38" height="48" rx="6" fill="#FF7A00"/>
+  <path d="M38 6 L50 6 L50 20 L38 20 Z" fill="#994400"/>
+  <path d="M38 6 L50 20 L38 20 Z" fill="#ffbb55"/>
+  <line x1="38" y1="6" x2="38" y2="20" stroke="rgba(0,0,0,0.15)" stroke-width="0.8"/>
+  <!-- Slide preview area -->
+  <rect x="16" y="24" width="30" height="20" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+  <!-- Mountain/chart shape inside slide -->
+  <path d="M16 44 L24 34 L31 39 L37 30 L46 44 Z" fill="rgba(255,255,255,0.45)" clip-path="url(#slide-clip)"/>
+  <clipPath id="slide-clip">
+    <rect x="16" y="24" width="30" height="20" rx="3"/>
+  </clipPath>
+  <!-- Thumbnail strips below -->
+  <rect x="16" y="48" width="9" height="4" rx="1.5" fill="rgba(255,255,255,0.3)"/>
+  <rect x="28" y="48" width="9" height="4" rx="1.5" fill="rgba(255,255,255,0.3)"/>
+  <rect x="40" y="48" width="6" height="4" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+  <rect x="12" y="6" width="38" height="4" rx="6" fill="rgba(255,255,255,0.08)"/>
+</svg>

@@ -30,14 +30,12 @@ class _FoldersPageState extends State<FoldersPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String uid = _auth.currentUser!.uid;
 
-  int fileCount = 0;
+  final ValueNotifier<int> fileCount = ValueNotifier<int>(0);
 
   final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
 
   PickOneFile pickOneFile = PickOneFile();
   ConvertFileSize convertFileSize = ConvertFileSize();
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -60,13 +58,18 @@ class _FoldersPageState extends State<FoldersPage> {
                 ),
               ),
               SizedBox(height: 2),
-              Text(
-                "${fileCount.toString()} items",
+
+              ValueListenableBuilder<int>(
+  valueListenable: fileCount,
+  builder: (context, count, child) {
+    return Text("${count} items",
                 style: GoogleFonts.urbanist(
                   color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 14,
-                ),
-              ),
+                ),);
+  },
+)
+              
             ],
           ),
         ),
@@ -156,39 +159,59 @@ class _FoldersPageState extends State<FoldersPage> {
 
                   final files = snapshot.data!.docs;
 
-                  String fileTypeLogo = "unknown_icon.svg";
-                  
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+  fileCount.value = files.length;
+});
+
 
                   return ListView.builder(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: files.length,
                     itemBuilder: (context, index) {
+                      final Map<String, String> fileIcons = {
+                        "pdf": "pdf.svg",
+                        "xls": "xlsx.svg",
+                        "xlsx": "xlsx.svg",
+                        "doc": "docx.svg",
+                        "docx": "docx.svg",
+                        "ppt": "pptx.svg",
+                        "pptx": "pptx.svg",
+                        "txt": "txt.svg",
+                        "csv": "csv.svg",
+                        "zip": "zip.svg",
+                        "rar": "zip.svg",
+                        "7z": "zip.svg",
+                        "mp3": "audio.svg",
+                        "wav": "audio.svg",
+                        "mp4": "video.svg",
+                        "mkv": "video.svg",
+                        "jpg": "img.svg",
+                        "jpeg": "img.svg",
+                        "png": "img.svg",
+                        "gif": "img.svg",
+                        "webp": "img.svg",
+                      };
 
-                      if (files.isNotEmpty){
-                    if (files[index].data()['fileType'] == "pdf"){
-                      fileTypeLogo = "pdf.svg";
-                    }
-                    else if(files[index].data()['fileType'] == "xlsx"){
-                      fileTypeLogo = "xlsx.svg";
-                    }
-                  }
+                      String fileType = files[index]
+                          .data()['fileType']
+                          .toString()
+                          .toLowerCase();
+                      String fileTypeLogo =
+                          fileIcons[fileType] ?? "unknown.svg";
                       return fileStructure(
                         files[index]['fileName'],
 
                         formatDateTime(files[index].data()['createdOn']),
                         files[index].data()['fileType'],
                         files[index].data()['fileSize'],
-                        fileTypeLogo
-
+                        fileTypeLogo,
+                        files[index].id,
                       );
                     },
                   );
                 },
               ),
-              // fileStructure("Work", "25 Oct 2022", "Excel", "2.4 MB"),
-              // fileStructure("Work", "25 Oct 2022", "Excel", "2.4 MB"),
-              // fileStructure("Work", "25 Oct 2022", "Excel", "2.4 MB"),
             ],
           ),
         ),
@@ -275,31 +298,28 @@ class _FoldersPageState extends State<FoldersPage> {
     String date,
     String filetype,
     String size,
-    String fileTypeLogo
+    String fileTypeLogo,
+    String fileId,
   ) {
     // if (filetype == "Folder" ){
 
     // }
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Container(
-        width: double.infinity,
-        height: 70,
-        decoration: BoxDecoration(
-          color: Colors.white10,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5),
-          child: Row(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: Column(
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  SvgPicture.asset("assets/icons/icons_new/$fileTypeLogo",height: 50,),
+                  SvgPicture.asset(
+                    "assets/icons/$fileTypeLogo",
+                    height: 40,
+                  ),
                   SizedBox(width: 15),
                   SizedBox(
-                    width: 220,
+                    width: 215,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,8 +333,9 @@ class _FoldersPageState extends State<FoldersPage> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                        SizedBox(height: 2),
                         Text(
-                          "$date • $size",
+                          date,
                           style: GoogleFonts.urbanist(
                             color: Colors.white70,
                             fontSize: 13,
@@ -326,14 +347,25 @@ class _FoldersPageState extends State<FoldersPage> {
                 ],
               ),
 
-              FaIcon(
-                FontAwesomeIcons.ellipsisVertical,
-                color: Colors.white70,
-                size: 18,
+              IconButton(
+                onPressed: () {
+                  // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
+                },
+                icon: FaIcon(
+                  FontAwesomeIcons.ellipsisVertical,
+                  color: Colors.white70,
+                  size: 18,
+                ),
               ),
             ],
           ),
-        ),
+          SizedBox(height: 10),
+          Divider(
+            color: Colors.white.withValues(alpha: 0.1),
+            height: 2,
+            thickness: 2,
+          ),
+        ],
       ),
     );
   }

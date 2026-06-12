@@ -97,13 +97,13 @@ class FirebaseFirestoreService {
     }
   }
 
-  void deleteFolder(String uid, String folderName) async {
+  void deleteFolder(String uid, String folderId) async {
     try {
       DocumentReference folder = _firebaseFirestore
           .collection('users')
           .doc(uid)
           .collection("folders")
-          .doc(folderName);
+          .doc(folderId);
 
       await folder.delete();
     } catch (e) {
@@ -152,4 +152,26 @@ class FirebaseFirestoreService {
         .collection("files")
         .snapshots();
   }
+
+  void deleteFileMetaData(String uid, String docId, String fileId) async {
+    try {
+      final folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(docId)
+        .collection("files").doc(fileId);
+          
+
+      await folder.delete();
+        
+       }
+
+
+      
+     catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+  
 }
