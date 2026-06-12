@@ -10,10 +10,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/utils/convert_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
-import 'package:overcloud/utils/menu_items.dart';
 import 'package:overcloud/utils/pick_one_file.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
-import 'package:popover/popover.dart';
 
 class FoldersPage extends StatefulWidget {
   final String folderName;
@@ -148,7 +146,7 @@ class _FoldersPageState extends State<FoldersPage> {
               SizedBox(height: 20),
 
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: _firestore.getFolderFiles(uid, widget.folderId),
+                stream: _firestore.getFilesMetaDataList(uid, widget.folderId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -210,7 +208,7 @@ class _FoldersPageState extends State<FoldersPage> {
                         files[index].data()['fileSize'],
                         fileTypeLogo,
                         files[index].id,
-                        context
+                        context,
                       );
                     },
                   );
@@ -304,7 +302,7 @@ class _FoldersPageState extends State<FoldersPage> {
     String size,
     String fileTypeLogo,
     String fileId,
-    BuildContext context
+    BuildContext context,
   ) {
     // if (filetype == "Folder" ){
 
@@ -349,31 +347,22 @@ class _FoldersPageState extends State<FoldersPage> {
                 ],
               ),
 
-              
-  Builder(
-  builder: (buttonContext) {
-    return IconButton(
-      icon: FaIcon(
-                  FontAwesomeIcons.ellipsisVertical,
-                  color: Colors.white70,
-                  size: 18,
-                ),
+              Builder(
+                builder: (buttonContext) {
+                  return IconButton(
+                    icon: FaIcon(
+                      FontAwesomeIcons.ellipsisVertical,
+                      color: Colors.white70,
+                      size: 18,
+                    ),
 
-      onPressed: () {
-        showPopover(
-          context: buttonContext,
-          bodyBuilder: (_) => const MenuItems(),
-          width: 200,
-          height: 150,
-          direction: PopoverDirection.bottom
-        );
-      },
-    );
-  },
-                
+                    onPressed: () {
+                      popOver.popOver(buttonContext, context, uid, widget.folderId, fileId, null,fileName, false );
+                    },
+                  );
+                },
 
                 // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
-                
               ),
             ],
           ),

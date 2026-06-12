@@ -1,81 +1,185 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/utils/rename_file_bottomsheet.dart';
+import 'package:overcloud/utils/rename_folder_bottomsheet.dart';
 import 'package:popover/popover.dart';
 
 class ShowPopOver {
-  Widget popOver(BuildContext context){
-    return GestureDetector(
-        onTap: () {
-          showPopover(
-            context: context,
-            bodyBuilder: (context) => const ListItems(),
-            onPop: () => print('Popover was popped!'),
-            direction: PopoverDirection.bottom,
-            backgroundColor: Colors.white,
-            width: 200,
-            height: 400,
-            arrowHeight: 15,
-            arrowWidth: 30,
-          );
-        },
+  FirebaseFirestoreService firestoreService = FirebaseFirestoreService();
+
+  Future<Object?> popOver(
+    BuildContext buttonContext,
+    BuildContext context,
+    String uid,
+    String? folderId,
+    String? fileId,
+    String? folderName,
+    String? fileName,
+
+    bool isFolder 
+  ) {
+    return showPopover(
+      context: buttonContext,
+      bodyBuilder: (_) => Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+        child: menuItems(context, uid, folderId, fileId,folderName,fileName,isFolder),
+      ),
+      width: 150,
+      height: 210,
+      direction: PopoverDirection.bottom,
+      radius: 20,
+      backgroundColor: Color.fromRGBO(50, 50, 50, 0.945),
     );
   }
 
-  
-}
+  Widget menuItems(
+    BuildContext context,
+    String uid,
+    String? folderId,
+    String? fileId,
+    String? folderName,
+    String? fileName,
 
-
-class ListItems extends StatelessWidget {
-  const ListItems({super.key});
-
-  @override
-  Widget build(BuildContext context) {
+    bool isFolder 
+  ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView(
-        padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
+      child: Column(
         children: [
-          InkWell(
+          GestureDetector(
             onTap: () {
-            
+              Navigator.pop(context);
+              isFolder ? renameFolderBottomSheet(context, uid, folderId!, folderName!) : renameFileBottomSheet(context, uid, folderId! , fileId!, fileName!);
             },
-            child: Container(
-              height: 50,
-              color: Colors.amber[100],
-              child: const Center(child: Text('Entry A')),
+            child: SizedBox(
+              height: 40,
+
+              child: Row(
+                children: [
+                  Icon(Icons.edit, color: Colors.white70, size: 23),
+                  SizedBox(width: 15),
+                  Text(
+                    "Rename",
+                    style: GoogleFonts.urbanist(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const Divider(),
-          Container(
-            height: 50,
-            color: Colors.amber[200],
-            child: const Center(child: Text('Entry B')),
+          SizedBox(height: 5),
+          SizedBox(
+            height: 40,
+
+            child: Row(
+              children: [
+                Icon(
+                  Icons.star_border_outlined,
+                  color: Colors.white70,
+                  size: 23,
+                ),
+                SizedBox(width: 15),
+                Text(
+                  "Favourites",
+                  style: GoogleFonts.urbanist(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const Divider(),
-          Container(
-            height: 50,
-            color: Colors.amber[300],
-            child: const Center(child: Text('Entry C')),
+          SizedBox(height: 5),
+          SizedBox(
+            height: 40,
+
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  color: Colors.white70,
+                  size: 23,
+                ),
+                SizedBox(width: 15),
+                Text(
+                  "Details",
+                  style: GoogleFonts.urbanist(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const Divider(),
-          Container(
-            height: 50,
-            color: Colors.amber[400],
-            child: const Center(child: Text('Entry D')),
+          SizedBox(height: 10),
+          Divider(
+            color: Colors.white.withValues(alpha: 0.1),
+            height: 2,
+            thickness: 2,
           ),
-          const Divider(),
-          Container(
-            height: 50,
-            color: Colors.amber[500],
-            child: const Center(child: Text('Entry E')),
-          ),
-          const Divider(),
-          Container(
-            height: 50,
-            color: Colors.amber[600],
-            child: const Center(child: Text('Entry F')),
+          SizedBox(height: 5),
+          GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+              isFolder ?
+              firestoreService.deleteFolder(uid, folderId!): firestoreService.deleteFileMetaData(uid, folderId!, fileId!);
+            },
+            child: Row(
+              children: [
+                SizedBox(width: 5),
+                SizedBox(
+                  height: 40,
+            
+                  child: Row(
+                    children: [
+                      FaIcon(
+                        FontAwesomeIcons.trashCan,
+                        color: Colors.red,
+                        size: 18,
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        "Delete",
+                        style: GoogleFonts.urbanist(
+                          color: Colors.red,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 }
+
+// class MenuItems extends StatelessWidget {
+
+//   const MenuItems({super.key});
+  
+//   @override
+//   Widget build(BuildContext context) {
+//     FirebaseFirestoreService firestoreService = FirebaseFirestoreService();
+
+//     return 
+//   }
+// }

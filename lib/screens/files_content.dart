@@ -8,8 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/utils/create_folder_bottomsheet.dart';
-import 'package:overcloud/utils/folder_actions_bottomsheet.dart';
 import 'package:overcloud/utils/format_date_time.dart';
+import 'package:overcloud/utils/show_pop_over.dart';
 
 class FilesContent extends StatefulWidget {
   final NotchBottomBarController? controller;
@@ -26,6 +26,8 @@ class _FilesContentState extends State<FilesContent> {
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String uid = _auth.currentUser!.uid;
+
+  ShowPopOver popOver = ShowPopOver();
 
   @override
   void initState() {
@@ -467,14 +469,23 @@ class _FilesContentState extends State<FilesContent> {
                     ],
                   ),
 
-                  IconButton(
-                    onPressed: () => folderActionsBottomSheet(context, uid, folderId, folderName),
+                   Builder(
+                builder: (buttonContext) {
+                  return IconButton(
                     icon: FaIcon(
                       FontAwesomeIcons.ellipsisVertical,
-                      color: Colors.white38,
-                      size: 16,
+                      color: Colors.white70,
+                      size: 18,
                     ),
-                  ),
+
+                    onPressed: () {
+                      popOver.popOver(buttonContext,context,uid, folderId, null,folderName, null,true);
+                    },
+                  );
+                },
+
+                // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
+              ),
                 ],
               ),
             ),

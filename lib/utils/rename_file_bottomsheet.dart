@@ -2,27 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 
-Future<String?> renameFolderBottomSheet(
+Future<String?> renameFileBottomSheet(
   BuildContext context,
   String uid,
-   String folderId,
-  String folderName,
- 
+  String folderId,
+  String fileId,
+  String fileName,
 ) async {
-  final TextEditingController folderController =
-      TextEditingController(text: folderName);
+  final TextEditingController folderController = TextEditingController(
+    text: fileName,
+  );
 
-  final FirebaseFirestoreService firestore =
-      FirebaseFirestoreService();
+  final FirebaseFirestoreService firestore = FirebaseFirestoreService();
 
   return await showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
     backgroundColor: const Color.fromRGBO(29, 29, 29, 1),
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(25),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
     ),
     builder: (context) {
       return Padding(
@@ -55,7 +53,7 @@ Future<String?> renameFolderBottomSheet(
             const SizedBox(height: 15),
 
             Text(
-              "Rename Folder",
+              "Rename File",
               style: GoogleFonts.urbanist(
                 color: Colors.white,
                 fontSize: 22,
@@ -66,12 +64,9 @@ Future<String?> renameFolderBottomSheet(
             const SizedBox(height: 8),
 
             Text(
-              "Enter a new name for your folder",
+              "Enter a new name for your file",
               textAlign: TextAlign.center,
-              style: GoogleFonts.urbanist(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
+              style: GoogleFonts.urbanist(color: Colors.white70, fontSize: 14),
             ),
 
             const SizedBox(height: 25),
@@ -82,10 +77,8 @@ Future<String?> renameFolderBottomSheet(
               cursorColor: Colors.deepOrange,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: "Folder Name",
-                hintStyle: GoogleFonts.urbanist(
-                  color: Colors.white38,
-                ),
+                hintText: "File Name",
+                hintStyle: GoogleFonts.urbanist(color: Colors.white38),
                 filled: true,
                 fillColor: const Color.fromRGBO(40, 40, 40, 1),
                 border: OutlineInputBorder(
@@ -108,32 +101,20 @@ Future<String?> renameFolderBottomSheet(
                   ),
                 ),
                 onPressed: () async {
-                  final newFolderName =
-                      folderController.text.trim();
+                  final newFileName = folderController.text.trim();
 
-                  if (newFolderName.isEmpty ||
-                      newFolderName == folderName) {
+                  if (newFileName.isEmpty || newFileName == fileName) {
                     Navigator.pop(context);
                     return;
                   }
 
-                  firestore.renameFolderName(
-                    uid,
-                    folderId,
-                    newFolderName,
-                  );
+                  firestore.renameFileName(uid, folderId, fileId, newFileName);
 
-                  Navigator.pop(
-                    context,
-                    newFolderName,
-                  );
+                  Navigator.pop(context, newFileName);
                 },
-                icon: const Icon(
-                  Icons.edit_rounded,
-                  color: Colors.white,
-                ),
+                icon: const Icon(Icons.edit_rounded, color: Colors.white),
                 label: Text(
-                  "Rename Folder",
+                  "Rename File",
                   style: GoogleFonts.urbanist(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

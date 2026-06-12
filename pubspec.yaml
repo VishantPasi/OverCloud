@@ -48,7 +48,7 @@ dependencies:
   flutter_arc_speed_dial: ^2.0.1
   file_picker: 8.1.7
   flutter_svg: ^2.3.0
-  popover: ^0.2.8+2
+  popover: ^0.4.0
 
 
 

@@ -55,7 +55,7 @@ class FirebaseFirestoreService {
 
       await folder.set({
         "folderName": folderName,
-        "createdOn": dateTime.toString(),
+        "modifiedOn": dateTime.toString(),
       });
     } catch (e) {
       debugPrint(e.toString());
@@ -73,14 +73,18 @@ class FirebaseFirestoreService {
 
       await folder.set({
         "folderName": folderName,
-        "createdOn": dateTime.toString(),
+        "modifiedOn": dateTime.toString(),
       });
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
-  void renameFolder(String uid, String folderId, String newFolderName) async {
+  void renameFolderName(
+    String uid,
+    String folderId,
+    String newFolderName,
+  ) async {
     try {
       DateTime dateTime = DateTime.now();
       await _firebaseFirestore
@@ -90,7 +94,7 @@ class FirebaseFirestoreService {
           .doc(folderId)
           .update({
             "folderName": newFolderName,
-            "createdOn": dateTime.toString(),
+            "modifiedOn": dateTime.toString(),
           });
     } catch (e) {
       debugPrint(e.toString());
@@ -131,7 +135,7 @@ class FirebaseFirestoreService {
 
       await folder.set({
         "fileName": fileName,
-        "createdOn": dateTime.toString(),
+        "modifiedOn": dateTime.toString(),
         "fileType": fileType,
         "fileSize": fileSize,
       });
@@ -140,38 +144,56 @@ class FirebaseFirestoreService {
     }
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> getFolderFiles(
+  Stream<QuerySnapshot<Map<String, dynamic>>> getFilesMetaDataList(
     String uid,
-    String docId,
+    String folderId,
   ) {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .collection('folders')
-        .doc(docId)
+        .doc(folderId)
         .collection("files")
         .snapshots();
   }
 
-  void deleteFileMetaData(String uid, String docId, String fileId) async {
+  void renameFileName(
+    String uid,
+    String folderId,
+    String fileId,
+    String newFileName,
+  ) async {
+    try {
+      DateTime dateTime = DateTime.now();
+      await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(folderId)
+          .collection("files")
+          .doc(fileId)
+          .update({
+            "fileName": newFileName,
+            "modifiedOn": dateTime.toString(),
+          });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void deleteFileMetaData(String uid, String folderId, String fileId) async {
     try {
       final folder = _firebaseFirestore
           .collection('users')
           .doc(uid)
           .collection("folders")
-          .doc(docId)
-        .collection("files").doc(fileId);
-          
+          .doc(folderId)
+          .collection("files")
+          .doc(fileId);
 
       await folder.delete();
-        
-       }
-
-
-      
-     catch (e) {
+    } catch (e) {
       debugPrint(e.toString());
     }
   }
-  
 }
