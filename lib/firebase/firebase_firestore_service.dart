@@ -17,10 +17,10 @@ class FirebaseFirestoreService {
     await SecureStorageService.setEmail(data.data()?["email"]);
     await SecureStorageService.setUID(uid);
 
-    createDefaultFolders(uid,"photos");
-    createDefaultFolders(uid,"documents");
-    createDefaultFolders(uid,"videos");
-    createDefaultFolders(uid,"music");
+    createDefaultFolders(uid, "photos");
+    createDefaultFolders(uid, "documents");
+    createDefaultFolders(uid, "videos");
+    createDefaultFolders(uid, "music");
   }
 
   //FOLDER RELATED CRUD
@@ -36,17 +36,15 @@ class FirebaseFirestoreService {
   void createDefaultFolders(String uid, String folderName) async {
     try {
       DocumentSnapshot existingFolders = await _firebaseFirestore
-      .collection("users")
-      .doc(uid)
-      .collection("folders")
-      .doc(folderName)
-      .get();
+          .collection("users")
+          .doc(uid)
+          .collection("folders")
+          .doc(folderName)
+          .get();
 
-      if (existingFolders.exists){
+      if (existingFolders.exists) {
         return;
       }
-
-
 
       DateTime dateTime = DateTime.now();
       DocumentReference folder = _firebaseFirestore
@@ -55,13 +53,14 @@ class FirebaseFirestoreService {
           .collection("folders")
           .doc(folderName);
 
-      await folder.set({"folderName": folderName,"createdOn": dateTime.toString()});
-      
+      await folder.set({
+        "folderName": folderName,
+        "createdOn": dateTime.toString(),
+      });
     } catch (e) {
       debugPrint(e.toString());
     }
   }
-  
 
   void createFolder(String uid, String folderName) async {
     try {
@@ -72,7 +71,10 @@ class FirebaseFirestoreService {
           .collection("folders")
           .doc();
 
-      await folder.set({"folderName": folderName,"createdOn": dateTime.toString()});
+      await folder.set({
+        "folderName": folderName,
+        "createdOn": dateTime.toString(),
+      });
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -85,7 +87,11 @@ class FirebaseFirestoreService {
           .collection('users')
           .doc(uid)
           .collection("folders")
-          .doc(folderId).update({"folderName": newFolderName, "createdOn": dateTime.toString()});
+          .doc(folderId)
+          .update({
+            "folderName": newFolderName,
+            "createdOn": dateTime.toString(),
+          });
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -106,9 +112,14 @@ class FirebaseFirestoreService {
   }
 
   //Files Metadata Crud
-   void createFileMetaData(String uid,String folderId) async {
+  void createFileMetaData(
+    String uid,
+    String folderId,
+    String? fileName,
+    String? fileType,
+    String? fileSize,
+  ) async {
     try {
-
       DateTime dateTime = DateTime.now();
       DocumentReference folder = _firebaseFirestore
           .collection('users')
@@ -118,7 +129,12 @@ class FirebaseFirestoreService {
           .collection("files")
           .doc();
 
-      // await folder.set({"fileName": file?.name,"createdOn": dateTime.toString(), "fileType" : file?.mimeType, "fileSize": "${sizeInMB.toStringAsFixed(2)} KB"});
+      await folder.set({
+        "fileName": fileName,
+        "createdOn": dateTime.toString(),
+        "fileType": fileType,
+        "fileSize": fileSize,
+      });
     } catch (e) {
       debugPrint(e.toString());
     }

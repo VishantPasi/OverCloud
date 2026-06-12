@@ -1,39 +1,43 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_arc_speed_dial/flutter_speed_dial_menu_button.dart';
 import 'package:flutter_arc_speed_dial/main_menu_floating_action_button.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/utils/convert_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
-import 'package:overcloud/utils/select_one_file.dart';
-
+import 'package:overcloud/utils/pick_one_file.dart';
 
 class FoldersPage extends StatefulWidget {
   final String folderName;
   final String folderId;
-  const FoldersPage({super.key, required this.folderName, required this.folderId});
+  const FoldersPage({
+    super.key,
+    required this.folderName,
+    required this.folderId,
+  });
 
   @override
   State<FoldersPage> createState() => _FoldersPageState();
 }
 
 class _FoldersPageState extends State<FoldersPage> {
-
-  
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String uid = _auth.currentUser!.uid;
-
 
   int fileCount = 0;
 
   final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
 
-  // SelectOneFile _selectOneFile = SelectOneFile();
+  PickOneFile pickOneFile = PickOneFile();
+  ConvertFileSize convertFileSize = ConvertFileSize();
 
-
+  
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +140,7 @@ class _FoldersPageState extends State<FoldersPage> {
               SizedBox(height: 20),
 
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: _firestore.getFolderFiles(uid,widget.folderId),
+                stream: _firestore.getFolderFiles(uid, widget.folderId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -150,26 +154,33 @@ class _FoldersPageState extends State<FoldersPage> {
                     return const Center(child: Text("No Files Found"));
                   }
 
-  
                   final files = snapshot.data!.docs;
-    
+
+                  String fileTypeLogo = "unknown_icon.svg";
+                  
 
                   return ListView.builder(
-
-                    
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: files.length,
                     itemBuilder: (context, index) {
 
-                      
-                      
+                      if (files.isNotEmpty){
+                    if (files[index].data()['fileType'] == "pdf"){
+                      fileTypeLogo = "pdf.svg";
+                    }
+                    else if(files[index].data()['fileType'] == "xlsx"){
+                      fileTypeLogo = "xlsx.svg";
+                    }
+                  }
                       return fileStructure(
                         files[index]['fileName'],
-                        
-                          formatDateTime(files[index].data()['createdOn']),
-                          files[index].data()['fileType'],
-                       files[index].data()['fileSize'],
+
+                        formatDateTime(files[index].data()['createdOn']),
+                        files[index].data()['fileType'],
+                        files[index].data()['fileSize'],
+                        fileTypeLogo
+
                       );
                     },
                   );
@@ -182,7 +193,7 @@ class _FoldersPageState extends State<FoldersPage> {
           ),
         ),
       ),
-      floatingActionButton: _getFloatingActionButton(widget.folderId)
+      floatingActionButton: _getFloatingActionButton(widget.folderId),
     );
   }
 
@@ -191,51 +202,56 @@ class _FoldersPageState extends State<FoldersPage> {
       mainFABPosX: 5,
       //if needed to close the menu after clicking sub-FAB
       isShowSpeedDial: _isShowDial.value,
-       updateSpeedDialStatus: (isShow) {
+      updateSpeedDialStatus: (isShow) {
         //return any open or close change within the widget
         _isShowDial.value = isShow;
-        
       },
       isEnableAnimation: true,
-      //general init
 
+      //general init
       isMainFABMini: false,
       mainMenuFloatingActionButton: MainMenuFloatingActionButton(
-          mini: false,
-          child: FaIcon(FontAwesomeIcons.plus,size: 18,color: Colors.white,),
-          backgroundColor: Colors.deepOrange,
-          heroTag: "main_fab",
-          onPressed: () {},
-          shape:CircleBorder(),
-          closeMenuChild: Icon(Icons.close),
-          closeMenuForegroundColor: Colors.deepOrange,
-          closeMenuBackgroundColor: Colors.white),
+        mini: false,
+        child: FaIcon(FontAwesomeIcons.plus, size: 18, color: Colors.white),
+        backgroundColor: Colors.deepOrange,
+        heroTag: "main_fab",
+        onPressed: () {},
+        shape: CircleBorder(),
+        closeMenuChild: Icon(Icons.close),
+        closeMenuForegroundColor: Colors.deepOrange,
+        closeMenuBackgroundColor: Colors.white,
+      ),
       floatingActionButtonWidgetChildren: <FloatingActionButton>[
-        
         FloatingActionButton(
           shape: CircleBorder(),
           mini: false,
           heroTag: "file_upload",
           onPressed: () async {
-           
-          // _firestore.createFileMetaData(uid, widget.folderId);
-          _isShowDial.value = false;
+            PlatformFile? file = await pickOneFile.pickFile();
 
-            
+            if (file != null) {
+              _firestore.createFileMetaData(
+                uid,
+                widget.folderId,
+                file.name,
+                file.extension,
+                convertFileSize.fileSize(file.size),
+              );
+            }
+
+            _isShowDial.value = false;
+            setState(() {});
           },
           backgroundColor: Colors.deepOrange,
-          child: FaIcon(FontAwesomeIcons.fileArrowUp,color: Colors.white,),
+          child: FaIcon(FontAwesomeIcons.fileArrowUp, color: Colors.white),
         ),
         FloatingActionButton(
           shape: CircleBorder(),
           mini: false,
           heroTag: "camera",
-          onPressed: () {
-
-
-          },
+          onPressed: () {},
           backgroundColor: Colors.deepOrange,
-          child: FaIcon(FontAwesomeIcons.cameraRetro,color: Colors.white,),
+          child: FaIcon(FontAwesomeIcons.cameraRetro, color: Colors.white),
         ),
         FloatingActionButton(
           shape: CircleBorder(),
@@ -246,7 +262,7 @@ class _FoldersPageState extends State<FoldersPage> {
             _isShowDial.value = false;
           },
           backgroundColor: Colors.deepOrange,
-          child: FaIcon(FontAwesomeIcons.folderPlus,color: Colors.white,),
+          child: FaIcon(FontAwesomeIcons.folderPlus, color: Colors.white),
         ),
       ],
       isSpeedDialFABsMini: false,
@@ -259,6 +275,7 @@ class _FoldersPageState extends State<FoldersPage> {
     String date,
     String filetype,
     String size,
+    String fileTypeLogo
   ) {
     // if (filetype == "Folder" ){
 
@@ -279,32 +296,32 @@ class _FoldersPageState extends State<FoldersPage> {
             children: [
               Row(
                 children: [
-                  FaIcon(
-                    FontAwesomeIcons.solidFolder,
-                    color: const Color.fromRGBO(255, 196, 87, 1),
-                    size: 30,
-                  ),
+                  SvgPicture.asset("assets/icons/icons_new/$fileTypeLogo",height: 50,),
                   SizedBox(width: 15),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        fileName,
-                        style: GoogleFonts.urbanist(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                  SizedBox(
+                    width: 220,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          fileName,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        "$date - $size",
-                        style: GoogleFonts.urbanist(
-                          color: Colors.white70,
-                          fontSize: 14,
+                        Text(
+                          "$date • $size",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

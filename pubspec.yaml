@@ -47,6 +47,7 @@ dependencies:
   intl: ^0.20.2
   flutter_arc_speed_dial: ^2.0.1
   file_picker: 8.1.7
+  flutter_svg: ^2.3.0
 
 
 
@@ -77,6 +78,8 @@ flutter:
      - assets/images/
      - assets/logos/
      - assets/animations/
+     - assets/icons/
+     - assets/icons/icons_new/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
