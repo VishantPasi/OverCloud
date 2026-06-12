@@ -10,7 +10,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/utils/convert_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
+import 'package:overcloud/utils/menu_items.dart';
 import 'package:overcloud/utils/pick_one_file.dart';
+import 'package:overcloud/utils/show_pop_over.dart';
+import 'package:popover/popover.dart';
 
 class FoldersPage extends StatefulWidget {
   final String folderName;
@@ -36,6 +39,7 @@ class _FoldersPageState extends State<FoldersPage> {
 
   PickOneFile pickOneFile = PickOneFile();
   ConvertFileSize convertFileSize = ConvertFileSize();
+  ShowPopOver popOver = ShowPopOver();
 
   @override
   Widget build(BuildContext context) {
@@ -60,16 +64,17 @@ class _FoldersPageState extends State<FoldersPage> {
               SizedBox(height: 2),
 
               ValueListenableBuilder<int>(
-  valueListenable: fileCount,
-  builder: (context, count, child) {
-    return Text("${count} items",
-                style: GoogleFonts.urbanist(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 14,
-                ),);
-  },
-)
-              
+                valueListenable: fileCount,
+                builder: (context, itemCount, child) {
+                  return Text(
+                    "$itemCount items",
+                    style: GoogleFonts.urbanist(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 14,
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -160,9 +165,8 @@ class _FoldersPageState extends State<FoldersPage> {
                   final files = snapshot.data!.docs;
 
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-  fileCount.value = files.length;
-});
-
+                    fileCount.value = files.length;
+                  });
 
                   return ListView.builder(
                     shrinkWrap: true,
@@ -201,12 +205,12 @@ class _FoldersPageState extends State<FoldersPage> {
                           fileIcons[fileType] ?? "unknown.svg";
                       return fileStructure(
                         files[index]['fileName'],
-
                         formatDateTime(files[index].data()['createdOn']),
                         files[index].data()['fileType'],
                         files[index].data()['fileSize'],
                         fileTypeLogo,
                         files[index].id,
+                        context
                       );
                     },
                   );
@@ -300,6 +304,7 @@ class _FoldersPageState extends State<FoldersPage> {
     String size,
     String fileTypeLogo,
     String fileId,
+    BuildContext context
   ) {
     // if (filetype == "Folder" ){
 
@@ -313,10 +318,7 @@ class _FoldersPageState extends State<FoldersPage> {
             children: [
               Row(
                 children: [
-                  SvgPicture.asset(
-                    "assets/icons/$fileTypeLogo",
-                    height: 40,
-                  ),
+                  SvgPicture.asset("assets/icons/$fileTypeLogo", height: 40),
                   SizedBox(width: 15),
                   SizedBox(
                     width: 215,
@@ -347,15 +349,31 @@ class _FoldersPageState extends State<FoldersPage> {
                 ],
               ),
 
-              IconButton(
-                onPressed: () {
-                  // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
-                },
-                icon: FaIcon(
+              
+  Builder(
+  builder: (buttonContext) {
+    return IconButton(
+      icon: FaIcon(
                   FontAwesomeIcons.ellipsisVertical,
                   color: Colors.white70,
                   size: 18,
                 ),
+
+      onPressed: () {
+        showPopover(
+          context: buttonContext,
+          bodyBuilder: (_) => const MenuItems(),
+          width: 200,
+          height: 150,
+          direction: PopoverDirection.bottom
+        );
+      },
+    );
+  },
+                
+
+                // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
+                
               ),
             ],
           ),
