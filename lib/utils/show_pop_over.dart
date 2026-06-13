@@ -20,7 +20,7 @@ class ShowPopOver {
     String? fileType,
     String? fileSize,
     bool isFolder,
-    bool isStarred
+    bool isStarred,
   ) {
     return showPopover(
       context: buttonContext,
@@ -65,8 +65,8 @@ class ShowPopOver {
     String? fileName,
     String? fileType,
     String? fileSize,
-bool isStarred,
     bool isFolder,
+    bool isStarred,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
@@ -112,26 +112,29 @@ bool isStarred,
           SizedBox(height: 5),
           GestureDetector(
             onTap: () {
+              print(
+                "errorr: $folderId, $folderName, $fileId, $fileName, $fileType, $fileSize $isFolder",
+              );
               isFolder
                   ? firestoreService.addToStarred(
                       uid,
                       folderId!,
-                      folderName!,
-                      null,
-                      null,
-                      null,
-                      null,
-                      isFolder,
+                      folderName,
+                      fileId,
+                      fileName,
+                      fileType,
+                      fileSize,
+                      true,
                     )
                   : firestoreService.addToStarred(
                       uid,
                       folderId!,
-                      null,
-                      fileId!,
-                      fileName!,
-                      fileType!,
-                      fileSize!,
-                      isFolder,
+                      folderName,
+                      fileId,
+                      fileName,
+                      fileType,
+                      fileSize,
+                      false,
                     );
             },
             child: SizedBox(
@@ -187,7 +190,7 @@ bool isStarred,
             thickness: 2,
           ),
           SizedBox(height: 5),
-         !isStarred ? GestureDetector(
+          GestureDetector(
             onTap: () {
               Navigator.pop(context);
               isFolder
@@ -225,7 +228,7 @@ bool isStarred,
                 ),
               ],
             ),
-          ): SizedBox(),
+          ),
         ],
       ),
     );

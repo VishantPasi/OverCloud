@@ -207,6 +207,8 @@ class FirebaseFirestoreService {
     String? fileSize,
     bool isFolder,
   ) async {
+
+    print("errorr2: $folderId");
     try {
       DateTime dateTime = DateTime.now();
 
@@ -225,6 +227,8 @@ class FirebaseFirestoreService {
             .collection("folders")
             .doc(folderId);
 
+          print("folderiddd: $folderId");
+
         await update.update({"isStarred": true});
 
         await starred.set({
@@ -242,6 +246,8 @@ class FirebaseFirestoreService {
             .collection("files").doc(fileId);
 
         await update.update({"isStarred": true});
+
+        print("folderiddd: $folderId");
 
         await starred.set({
           "fileName": fileName,
