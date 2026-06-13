@@ -236,6 +236,7 @@ class _StarredPageState extends State<StarredPage> {
                               ? files[index].data()['folderId']
                               : files[index].data()['fileId'],
                           files[index].data()['isFolder'],
+                          
                   
                         );
                       },
@@ -340,13 +341,13 @@ class _StarredPageState extends State<StarredPage> {
                           buttonContext,
                           context,
                           uid,
-                          widget.folderId,
                           fileIdOrFolderId,
-                          null,
+                          fileIdOrFolderId,
+                          fileNameOrFolderName,
                           fileNameOrFolderName,
                           filetype,
                           fileSize,
-                          false,
+                          isFolder,
                           true
                         );
                       },

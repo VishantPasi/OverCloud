@@ -98,6 +98,7 @@ class FirebaseFirestoreService {
             "folderName": newFolderName,
             "modifiedOn": dateTime.toString(),
           });
+      renameStarredFolderOrFile(uid, folderId, null, newFolderName, null,true);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -176,6 +177,8 @@ class FirebaseFirestoreService {
           .collection("files")
           .doc(fileId)
           .update({"fileName": newFileName, "modifiedOn": dateTime.toString()});
+      
+      renameStarredFolderOrFile(uid, null, fileId, null, newFileName,false);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -207,7 +210,6 @@ class FirebaseFirestoreService {
     String? fileSize,
     bool isFolder,
   ) async {
-
     print("errorr2: $folderId");
     try {
       DateTime dateTime = DateTime.now();
@@ -227,8 +229,6 @@ class FirebaseFirestoreService {
             .collection("folders")
             .doc(folderId);
 
-          print("folderiddd: $folderId");
-
         await update.update({"isStarred": true});
 
         await starred.set({
@@ -243,11 +243,10 @@ class FirebaseFirestoreService {
             .doc(uid)
             .collection("folders")
             .doc(folderId)
-            .collection("files").doc(fileId);
+            .collection("files")
+            .doc(fileId);
 
         await update.update({"isStarred": true});
-
-        print("folderiddd: $folderId");
 
         await starred.set({
           "fileName": fileName,
@@ -273,5 +272,116 @@ class FirebaseFirestoreService {
         .doc("starred")
         .collection("foldersAndFiles")
         .snapshots();
+  }
+
+  void renameStarredFolderOrFile(
+    String uid,
+    String? folderId,
+    String? fileId,
+    String? newFolderName,
+    String? newFileName,
+    bool isFolder,
+  ) async {
+    try {
+      DateTime dateTime = DateTime.now();
+
+      print("errorrrrrr: $folderId,$fileId,$newFolderName,$newFileName,$isFolder");
+
+      if (isFolder) {
+        final starred = await _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc("starred")
+            .collection("foldersAndFiles")
+            .where("folderId", isEqualTo: folderId)
+            .get();
+
+        for (var docs in starred.docs) {
+          docs.reference.update({
+            "folderName": newFolderName,
+            "modifiedOn": dateTime.toString(),
+          });
+        }
+      }
+      else{
+        final starred = await _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc("starred")
+            .collection("foldersAndFiles")
+            .where("fileId", isEqualTo: fileId)
+            .get();
+
+        for (var docs in starred.docs) {
+          docs.reference.update({
+            "fileName": newFileName,
+            "modifiedOn": dateTime.toString(),
+          });
+        }
+      }
+
+      
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void removeFromStarred(
+    String uid,
+    String? folderId,
+    String? fileId,
+    bool isFolder,
+  ) async {
+    try {
+      if (isFolder) {
+        final folder = await _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc("starred")
+            .collection("foldersAndFiles")
+            .where("folderId", isEqualTo: folderId)
+            .get();
+
+        for (var docs in folder.docs) {
+          docs.reference.delete();
+        }
+
+        DocumentReference update = _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc(folderId);
+
+        await update.update({"isStarred": false});
+      } else {
+        final folder = await _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc("starred")
+            .collection("foldersAndFiles")
+            .where("fileId", isEqualTo: fileId)
+            .get();
+
+        for (var docs in folder.docs) {
+          docs.reference.delete();
+        }
+
+        DocumentReference update = _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc(folderId)
+            .collection("files")
+            .doc(fileId);
+
+        await update.update({"isStarred": false});
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 }

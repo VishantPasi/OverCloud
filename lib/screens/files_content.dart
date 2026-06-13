@@ -410,7 +410,7 @@ class _FilesContentState extends State<FilesContent> {
                           formatDateTime(
                             folders[index].data()['modifiedOn'],
                           ).toString(),
-                          folders[index].data()['isStarred']
+                          folders[index].data()['isStarred'],
                         );
                       },
                     );
@@ -424,7 +424,12 @@ class _FilesContentState extends State<FilesContent> {
     );
   }
 
-  Widget folderStructure(String folderId, String folderName, String date, bool isStarred) {
+  Widget folderStructure(
+    String folderId,
+    String folderName,
+    String date,
+    bool isStarred,
+  ) {
     return Column(
       children: [
         Padding(
@@ -478,41 +483,44 @@ class _FilesContentState extends State<FilesContent> {
 
                   Row(
                     children: [
-                      isStarred ? FaIcon(FontAwesomeIcons.solidStar, color: const Color.fromRGBO(255, 170, 60, 1), size: 15,) : SizedBox(),
+                      isStarred
+                          ? FaIcon(
+                              FontAwesomeIcons.solidStar,
+                              color: const Color.fromRGBO(255, 170, 60, 1),
+                              size: 15,
+                            )
+                          : SizedBox(),
                       Builder(
-                    builder: (buttonContext) {
-                      return IconButton(
-                        icon: FaIcon(
-                          FontAwesomeIcons.ellipsisVertical,
-                          color: Colors.white70,
-                          size: 18,
-                        ),
+                        builder: (buttonContext) {
+                          return IconButton(
+                            icon: FaIcon(
+                              FontAwesomeIcons.ellipsisVertical,
+                              color: Colors.white70,
+                              size: 18,
+                            ),
 
-                        onPressed: () {
-                          
-                          popOver.popOver(
-                            buttonContext,
-                            context,
-                            uid,
-                            folderId,
-                            null,
-                            folderName,
-                            null,
-                            null,
-                            null,
-                            true,
-                            isStarred
+                            onPressed: () {
+                              popOver.popOver(
+                                buttonContext,
+                                context,
+                                uid,
+                                folderId,
+                                null,
+                                folderName,
+                                null,
+                                null,
+                                null,
+                                true,
+                                isStarred,
+                              );
+                            },
                           );
                         },
-                      );
-                    },
 
-                    // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
-                  ),
+                        // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
+                      ),
                     ],
                   ),
-
-                  
                 ],
               ),
             ),

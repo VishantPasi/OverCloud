@@ -113,9 +113,16 @@ class ShowPopOver {
           GestureDetector(
             onTap: () {
               print(
-                "errorr: $folderId, $folderName, $fileId, $fileName, $fileType, $fileSize $isFolder",
+                "errorr: $folderId, $folderName, $fileId, $fileName, $fileType, $fileSize $isStarred,$isFolder",
               );
-              isFolder
+              if (isStarred){
+                isFolder ? 
+              firestoreService.removeFromStarred(uid, folderId!, null, isFolder): firestoreService.removeFromStarred(uid, folderId, fileId, isFolder);
+
+                    Navigator.pop(context);
+              
+              }else{
+                isFolder
                   ? firestoreService.addToStarred(
                       uid,
                       folderId!,
@@ -136,20 +143,36 @@ class ShowPopOver {
                       fileSize,
                       false,
                     );
+
+                    Navigator.pop(context);
+              }
+              
             },
             child: SizedBox(
               height: 40,
 
               child: Row(
                 children: [
-                  Icon(
+                  isStarred ? Icon(
                     Icons.star_border_outlined,
                     color: Colors.white70,
                     size: 23,
+                  ): Row(
+                    children: [
+                      SizedBox(width: 4,),
+                      FaIcon(FontAwesomeIcons.solidStar, color: Colors.white70, size: 16,),
+                    ],
                   ),
                   SizedBox(width: 15),
-                  Text(
-                    "Favourites",
+                  isStarred ? Text(
+                    "Unstar",
+                    style: GoogleFonts.urbanist(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ): Text(
+                    "Starred",
                     style: GoogleFonts.urbanist(
                       color: Colors.white70,
                       fontSize: 14,

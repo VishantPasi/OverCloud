@@ -225,6 +225,9 @@ class _FoldersPageState extends State<FoldersPage> {
                             .toLowerCase();
                         String fileTypeLogo =
                             fileIcons[fileType] ?? "unknown.svg";
+
+
+                          print(files[index].reference.path);
                         return fileStructure(
                           context,
                           files[index]['fileName'],
@@ -234,6 +237,7 @@ class _FoldersPageState extends State<FoldersPage> {
                           fileTypeLogo,
                           files[index].id,
                           files[index].data()['isStarred']
+                          
                           
                         );
                       },
