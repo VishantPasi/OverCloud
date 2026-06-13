@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_arc_speed_dial/flutter_speed_dial_menu_button.dart';
-import 'package:flutter_arc_speed_dial/main_menu_floating_action_button.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,7 +8,6 @@ import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/utils/convert_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
-import 'package:overcloud/utils/pick_one_file.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
 class StarredPage extends StatefulWidget {

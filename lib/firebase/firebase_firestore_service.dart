@@ -98,7 +98,7 @@ class FirebaseFirestoreService {
             "folderName": newFolderName,
             "modifiedOn": dateTime.toString(),
           });
-      renameStarredFolderOrFile(uid, folderId, null, newFolderName, null,true);
+      renameStarredFolderOrFile(uid, folderId, null, newFolderName, null, true);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -177,8 +177,8 @@ class FirebaseFirestoreService {
           .collection("files")
           .doc(fileId)
           .update({"fileName": newFileName, "modifiedOn": dateTime.toString()});
-      
-      renameStarredFolderOrFile(uid, null, fileId, null, newFileName,false);
+
+      renameStarredFolderOrFile(uid, null, fileId, null, newFileName, false);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -285,7 +285,9 @@ class FirebaseFirestoreService {
     try {
       DateTime dateTime = DateTime.now();
 
-      print("errorrrrrr: $folderId,$fileId,$newFolderName,$newFileName,$isFolder");
+      print(
+        "errorrrrrr: $folderId,$fileId,$newFolderName,$newFileName,$isFolder",
+      );
 
       if (isFolder) {
         final starred = await _firebaseFirestore
@@ -303,8 +305,7 @@ class FirebaseFirestoreService {
             "modifiedOn": dateTime.toString(),
           });
         }
-      }
-      else{
+      } else {
         final starred = await _firebaseFirestore
             .collection('users')
             .doc(uid)
@@ -321,8 +322,6 @@ class FirebaseFirestoreService {
           });
         }
       }
-
-      
     } catch (e) {
       debugPrint(e.toString());
     }
