@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/screens/folders_page.dart';
+import 'package:overcloud/screens/starred_page.dart';
 import 'package:overcloud/services/secure_storage_service.dart';
 
 class HomeContent extends StatefulWidget {
@@ -12,14 +13,9 @@ class HomeContent extends StatefulWidget {
 
   @override
   State<HomeContent> createState() => _HomeContentState();
-
-
-
-
 }
 
 class _HomeContentState extends State<HomeContent> {
-
   String? fullName;
   String? uid;
 
@@ -27,8 +23,6 @@ class _HomeContentState extends State<HomeContent> {
   void initState() {
     loadUserData();
     super.initState();
-
-    
   }
 
   Future<void> loadUserData() async {
@@ -37,8 +31,6 @@ class _HomeContentState extends State<HomeContent> {
 
     setState(() {});
   }
-
-
 
   Widget greetingText() {
     final hour = DateTime.now().hour;
@@ -93,15 +85,16 @@ class _HomeContentState extends State<HomeContent> {
 
   Widget initialsAvatar() {
     return GestureDetector(
-      onTap: ()=> Scaffold.of(context).openDrawer(),
+      onTap: () => Scaffold.of(context).openDrawer(),
       child: Stack(
         children: [
           CircleAvatar(
             radius: 23,
             backgroundColor: Colors.deepOrange,
             child: Text(
-      
-              fullName != null ? "${fullName!.split(" ").first[0]}${fullName!.split(" ").last[0]}": "?",
+              fullName != null
+                  ? "${fullName!.split(" ").first[0]}${fullName!.split(" ").last[0]}"
+                  : "?",
               style: GoogleFonts.robotoMono(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -344,7 +337,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "120",
                       context,
-                      "photos"
+                      "photos",
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -354,7 +347,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "45",
                       context,
-                      "documents"
+                      "documents",
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -364,7 +357,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "23",
                       context,
-                      "videos"
+                      "videos",
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -374,7 +367,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "15",
                       context,
-                      "music"
+                      "music",
                     ),
                     SizedBox(width: 10),
                     infoChips(
@@ -384,7 +377,7 @@ class _HomeContentState extends State<HomeContent> {
 
                       "",
                       context,
-                      "others"
+                      "others",
                     ),
                   ],
                 ),
@@ -409,7 +402,7 @@ class _HomeContentState extends State<HomeContent> {
                     FontAwesomeIcons.solidFolderOpen,
                     const Color.fromRGBO(255, 196, 87, 1),
                     context,
-                    "OverAllFiles"
+                    "OverAllFiles",
                   ),
                   quickAccess(
                     "24",
@@ -418,7 +411,7 @@ class _HomeContentState extends State<HomeContent> {
                     FontAwesomeIcons.userLock,
                     const Color.fromRGBO(255, 120, 80, 1),
                     context,
-                    "private"
+                    "private",
                   ),
                   quickAccess(
                     "87",
@@ -427,7 +420,7 @@ class _HomeContentState extends State<HomeContent> {
                     FontAwesomeIcons.solidStar,
                     const Color.fromRGBO(255, 170, 60, 1),
                     context,
-                    "favourites"
+                    "starred",
                   ),
                 ],
               ),
@@ -493,88 +486,101 @@ Widget quickAccess(
   FaIconData icon,
   Color iconColor,
   BuildContext context,
-  String folderId
+  String folderId,
 ) {
   return Expanded(
-    child: GestureDetector(
-      onTap: () => MaterialPageRoute(
-        builder: (context) => FoldersPage(folderName: title, folderId: folderId,),
-      ),
-      child: Container(
-        height: 110,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.08),
-            width: 1,
-          ),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color.fromRGBO(45, 45, 45, 0.95),
-              const Color.fromRGBO(25, 25, 25, 0.95),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+    child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: ((context) => folderId == "files"
+                  ? FoldersPage(folderName: subTitle, folderId: folderId)
+                  : folderId == "private"
+                  ? FoldersPage(folderName: subTitle, folderId: folderId)
+                  : StarredPage(folderName: subTitle, folderId: folderId)),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: FaIcon(icon, color: iconColor, size: 18),
-                  ),
-                ),
-
-                FaIcon(
-                  FontAwesomeIcons.chevronRight,
-                  color: Colors.white30,
-                  size: 12,
-                ),
+          );
+        },
+        child: Container(
+          height: 110,
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 1,
+            ),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color.fromRGBO(45, 45, 45, 0.95),
+                const Color.fromRGBO(25, 25, 25, 0.95),
               ],
             ),
-
-            const Spacer(),
-
-            Text(
-              title,
-              style: GoogleFonts.urbanist(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                height: 1,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
-            ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: iconColor.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: FaIcon(icon, color: iconColor, size: 18),
+                    ),
+                  ),
 
-            const SizedBox(height: 6),
-
-            Text(
-              subTitle,
-              style: GoogleFonts.urbanist(
-                color: Colors.white60,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+                  FaIcon(
+                    FontAwesomeIcons.chevronRight,
+                    color: Colors.white30,
+                    size: 12,
+                  ),
+                ],
               ),
-            ),
-          ],
+
+              const Spacer(),
+
+              Text(
+                title,
+                style: GoogleFonts.urbanist(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              Text(
+                subTitle,
+                style: GoogleFonts.urbanist(
+                  color: Colors.white60,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -592,7 +598,9 @@ Widget infoChips(
   return GestureDetector(
     onTap: () => Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => FoldersPage(folderName: text, folderId: folderId,)),
+      MaterialPageRoute(
+        builder: (context) => FoldersPage(folderName: text, folderId: folderId),
+      ),
     ),
     child: Container(
       padding: EdgeInsets.symmetric(horizontal: 5, vertical: 12),

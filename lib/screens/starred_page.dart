@@ -8,34 +8,32 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/utils/convert_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 import 'package:overcloud/utils/pick_one_file.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
-class FoldersPage extends StatefulWidget {
+class StarredPage extends StatefulWidget {
   final String folderName;
   final String folderId;
-  const FoldersPage({
+  const StarredPage({
     super.key,
     required this.folderName,
     required this.folderId,
   });
 
   @override
-  State<FoldersPage> createState() => _FoldersPageState();
+  State<StarredPage> createState() => _StarredPageState();
 }
 
-class _FoldersPageState extends State<FoldersPage> {
+class _StarredPageState extends State<StarredPage> {
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String uid = _auth.currentUser!.uid;
 
   final ValueNotifier<int> fileCount = ValueNotifier<int>(0);
 
-  final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
-
-  PickOneFile pickOneFile = PickOneFile();
   ConvertFileSize convertFileSize = ConvertFileSize();
   ShowPopOver popOver = ShowPopOver();
 
@@ -148,7 +146,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 SizedBox(height: 20),
         
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: _firestore.getFilesMetaDataList(uid, widget.folderId),
+                  stream: _firestore.getStarredFoldersAndFiles(uid),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -225,16 +223,20 @@ class _FoldersPageState extends State<FoldersPage> {
                             .toLowerCase();
                         String fileTypeLogo =
                             fileIcons[fileType] ?? "unknown.svg";
+        
                         return fileStructure(
                           context,
-                          files[index]['fileName'],
+                          files[index].data()['fileName'] ??
+                              files[index].data()['folderName'],
                           formatDateTime(files[index].data()['modifiedOn']),
-                          files[index].data()['fileType'],
-                          files[index].data()['fileSize'],
+                          files[index].data()['isFolder'] ? "" : files[index].data()['fileType'],
+                          files[index].data()['isFolder'] ? "" : files[index].data()['fileSize'],
                           fileTypeLogo,
-                          files[index].id,
-                          files[index].data()['isStarred']
-                          
+                          files[index].data()['isFolder']
+                              ? files[index].data()['folderId']
+                              : files[index].data()['fileId'],
+                          files[index].data()['isFolder'],
+                  
                         );
                       },
                     );
@@ -245,179 +247,122 @@ class _FoldersPageState extends State<FoldersPage> {
           ),
         ),
       ),
-      floatingActionButton: _getFloatingActionButton(widget.folderId),
-    );
-  }
-
-  Widget _getFloatingActionButton(String folderId) {
-    return SpeedDialMenuButton(
-      mainFABPosX: 5,
-      //if needed to close the menu after clicking sub-FAB
-      isShowSpeedDial: _isShowDial.value,
-      updateSpeedDialStatus: (isShow) {
-        //return any open or close change within the widget
-        _isShowDial.value = isShow;
-      },
-      isEnableAnimation: true,
-
-      //general init
-      isMainFABMini: false,
-      mainMenuFloatingActionButton: MainMenuFloatingActionButton(
-        mini: false,
-        child: FaIcon(FontAwesomeIcons.plus, size: 18, color: Colors.white),
-        backgroundColor: Colors.deepOrange,
-        heroTag: "main_fab",
-        onPressed: () {},
-        shape: CircleBorder(),
-        closeMenuChild: Icon(Icons.close),
-        closeMenuForegroundColor: Colors.deepOrange,
-        closeMenuBackgroundColor: Colors.white,
-      ),
-      floatingActionButtonWidgetChildren: <FloatingActionButton>[
-        FloatingActionButton(
-          shape: CircleBorder(),
-          mini: false,
-          heroTag: "file_upload",
-          onPressed: () async {
-            PlatformFile? file = await pickOneFile.pickFile(folderId);
-
-            if (file != null) {
-              _firestore.createFileMetaData(
-                uid,
-                widget.folderId,
-                file.name,
-                file.extension,
-                convertFileSize.fileSize(file.size),
-              );
-            }
-
-            _isShowDial.value = false;
-            setState(() {});
-          },
-          backgroundColor: Colors.deepOrange,
-          child: FaIcon(FontAwesomeIcons.fileArrowUp, color: Colors.white),
-        ),
-        FloatingActionButton(
-          shape: CircleBorder(),
-          mini: false,
-          heroTag: "camera",
-          onPressed: () {},
-          backgroundColor: Colors.deepOrange,
-          child: FaIcon(FontAwesomeIcons.cameraRetro, color: Colors.white),
-        ),
-        FloatingActionButton(
-          shape: CircleBorder(),
-          mini: false,
-          heroTag: "create_folder",
-          onPressed: () {
-            //if no need to change the menu status
-            _isShowDial.value = false;
-          },
-          backgroundColor: Colors.deepOrange,
-          child: FaIcon(FontAwesomeIcons.folderPlus, color: Colors.white),
-        ),
-      ],
-      isSpeedDialFABsMini: false,
-      paddingBtwSpeedDialButton: 20.0,
     );
   }
 
   Widget fileStructure(
     BuildContext context,
-    String fileName,
+    String fileNameOrFolderName,
     String date,
     String filetype,
     String fileSize,
     String fileTypeLogo,
-    String fileId,
-    bool isStarred
-    
+    String fileIdOrFolderId,
+    bool isFolder,
   ) {
     // if (filetype == "Folder" ){
 
     // }
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  SvgPicture.asset("assets/icons/$fileTypeLogo", height: 40),
-                  SizedBox(width: 15),
-                  SizedBox(
-                    width: 215,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          fileName,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.urbanist(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+    return GestureDetector(
+      onTap: () {
+        isFolder
+            ? Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FoldersPage(
+                    folderName: fileNameOrFolderName,
+                    folderId: fileIdOrFolderId,
+                  ),
+                ),
+              )
+            : null;
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    isFolder
+                        ? FaIcon(
+                            FontAwesomeIcons.solidFolder,
+                            color: const Color.fromRGBO(255, 196, 87, 1),
+                            size: 30,
+                          )
+                        : SvgPicture.asset(
+                            "assets/icons/$fileTypeLogo",
+                            height: 40,
                           ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          date,
-                          style: GoogleFonts.urbanist(
-                            color: Colors.white70,
-                            fontSize: 13,
+                    SizedBox(width: 15),
+                    SizedBox(
+                      width: 215,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            fileNameOrFolderName,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.urbanist(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 2),
+                          Text(
+                            date,
+                            style: GoogleFonts.urbanist(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
 
-              Row(
-                children: [
-                  isStarred ? FaIcon(FontAwesomeIcons.solidStar, color: const Color.fromRGBO(255, 170, 60, 1), size: 15,) : SizedBox(),
-                  Builder(
-                    builder: (buttonContext) {
-                      return IconButton(
-                        icon: FaIcon(
-                          FontAwesomeIcons.ellipsisVertical,
-                          color: Colors.white70,
-                          size: 18,
-                        ),
-                  
-                        onPressed: () {
-                          popOver.popOver(
-                            buttonContext,
-                            context,
-                            uid,
-                            widget.folderId,
-                            fileId,
-                            null,
-                            fileName,
-                            filetype,
-                            fileSize,
-                            false,
-                            isStarred
-                          );
-                          
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 10),
-          Divider(
-            color: Colors.white.withValues(alpha: 0.1),
-            height: 2,
-            thickness: 2,
-          ),
-        ],
+                Builder(
+                  builder: (buttonContext) {
+                    return IconButton(
+                      icon: FaIcon(
+                        FontAwesomeIcons.ellipsisVertical,
+                        color: Colors.white70,
+                        size: 18,
+                      ),
+
+                      onPressed: () {
+                        popOver.popOver(
+                          buttonContext,
+                          context,
+                          uid,
+                          widget.folderId,
+                          fileIdOrFolderId,
+                          null,
+                          fileNameOrFolderName,
+                          filetype,
+                          fileSize,
+                          false,
+                          true
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Divider(
+              color: Colors.white.withValues(alpha: 0.1),
+              height: 2,
+              thickness: 2,
+            ),
+          ],
+        ),
       ),
     );
   }

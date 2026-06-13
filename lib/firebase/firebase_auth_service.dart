@@ -139,6 +139,7 @@ class FirebaseAuthService {
       _firestoreService.createDefaultFolders(uid,"documents");
       _firestoreService.createDefaultFolders(uid,"videos");
       _firestoreService.createDefaultFolders(uid,"music");
+      _firestoreService.createDefaultFolders(uid,"starred");
 
       if (!context.mounted) return;
 
@@ -182,6 +183,12 @@ class FirebaseAuthService {
       await _firestoreService.storeUserDetails(uid);
 
       if (!context.mounted) return;
+
+      _firestoreService.createDefaultFolders(uid,"photos");
+      _firestoreService.createDefaultFolders(uid,"documents");
+      _firestoreService.createDefaultFolders(uid,"videos");
+      _firestoreService.createDefaultFolders(uid,"music");
+      _firestoreService.createDefaultFolders(uid,"starred");
 
       isLoading.value = false;
 

@@ -238,26 +238,26 @@ class _FilesContentState extends State<FilesContent> {
                             FontAwesomeIcons.photoFilm,
                             "Photos",
                             "243 items",
-                            "photos"
+                            "photos",
                           ),
 
                           gridContainerForCountTwo(
                             FontAwesomeIcons.solidFileLines,
                             "Documents",
                             "126 items",
-                            "documents"
+                            "documents",
                           ),
                           gridContainerForCountTwo(
                             FontAwesomeIcons.clapperboard,
                             "Videos",
                             "43 items",
-                            "videos"
+                            "videos",
                           ),
                           gridContainerForCountTwo(
                             FontAwesomeIcons.music,
                             "Music",
                             "152 items",
-                            "music"
+                            "music",
                           ),
                         ]
                       : [
@@ -265,26 +265,26 @@ class _FilesContentState extends State<FilesContent> {
                             FontAwesomeIcons.photoFilm,
                             "Photos",
                             "243 items",
-                            "photos"
+                            "photos",
                           ),
 
                           gridContainerForCountOne(
                             FontAwesomeIcons.solidFileLines,
                             "Documents",
                             "126 items",
-                            "documents"
+                            "documents",
                           ),
                           gridContainerForCountOne(
                             FontAwesomeIcons.clapperboard,
                             "Videos",
                             "43 items",
-                            "videos"
+                            "videos",
                           ),
                           gridContainerForCountOne(
                             FontAwesomeIcons.music,
                             "Music",
                             "152 items",
-                            "music"
+                            "music",
                           ),
                         ],
                 ),
@@ -357,30 +357,32 @@ class _FilesContentState extends State<FilesContent> {
                       return Center(child: Text(snapshot.error.toString()));
                     }
 
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty || snapshot.data!.docs.length == 4) {
-                     return Container(
-                height: 150,
-                width: size.width,
-                margin: EdgeInsets.only(top: 15),
-                decoration: BoxDecoration(
-                  color: Color.fromRGBO(25, 25, 25, 1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    width: 1,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    "No Folders",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white38,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              );
+                    if (!snapshot.hasData ||
+                        snapshot.data!.docs.isEmpty ||
+                        snapshot.data!.docs.length == 5) {
+                      return Container(
+                        height: 150,
+                        width: size.width,
+                        margin: EdgeInsets.only(top: 15),
+                        decoration: BoxDecoration(
+                          color: Color.fromRGBO(25, 25, 25, 1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            width: 1,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "No Folders",
+                            style: GoogleFonts.urbanist(
+                              color: Colors.white38,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      );
                     }
 
                     final excludedFolders = [
@@ -388,10 +390,13 @@ class _FilesContentState extends State<FilesContent> {
                       "documents",
                       "videos",
                       "music",
+                      "starred",
                     ];
 
                     final folders = snapshot.data!.docs.where((doc) {
-                      return !excludedFolders.contains(doc.data()['folderName']);
+                      return !excludedFolders.contains(
+                        doc.data()['folderName'],
+                      );
                     }).toList();
 
                     return ListView.builder(
@@ -403,8 +408,9 @@ class _FilesContentState extends State<FilesContent> {
                           folders[index].id,
                           folders[index].data()['folderName'],
                           formatDateTime(
-                            folders[index].data()['createdOn'],
+                            folders[index].data()['modifiedOn'],
                           ).toString(),
+                          folders[index].data()['isStarred']
                         );
                       },
                     );
@@ -418,7 +424,7 @@ class _FilesContentState extends State<FilesContent> {
     );
   }
 
-  Widget folderStructure(String folderId, String folderName, String date) {
+  Widget folderStructure(String folderId, String folderName, String date, bool isStarred) {
     return Column(
       children: [
         Padding(
@@ -428,7 +434,8 @@ class _FilesContentState extends State<FilesContent> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FoldersPage(folderName: folderName,folderId: folderId,),
+                  builder: (context) =>
+                      FoldersPage(folderName: folderName, folderId: folderId),
                 ),
               );
             },
@@ -469,23 +476,42 @@ class _FilesContentState extends State<FilesContent> {
                     ],
                   ),
 
-                   Builder(
-                builder: (buttonContext) {
-                  return IconButton(
-                    icon: FaIcon(
-                      FontAwesomeIcons.ellipsisVertical,
-                      color: Colors.white70,
-                      size: 18,
-                    ),
+                  Row(
+                    children: [
+                      isStarred ? FaIcon(FontAwesomeIcons.solidStar, color: const Color.fromRGBO(255, 170, 60, 1), size: 15,) : SizedBox(),
+                      Builder(
+                    builder: (buttonContext) {
+                      return IconButton(
+                        icon: FaIcon(
+                          FontAwesomeIcons.ellipsisVertical,
+                          color: Colors.white70,
+                          size: 18,
+                        ),
 
-                    onPressed: () {
-                      popOver.popOver(buttonContext,context,uid, folderId, null,folderName, null,true);
+                        onPressed: () {
+                          popOver.popOver(
+                            buttonContext,
+                            context,
+                            uid,
+                            folderId,
+                            null,
+                            folderName,
+                            null,
+                            null,
+                            null,
+                            true,
+                            isStarred
+                          );
+                        },
+                      );
                     },
-                  );
-                },
 
-                // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
-              ),
+                    // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
+                  ),
+                    ],
+                  ),
+
+                  
                 ],
               ),
             ),
@@ -504,7 +530,7 @@ class _FilesContentState extends State<FilesContent> {
     FaIconData icon,
     String title,
     String subTitle,
-    String folderId
+    String folderId,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -571,14 +597,15 @@ class _FilesContentState extends State<FilesContent> {
     FaIconData icon,
     String title,
     String subTitle,
-    String folderId
+    String folderId,
   ) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => FoldersPage(folderName: title,folderId: folderId,),
+            builder: (context) =>
+                FoldersPage(folderName: title, folderId: folderId),
           ),
         );
       },

@@ -54,7 +54,8 @@ class FirebaseFirestoreService {
           .doc(folderName);
 
       await folder.set({
-        "folderName": folderName,
+        "folderName":
+            "${folderName[0].toUpperCase()}${folderName.substring(1)}",
         "modifiedOn": dateTime.toString(),
       });
     } catch (e) {
@@ -74,6 +75,7 @@ class FirebaseFirestoreService {
       await folder.set({
         "folderName": folderName,
         "modifiedOn": dateTime.toString(),
+        "isStarred": false,
       });
     } catch (e) {
       debugPrint(e.toString());
@@ -138,6 +140,7 @@ class FirebaseFirestoreService {
         "modifiedOn": dateTime.toString(),
         "fileType": fileType,
         "fileSize": fileSize,
+        "isStarred": false,
       });
     } catch (e) {
       debugPrint(e.toString());
@@ -172,10 +175,7 @@ class FirebaseFirestoreService {
           .doc(folderId)
           .collection("files")
           .doc(fileId)
-          .update({
-            "fileName": newFileName,
-            "modifiedOn": dateTime.toString(),
-          });
+          .update({"fileName": newFileName, "modifiedOn": dateTime.toString()});
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -195,5 +195,77 @@ class FirebaseFirestoreService {
     } catch (e) {
       debugPrint(e.toString());
     }
+  }
+
+  void addToStarred(
+    String uid,
+    String folderId,
+    String? folderName,
+    String? fileId,
+    String? fileName,
+    String? fileType,
+    String? fileSize,
+    bool isFolder,
+  ) async {
+    try {
+      DateTime dateTime = DateTime.now();
+
+      DocumentReference starred = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc("starred")
+          .collection("foldersAndFiles")
+          .doc();
+
+      if (isFolder) {
+        DocumentReference update = _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc(folderId);
+
+        await update.update({"isStarred": true});
+
+        await starred.set({
+          "folderName": folderName,
+          "folderId": folderId,
+          "isFolder": true,
+          "modifiedOn": dateTime.toString(),
+        });
+      } else {
+        DocumentReference update = _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc(folderId)
+            .collection("files").doc(fileId);
+
+        await update.update({"isStarred": true});
+
+        await starred.set({
+          "fileName": fileName,
+          "fileId": fileId,
+          "fileType": fileType,
+          "fileSize": fileSize,
+          "isFolder": false,
+          "modifiedOn": dateTime.toString(),
+        });
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getStarredFoldersAndFiles(
+    String uid,
+  ) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('folders')
+        .doc("starred")
+        .collection("foldersAndFiles")
+        .snapshots();
   }
 }

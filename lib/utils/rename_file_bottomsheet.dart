@@ -10,7 +10,7 @@ Future<String?> renameFileBottomSheet(
   String fileName,
 ) async {
   final TextEditingController folderController = TextEditingController(
-    text: fileName,
+    text: fileName.split(".").first,
   );
 
   final FirebaseFirestoreService firestore = FirebaseFirestoreService();
@@ -75,7 +75,8 @@ Future<String?> renameFileBottomSheet(
               controller: folderController,
               autofocus: true,
               cursorColor: Colors.deepOrange,
-              style: const TextStyle(color: Colors.white),
+              style: GoogleFonts.urbanist(color: Colors.white),
+              
               decoration: InputDecoration(
                 hintText: "File Name",
                 hintStyle: GoogleFonts.urbanist(color: Colors.white38),
@@ -85,6 +86,8 @@ Future<String?> renameFileBottomSheet(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide.none,
                 ),
+                suffixText: "    .${fileName.split(".").last}",
+                suffixStyle: GoogleFonts.urbanist(color: Colors.white)
               ),
             ),
 
@@ -101,7 +104,7 @@ Future<String?> renameFileBottomSheet(
                   ),
                 ),
                 onPressed: () async {
-                  final newFileName = folderController.text.trim();
+                  final newFileName = "${folderController.text.trim()}.${fileName.split(".").last}";
 
                   if (newFileName.isEmpty || newFileName == fileName) {
                     Navigator.pop(context);

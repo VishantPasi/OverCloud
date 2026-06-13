@@ -17,8 +17,10 @@ class ShowPopOver {
     String? fileId,
     String? folderName,
     String? fileName,
-
-    bool isFolder 
+    String? fileType,
+    String? fileSize,
+    bool isFolder,
+    bool isStarred
   ) {
     return showPopover(
       context: buttonContext,
@@ -31,7 +33,18 @@ class ShowPopOver {
             width: 1,
           ),
         ),
-        child: menuItems(context, uid, folderId, fileId,folderName,fileName,isFolder),
+        child: menuItems(
+          context,
+          uid,
+          folderId,
+          fileId,
+          folderName,
+          fileName,
+          fileType,
+          fileSize,
+          isFolder,
+          isStarred,
+        ),
       ),
       width: 150,
       height: 210,
@@ -41,6 +54,8 @@ class ShowPopOver {
     );
   }
 
+  //150, 210
+
   Widget menuItems(
     BuildContext context,
     String uid,
@@ -48,8 +63,10 @@ class ShowPopOver {
     String? fileId,
     String? folderName,
     String? fileName,
-
-    bool isFolder 
+    String? fileType,
+    String? fileSize,
+bool isStarred,
+    bool isFolder,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
@@ -58,7 +75,20 @@ class ShowPopOver {
           GestureDetector(
             onTap: () {
               Navigator.pop(context);
-              isFolder ? renameFolderBottomSheet(context, uid, folderId!, folderName!) : renameFileBottomSheet(context, uid, folderId! , fileId!, fileName!);
+              isFolder
+                  ? renameFolderBottomSheet(
+                      context,
+                      uid,
+                      folderId!,
+                      folderName!,
+                    )
+                  : renameFileBottomSheet(
+                      context,
+                      uid,
+                      folderId!,
+                      fileId!,
+                      fileName!,
+                    );
             },
             child: SizedBox(
               height: 40,
@@ -80,26 +110,51 @@ class ShowPopOver {
             ),
           ),
           SizedBox(height: 5),
-          SizedBox(
-            height: 40,
+          GestureDetector(
+            onTap: () {
+              isFolder
+                  ? firestoreService.addToStarred(
+                      uid,
+                      folderId!,
+                      folderName!,
+                      null,
+                      null,
+                      null,
+                      null,
+                      isFolder,
+                    )
+                  : firestoreService.addToStarred(
+                      uid,
+                      folderId!,
+                      null,
+                      fileId!,
+                      fileName!,
+                      fileType!,
+                      fileSize!,
+                      isFolder,
+                    );
+            },
+            child: SizedBox(
+              height: 40,
 
-            child: Row(
-              children: [
-                Icon(
-                  Icons.star_border_outlined,
-                  color: Colors.white70,
-                  size: 23,
-                ),
-                SizedBox(width: 15),
-                Text(
-                  "Favourites",
-                  style: GoogleFonts.urbanist(
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.star_border_outlined,
                     color: Colors.white70,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    size: 23,
                   ),
-                ),
-              ],
+                  SizedBox(width: 15),
+                  Text(
+                    "Favourites",
+                    style: GoogleFonts.urbanist(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           SizedBox(height: 5),
@@ -132,18 +187,23 @@ class ShowPopOver {
             thickness: 2,
           ),
           SizedBox(height: 5),
-          GestureDetector(
-            onTap: (){
+         !isStarred ? GestureDetector(
+            onTap: () {
               Navigator.pop(context);
-              isFolder ?
-              firestoreService.deleteFolder(uid, folderId!): firestoreService.deleteFileMetaData(uid, folderId!, fileId!);
+              isFolder
+                  ? firestoreService.deleteFolder(uid, folderId!)
+                  : firestoreService.deleteFileMetaData(
+                      uid,
+                      folderId!,
+                      fileId!,
+                    );
             },
             child: Row(
               children: [
                 SizedBox(width: 5),
                 SizedBox(
                   height: 40,
-            
+
                   child: Row(
                     children: [
                       FaIcon(
@@ -165,7 +225,7 @@ class ShowPopOver {
                 ),
               ],
             ),
-          ),
+          ): SizedBox(),
         ],
       ),
     );
