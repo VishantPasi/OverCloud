@@ -16,10 +16,12 @@ import 'package:overcloud/utils/show_pop_over.dart';
 class FoldersPage extends StatefulWidget {
   final String folderName;
   final String folderId;
+  final String? path;
   const FoldersPage({
     super.key,
     required this.folderName,
     required this.folderId,
+    this.path,
   });
 
   @override
@@ -236,6 +238,7 @@ class _FoldersPageState extends State<FoldersPage> {
                           files[index].data()['fileSize'],
                           fileTypeLogo,
                           files[index].id,
+                          files[index].reference.path,
                           files[index].data()['isStarred']
                           
                           
@@ -249,11 +252,11 @@ class _FoldersPageState extends State<FoldersPage> {
           ),
         ),
       ),
-      floatingActionButton: _getFloatingActionButton(widget.folderId),
+      floatingActionButton: _getFloatingActionButton(widget.folderId, widget.path!),
     );
   }
 
-  Widget _getFloatingActionButton(String folderId) {
+  Widget _getFloatingActionButton(String folderId, String path) {
     return SpeedDialMenuButton(
       mainFABPosX: 5,
       //if needed to close the menu after clicking sub-FAB
@@ -292,6 +295,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 file.name,
                 file.extension,
                 convertFileSize.fileSize(file.size),
+                path
               );
             }
 
@@ -309,17 +313,32 @@ class _FoldersPageState extends State<FoldersPage> {
           backgroundColor: Colors.deepOrange,
           child: FaIcon(FontAwesomeIcons.cameraRetro, color: Colors.white),
         ),
-        FloatingActionButton(
-          shape: CircleBorder(),
-          mini: false,
-          heroTag: "create_folder",
-          onPressed: () {
-            //if no need to change the menu status
-            _isShowDial.value = false;
-          },
-          backgroundColor: Colors.deepOrange,
-          child: FaIcon(FontAwesomeIcons.folderPlus, color: Colors.white),
-        ),
+       FloatingActionButton(
+  heroTag: "gallery",
+  onPressed: () async {
+     PlatformFile? file = await pickOneFile.pickFile("photos");
+
+            if (file != null) {
+              _firestore.createFileMetaData(
+                uid,
+                widget.folderId,
+                file.name,
+                file.extension,
+                convertFileSize.fileSize(file.size),
+                path
+              );
+            }
+             _isShowDial.value = false;
+            setState(() {});
+
+  },
+  backgroundColor: Colors.deepOrange,
+   shape: CircleBorder(),
+  child: const FaIcon(
+    FontAwesomeIcons.solidImages,
+    color: Colors.white,
+  ),
+),
       ],
       isSpeedDialFABsMini: false,
       paddingBtwSpeedDialButton: 20.0,
@@ -334,6 +353,7 @@ class _FoldersPageState extends State<FoldersPage> {
     String fileSize,
     String fileTypeLogo,
     String fileId,
+    String path,
     bool isStarred
     
   ) {
@@ -403,6 +423,8 @@ class _FoldersPageState extends State<FoldersPage> {
                             fileName,
                             filetype,
                             fileSize,
+                            path,
+                            widget.folderId,
                             false,
                             isStarred
                           );

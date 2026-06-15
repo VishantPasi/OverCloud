@@ -118,6 +118,11 @@ class FirebaseFirestoreService {
     }
   }
 
+  //cannot create folders files,photos...
+
+
+
+
   //Files Metadata Crud
   void createFileMetaData(
     String uid,
@@ -125,6 +130,7 @@ class FirebaseFirestoreService {
     String? fileName,
     String? fileType,
     String? fileSize,
+    String? path
   ) async {
     try {
       DateTime dateTime = DateTime.now();
@@ -143,6 +149,9 @@ class FirebaseFirestoreService {
         "fileSize": fileSize,
         "isStarred": false,
       });
+
+
+      createRecentFilesMetaData(uid,fileName,fileType,fileSize,path);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -208,6 +217,7 @@ class FirebaseFirestoreService {
     String? fileName,
     String? fileType,
     String? fileSize,
+    String? path,
     bool isFolder,
   ) async {
     print("errorr2: $folderId");
@@ -223,6 +233,8 @@ class FirebaseFirestoreService {
           .doc();
 
       if (isFolder) {
+
+        print("started adding");
         DocumentReference update = _firebaseFirestore
             .collection('users')
             .doc(uid)
@@ -230,13 +242,17 @@ class FirebaseFirestoreService {
             .doc(folderId);
 
         await update.update({"isStarred": true});
+        print("don update");
 
         await starred.set({
           "folderName": folderName,
           "folderId": folderId,
           "isFolder": true,
+          "path": path,
           "modifiedOn": dateTime.toString(),
         });
+
+        print("ended adding");
       } else {
         DocumentReference update = _firebaseFirestore
             .collection('users')
@@ -253,6 +269,7 @@ class FirebaseFirestoreService {
           "fileId": fileId,
           "fileType": fileType,
           "fileSize": fileSize,
+          "path" : path,
           "isFolder": false,
           "modifiedOn": dateTime.toString(),
         });
@@ -331,6 +348,7 @@ class FirebaseFirestoreService {
     String uid,
     String? folderId,
     String? fileId,
+    String filePath,
     bool isFolder,
   ) async {
     try {
@@ -348,11 +366,7 @@ class FirebaseFirestoreService {
           docs.reference.delete();
         }
 
-        DocumentReference update = _firebaseFirestore
-            .collection('users')
-            .doc(uid)
-            .collection("folders")
-            .doc(folderId);
+        DocumentReference update = _firebaseFirestore.doc(filePath);
 
         await update.update({"isStarred": false});
       } else {
@@ -369,13 +383,8 @@ class FirebaseFirestoreService {
           docs.reference.delete();
         }
 
-        DocumentReference update = _firebaseFirestore
-            .collection('users')
-            .doc(uid)
-            .collection("folders")
-            .doc(folderId)
-            .collection("files")
-            .doc(fileId);
+        DocumentReference update = _firebaseFirestore.doc(filePath);
+            
 
         await update.update({"isStarred": false});
       }
@@ -383,4 +392,54 @@ class FirebaseFirestoreService {
       debugPrint(e.toString());
     }
   }
+
+
+  //recent files
+
+  void createRecentFilesMetaData(
+    String uid,
+    String? fileName,
+    String? fileType,
+    String? fileSize,
+    String? path
+  ) async {
+    try {
+      DateTime dateTime = DateTime.now();
+      DocumentReference folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("recents")
+          .doc();
+
+      await folder.set({
+        "fileName": fileName,
+        "modifiedOn": dateTime.toString(),
+        "fileType": fileType,
+        "fileSize": fileSize,
+        "path" : path,
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+
+Stream<QuerySnapshot<Map<String, dynamic>>> getRecentFilesMetaDataList(
+    String uid,
+  ) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('recents').orderBy('modifiedOn', descending: true).limit(3)
+        .snapshots();
+  }
+
+
+
+
+
+
 }
+
+
+

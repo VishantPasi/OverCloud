@@ -410,7 +410,9 @@ class _FilesContentState extends State<FilesContent> {
                           formatDateTime(
                             folders[index].data()['modifiedOn'],
                           ).toString(),
+                          folders[index].reference.path,
                           folders[index].data()['isStarred'],
+
                         );
                       },
                     );
@@ -428,6 +430,7 @@ class _FilesContentState extends State<FilesContent> {
     String folderId,
     String folderName,
     String date,
+    String path,
     bool isStarred,
   ) {
     return Column(
@@ -440,7 +443,7 @@ class _FilesContentState extends State<FilesContent> {
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      FoldersPage(folderName: folderName, folderId: folderId),
+                      FoldersPage(folderName: folderName, folderId: folderId,path: path,),
                 ),
               );
             },
@@ -510,6 +513,8 @@ class _FilesContentState extends State<FilesContent> {
                                 null,
                                 null,
                                 null,
+                                path,
+                                folderId,
                                 true,
                                 isStarred,
                               );

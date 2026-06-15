@@ -19,6 +19,8 @@ class ShowPopOver {
     String? fileName,
     String? fileType,
     String? fileSize,
+    String path,
+    String? currentFolderId,
     bool isFolder,
     bool isStarred,
   ) {
@@ -42,12 +44,14 @@ class ShowPopOver {
           fileName,
           fileType,
           fileSize,
+          path,
+          currentFolderId,
           isFolder,
           isStarred,
         ),
       ),
-      width: 150,
-      height: 210,
+      width: currentFolderId == "starred" ? 130 : 150 ,
+      height: currentFolderId == "starred" ? 155 : 210,
       direction: PopoverDirection.bottom,
       radius: 20,
       backgroundColor: Color.fromRGBO(50, 50, 50, 0.945),
@@ -65,6 +69,8 @@ class ShowPopOver {
     String? fileName,
     String? fileType,
     String? fileSize,
+    String path,
+    String? currentFolderId,
     bool isFolder,
     bool isStarred,
   ) {
@@ -117,7 +123,7 @@ class ShowPopOver {
               );
               if (isStarred){
                 isFolder ? 
-              firestoreService.removeFromStarred(uid, folderId!, null, isFolder): firestoreService.removeFromStarred(uid, folderId, fileId, isFolder);
+              firestoreService.removeFromStarred(uid, folderId!, null, path, isFolder): firestoreService.removeFromStarred(uid, folderId, fileId, path,isFolder);
 
                     Navigator.pop(context);
               
@@ -131,6 +137,7 @@ class ShowPopOver {
                       fileName,
                       fileType,
                       fileSize,
+                      path,
                       true,
                     )
                   : firestoreService.addToStarred(
@@ -141,6 +148,7 @@ class ShowPopOver {
                       fileName,
                       fileType,
                       fileSize,
+                      path,
                       false,
                     );
 
@@ -183,7 +191,7 @@ class ShowPopOver {
               ),
             ),
           ),
-          SizedBox(height: 5),
+       SizedBox(height: 5),
           SizedBox(
             height: 40,
 
@@ -206,14 +214,14 @@ class ShowPopOver {
               ],
             ),
           ),
-          SizedBox(height: 10),
-          Divider(
+          currentFolderId != "starred" ?  SizedBox(height: 10) : SizedBox(),
+         currentFolderId != "starred" ?  Divider(
             color: Colors.white.withValues(alpha: 0.1),
             height: 2,
             thickness: 2,
-          ),
-          SizedBox(height: 5),
-          GestureDetector(
+          ) : SizedBox() ,
+         currentFolderId != "starred" ?  SizedBox(height: 5) : SizedBox(),
+         currentFolderId != "starred" ?   GestureDetector(
             onTap: () {
               Navigator.pop(context);
               isFolder
@@ -251,7 +259,7 @@ class ShowPopOver {
                 ),
               ],
             ),
-          ),
+          ) : SizedBox(),
         ],
       ),
     );

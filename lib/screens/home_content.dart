@@ -1,10 +1,16 @@
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
+import 'package:overcloud/screens/recent_files_page.dart';
 import 'package:overcloud/screens/starred_page.dart';
 import 'package:overcloud/services/secure_storage_service.dart';
+import 'package:overcloud/utils/format_date_time.dart';
 
 class HomeContent extends StatefulWidget {
   final NotchBottomBarController? controller;
@@ -19,6 +25,10 @@ class _HomeContentState extends State<HomeContent> {
   String? fullName;
   String? uid;
 
+
+  final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
+
+
   @override
   void initState() {
     loadUserData();
@@ -26,8 +36,9 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Future<void> loadUserData() async {
-    fullName = await SecureStorageService.getFullName();
-    uid = await SecureStorageService.getUID();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  uid = _auth.currentUser!.uid;
+  fullName =  _auth.currentUser!.displayName;
 
     setState(() {});
   }
@@ -438,17 +449,33 @@ class _HomeContentState extends State<HomeContent> {
                       letterSpacing: 3,
                     ),
                   ),
-                  Text(
-                    "View All",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.deepOrange,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
+                  GestureDetector(
+                    onTap: ()=> Navigator.push(context, MaterialPageRoute(builder: (context) => RecentFilesPage())),
+                    child: Text(
+                      "View All",
+                      style: GoogleFonts.urbanist(
+                        color: Colors.deepOrange,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
               ),
-              Container(
+              SizedBox(height: 20,),
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: _firestore.getRecentFilesMetaDataList(uid!),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+        
+                    if (snapshot.hasError) {
+                      return Center(child: Text(snapshot.error.toString()));
+                    }
+        
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return Container(
                 height: 150,
                 width: size.width,
                 margin: EdgeInsets.only(top: 15),
@@ -470,7 +497,68 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                   ),
                 ),
-              ),
+              );
+                    }
+        
+                    final files = snapshot.data!.docs;
+        
+                
+        
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: files.length,
+                      itemBuilder: (context, index) {
+                        final Map<String, String> fileIcons = {
+                          "pdf": "pdf.svg",
+                          "xls": "xlsx.svg",
+                          "xlsx": "xlsx.svg",
+                          "doc": "docx.svg",
+                          "docx": "docx.svg",
+                          "ppt": "pptx.svg",
+                          "pptx": "pptx.svg",
+                          "txt": "txt.svg",
+                          "csv": "csv.svg",
+                          "zip": "zip.svg",
+                          "rar": "zip.svg",
+                          "7z": "zip.svg",
+                          "mp3": "audio.svg",
+                          "wav": "audio.svg",
+                          "mp4": "video.svg",
+                          "mkv": "video.svg",
+                          "jpg": "img.svg",
+                          "jpeg": "img.svg",
+                          "png": "img.svg",
+                          "gif": "img.svg",
+                          "webp": "img.svg",
+                        };
+        
+                        String fileType = files[index]
+                            .data()['fileType']
+                            .toString()
+                            .toLowerCase();
+                        String fileTypeLogo =
+                            fileIcons[fileType] ?? "unknown.svg";
+
+
+                          print(files[index].reference.path);
+                        return fileStructure(
+                          context,
+                          files[index]['fileName'],
+                          formatDateTime(files[index].data()['modifiedOn']),
+                          files[index].data()['fileType'],
+                          files[index].data()['fileSize'],
+                          fileTypeLogo,
+
+
+
+                          
+                        );
+                      },
+                    );
+                  },
+                ),
+              
               SizedBox(height: 30),
             ],
           ),
@@ -646,3 +734,70 @@ Widget infoChips(
     ),
   );
 }
+
+
+Widget fileStructure(
+    BuildContext context,
+    String fileName,
+    String date,
+    String filetype,
+    String fileSize,
+    String fileTypeLogo,
+  
+
+    
+  ) {
+    // if (filetype == "Folder" ){
+
+    // }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  SvgPicture.asset("assets/icons/$fileTypeLogo", height: 40),
+                  SizedBox(width: 15),
+                  SizedBox(
+                    width: 250,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          fileName,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          date,
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          Divider(
+            color: Colors.white.withValues(alpha: 0.1),
+            height: 2,
+            thickness: 2,
+          ),
+        ],
+      ),
+    );
+  }

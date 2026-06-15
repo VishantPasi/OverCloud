@@ -1,35 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_arc_speed_dial/flutter_speed_dial_menu_button.dart';
+import 'package:flutter_arc_speed_dial/main_menu_floating_action_button.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
-import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/utils/convert_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
+import 'package:overcloud/utils/pick_one_file.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
-class StarredPage extends StatefulWidget {
-  final String folderName;
-  final String folderId;
-  const StarredPage({
+class RecentFilesPage extends StatefulWidget {
+
+
+  const RecentFilesPage({
     super.key,
-    required this.folderName,
-    required this.folderId,
+
   });
 
   @override
-  State<StarredPage> createState() => _StarredPageState();
+  State<RecentFilesPage> createState() => _RecentFilesPageState();
 }
 
-class _StarredPageState extends State<StarredPage> {
+class _RecentFilesPageState extends State<RecentFilesPage> {
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String uid = _auth.currentUser!.uid;
 
   final ValueNotifier<int> fileCount = ValueNotifier<int>(0);
 
+  final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
+
+  PickOneFile pickOneFile = PickOneFile();
   ConvertFileSize convertFileSize = ConvertFileSize();
   ShowPopOver popOver = ShowPopOver();
 
@@ -47,7 +52,7 @@ class _StarredPageState extends State<StarredPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.folderName,
+                "Today's Recent Files",
                 style: GoogleFonts.urbanist(
                   color: Colors.white,
                   fontSize: 18,
@@ -123,7 +128,7 @@ class _StarredPageState extends State<StarredPage> {
                     Container(
                       width: 40,
                       height: 40,
-
+        
                       decoration: BoxDecoration(
                         color: Colors.white10,
                         shape: BoxShape.circle,
@@ -138,20 +143,20 @@ class _StarredPageState extends State<StarredPage> {
                     ),
                   ],
                 ),
-
+        
                 SizedBox(height: 20),
-
+        
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: _firestore.getStarredFoldersAndFiles(uid),
+                  stream: _firestore.getRecentFilesMetaDataList(uid),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
-
+        
                     if (snapshot.hasError) {
                       return Center(child: Text(snapshot.error.toString()));
                     }
-
+        
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return Container(
                         height: 150,
@@ -177,13 +182,13 @@ class _StarredPageState extends State<StarredPage> {
                         ),
                       );
                     }
-
+        
                     final files = snapshot.data!.docs;
-
+        
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       fileCount.value = files.length;
                     });
-
+        
                     return ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -212,7 +217,7 @@ class _StarredPageState extends State<StarredPage> {
                           "gif": "img.svg",
                           "webp": "img.svg",
                         };
-
+        
                         String fileType = files[index]
                             .data()['fileType']
                             .toString()
@@ -220,23 +225,18 @@ class _StarredPageState extends State<StarredPage> {
                         String fileTypeLogo =
                             fileIcons[fileType] ?? "unknown.svg";
 
+
+                          print(files[index].reference.path);
                         return fileStructure(
                           context,
-                          files[index].data()['fileName'] ??
-                              files[index].data()['folderName'],
+                          files[index]['fileName'],
                           formatDateTime(files[index].data()['modifiedOn']),
-                          files[index].data()['isFolder']
-                              ? ""
-                              : files[index].data()['fileType'],
-                          files[index].data()['isFolder']
-                              ? ""
-                              : files[index].data()['fileSize'],
+                          files[index].data()['fileType'],
+                          files[index].data()['fileSize'],
                           fileTypeLogo,
-                          files[index].data()['isFolder']
-                              ? files[index].data()['folderId']
-                              : files[index].data()['fileId'],
-                          files[index].data()['path'],
-                          files[index].data()['isFolder'],
+
+                          
+                          
                         );
                       },
                     );
@@ -247,126 +247,75 @@ class _StarredPageState extends State<StarredPage> {
           ),
         ),
       ),
+
     );
   }
 
+  
   Widget fileStructure(
     BuildContext context,
-    String fileNameOrFolderName,
+    String fileName,
     String date,
     String filetype,
     String fileSize,
     String fileTypeLogo,
-    String fileIdOrFolderId,
-    String filePath,
-    bool isFolder,
+
+    
   ) {
     // if (filetype == "Folder" ){
 
     // }
-    return GestureDetector(
-      onTap: () {
-        isFolder
-            ? Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => FoldersPage(
-                    folderName: fileNameOrFolderName,
-                    folderId: fileIdOrFolderId,
-                  ),
-                ),
-              )
-            : null;
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 10.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    isFolder
-                        ? FaIcon(
-                            FontAwesomeIcons.solidFolder,
-                            color: const Color.fromRGBO(255, 196, 87, 1),
-                            size: 30,
-                          )
-                        : SvgPicture.asset(
-                            "assets/icons/$fileTypeLogo",
-                            height: 40,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  SvgPicture.asset("assets/icons/$fileTypeLogo", height: 40),
+                  SizedBox(width: 15),
+                  SizedBox(
+                    width: 250,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          fileName,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                           ),
-                    SizedBox(width: 15),
-                    SizedBox(
-                      width: 215,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            fileNameOrFolderName,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.urbanist(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          date,
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 13,
                           ),
-                          SizedBox(height: 2),
-                          Text(
-                            date,
-                            style: GoogleFonts.urbanist(
-                              color: Colors.white70,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
 
-                Builder(
-                  builder: (buttonContext) {
-                    return IconButton(
-                      icon: FaIcon(
-                        FontAwesomeIcons.ellipsisVertical,
-                        color: Colors.white70,
-                        size: 18,
-                      ),
-
-                      onPressed: () {
-                        popOver.popOver(
-                          buttonContext,
-                          context,
-                          uid,
-                          fileIdOrFolderId,
-                          fileIdOrFolderId,
-                          fileNameOrFolderName,
-                          fileNameOrFolderName,
-                          filetype,
-                          fileSize,
-                          filePath,
-                          widget.folderId,
-                          isFolder,
-                          true,
-                        );
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Divider(
-              color: Colors.white.withValues(alpha: 0.1),
-              height: 2,
-              thickness: 2,
-            ),
-          ],
-        ),
+              
+          SizedBox(height: 10),
+          Divider(
+            color: Colors.white.withValues(alpha: 0.1),
+            height: 2,
+            thickness: 2,
+          ),
+        ],
       ),
+        ]
+      )
     );
   }
 }
