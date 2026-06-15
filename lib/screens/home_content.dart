@@ -9,7 +9,6 @@ import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/screens/recent_files_page.dart';
 import 'package:overcloud/screens/starred_page.dart';
-import 'package:overcloud/services/secure_storage_service.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 
 class HomeContent extends StatefulWidget {
@@ -36,9 +35,9 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Future<void> loadUserData() async {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  uid = _auth.currentUser!.uid;
-  fullName =  _auth.currentUser!.displayName;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  uid = auth.currentUser!.uid;
+  fullName =  auth.currentUser!.displayName;
 
     setState(() {});
   }

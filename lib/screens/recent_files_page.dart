@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_arc_speed_dial/flutter_speed_dial_menu_button.dart';
-import 'package:flutter_arc_speed_dial/main_menu_floating_action_button.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -32,7 +29,6 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
 
   final ValueNotifier<int> fileCount = ValueNotifier<int>(0);
 
-  final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
 
   PickOneFile pickOneFile = PickOneFile();
   ConvertFileSize convertFileSize = ConvertFileSize();
