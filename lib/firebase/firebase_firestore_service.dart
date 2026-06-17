@@ -114,9 +114,8 @@ class FirebaseFirestoreService {
           .doc(folderId);
 
       await folder.delete();
-      removeFromStarred(uid, folderId, null, null, true);
+      removeFromStarred(uid, folderId, null, null, null,true);
       deleteRecentFile(uid, folderId, null, true);
-      
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -130,7 +129,7 @@ class FirebaseFirestoreService {
     String folderId,
     String? fileName,
     String? fileType,
-    String? fileSize,
+    int? fileSize,
     String? path,
   ) async {
     try {
@@ -150,6 +149,8 @@ class FirebaseFirestoreService {
         "fileSize": fileSize,
         "isStarred": false,
       });
+
+      updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
 
       createRecentFilesMetaData(
         uid,
@@ -203,7 +204,13 @@ class FirebaseFirestoreService {
     }
   }
 
-  void deleteFileMetaData(String uid, String folderId, String fileId) async {
+  void deleteFileMetaData(
+    String uid,
+    String folderId,
+    String fileId,
+    String fileType,
+    int fileSize,
+  ) async {
     try {
       final folder = _firebaseFirestore
           .collection('users')
@@ -215,7 +222,9 @@ class FirebaseFirestoreService {
 
       await folder.delete();
 
-      removeFromStarred(uid, folderId, fileId, null, false);
+      updateOverallMetadata(uid, fileType, 1, fileSize, false);
+
+      removeFromStarred(uid, folderId, fileId, null, fileSize,false);
       deleteRecentFile(uid, folderId, fileId, false);
     } catch (e) {
       debugPrint(e.toString());
@@ -229,7 +238,7 @@ class FirebaseFirestoreService {
     String? fileId,
     String? fileName,
     String? fileType,
-    String? fileSize,
+    int? fileSize,
     String? path,
     bool isFolder,
   ) async {
@@ -285,6 +294,7 @@ class FirebaseFirestoreService {
           "isFolder": false,
           "modifiedOn": dateTime.toString(),
         });
+
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -361,6 +371,7 @@ class FirebaseFirestoreService {
     String? folderId,
     String? fileId,
     String? filePath,
+    int? fileSize,
     bool isFolder,
   ) async {
     try {
@@ -398,6 +409,7 @@ class FirebaseFirestoreService {
         DocumentReference update = _firebaseFirestore.doc(filePath!);
 
         await update.update({"isStarred": false});
+
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -412,7 +424,7 @@ class FirebaseFirestoreService {
     String? fileId,
     String? fileName,
     String? fileType,
-    String? fileSize,
+    int? fileSize,
     String? path,
   ) async {
     try {
@@ -477,35 +489,195 @@ class FirebaseFirestoreService {
     }
   }
 
-  void deleteRecentFile(String uid, String folderId, String? fileId, bool isFolder) async {
+  void deleteRecentFile(
+    String uid,
+    String folderId,
+    String? fileId,
+    bool isFolder,
+  ) async {
     try {
-      if(isFolder){
+      if (isFolder) {
         print("dsafd: $folderId");
         final folder = await _firebaseFirestore
-          .collection('users')
-          .doc(uid)
-          .collection("recents")
-          .where("folderId", isEqualTo: folderId).get();
+            .collection('users')
+            .doc(uid)
+            .collection("recents")
+            .where("folderId", isEqualTo: folderId)
+            .get();
 
-      for (var docs in folder.docs) {
-        docs.reference.delete();
-      }
-      }
-      else{
+        for (var docs in folder.docs) {
+          docs.reference.delete();
+        }
+      } else {
         final folder = await _firebaseFirestore
-          .collection('users')
-          .doc(uid)
-          .collection("recents")
-          .where("fileId", isEqualTo: fileId)
-          .get();
+            .collection('users')
+            .doc(uid)
+            .collection("recents")
+            .where("fileId", isEqualTo: fileId)
+            .get();
 
-      for (var docs in folder.docs) {
-        docs.reference.delete();
+        for (var docs in folder.docs) {
+          docs.reference.delete();
+        }
       }
-      }
-      
     } catch (e) {
       debugPrint(e.toString());
+    }
+  }
+
+  //overallMetadata
+
+  void createOverallMetadataFolders(String uid, String fileType) async {
+    try {
+      DocumentSnapshot existingFolders = await _firebaseFirestore
+          .collection("users")
+          .doc(uid)
+          .collection("overallMetadata")
+          .doc(fileType)
+          .get();
+
+      if (existingFolders.exists) {
+        return;
+      }
+
+      DateTime dateTime = DateTime.now();
+      DocumentReference folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("overallMetadata")
+          .doc(fileType);
+
+      await folder.set({
+        "fileType": fileType,
+        "totalCount": 0,
+        "totalSize": 0,
+        "modifiedOn": dateTime.toString(),
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<QueryDocumentSnapshot<Map<String, dynamic>>?> getOverallMetadata(
+    String uid,
+    String fileType,
+  ) async {
+    try {
+      final metadata = await _firebaseFirestore
+          .collection("users")
+          .doc(uid)
+          .collection("overallMetadata")
+          .where("fileType", isEqualTo: fileType)
+          .get();
+
+      if (metadata.docs.isNotEmpty) {
+        return metadata.docs.first;
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return null;
+  }
+
+  void updateOverallMetadata(
+    String uid,
+    String fileType,
+    int newTotalCount,
+    int newTotalSize,
+    bool isIncrementing,
+  ) async {
+    try {
+      // Normalize file types
+      switch (fileType.toLowerCase()) {
+        case 'pdf':
+        case 'doc':
+        case 'docx':
+        case 'ppt':
+        case 'pptx':
+        case 'xls':
+        case 'xlsx':
+        case 'txt':
+          fileType = 'documents';
+          break;
+
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+        case 'gif':
+        case 'webp':
+          fileType = 'photos';
+          break;
+
+        case 'mp4':
+        case 'mov':
+        case 'avi':
+        case 'mkv':
+          fileType = 'videos';
+          break;
+
+        case 'mp3':
+        case 'wav':
+        case 'aac':
+        case 'm4a':
+          fileType = 'music';
+          break;
+      }
+
+      final metadata = await _firebaseFirestore
+          .collection("users")
+          .doc(uid)
+          .collection("overallMetadata")
+          .where("fileType", isEqualTo: fileType)
+          .get();
+
+      final overall = await _firebaseFirestore
+          .collection("users")
+          .doc(uid)
+          .collection("overallMetadata")
+          .where("fileType", isEqualTo: "overall")
+          .get();
+
+      // final private = await _firebaseFirestore
+      //     .collection("users")
+      //     .doc(uid)
+      //     .collection("overallMetadata")
+      //     .where("fileType", isEqualTo: "private")
+      //     .get();
+
+      // final starred = await _firebaseFirestore
+      //     .collection("users")
+      //     .doc(uid)
+      //     .collection("overallMetadata")
+      //     .where("fileType", isEqualTo: "private")
+      //     .get();
+
+      
+        if (metadata.docs.isNotEmpty) {
+          if (isIncrementing) {
+            await metadata.docs.first.reference.update({
+              "totalCount": FieldValue.increment(newTotalCount),
+              "totalSize": FieldValue.increment(newTotalSize),
+            });
+            await overall.docs.first.reference.update({
+              "totalCount": FieldValue.increment(newTotalCount),
+              "totalSize": FieldValue.increment(newTotalSize),
+            });
+          } else {
+            await metadata.docs.first.reference.update({
+              "totalCount": FieldValue.increment(-newTotalCount),
+              "totalSize": FieldValue.increment(-newTotalSize),
+            });
+            await overall.docs.first.reference.update({
+              "totalCount": FieldValue.increment(-newTotalCount),
+              "totalSize": FieldValue.increment(-newTotalSize),
+            });
+          }
+        }
+      
+    } catch (e) {
+      debugPrint("updateOverallMetadata Error: $e");
     }
   }
 }

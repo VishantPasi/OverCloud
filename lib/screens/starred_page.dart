@@ -229,7 +229,7 @@ class _StarredPageState extends State<StarredPage> {
                               ? ""
                               : files[index].data()['fileType'],
                           files[index].data()['isFolder']
-                              ? ""
+                              ? null
                               : files[index].data()['fileSize'],
                           fileTypeLogo,
                           files[index].data()["fileId"],
@@ -254,16 +254,14 @@ class _StarredPageState extends State<StarredPage> {
     String fileNameOrFolderName,
     String date,
     String filetype,
-    String fileSize,
+    int? fileSize,
     String fileTypeLogo,
     String? fileId,
     String folderId,
     String filePath,
     bool isFolder,
   ) {
-    // if (filetype == "Folder" ){
 
-    // }
     return GestureDetector(
       onTap: () {
         isFolder

@@ -294,7 +294,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 widget.folderId,
                 file.name,
                 file.extension,
-                _convertFileSize.fileSize(file.size),
+                file.size,
                 path
               );
             }
@@ -324,7 +324,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 widget.folderId,
                 file.name,
                 file.extension,
-              _convertFileSize.fileSize(file.size),
+              file.size,
                 path
               );
             }
@@ -350,7 +350,7 @@ class _FoldersPageState extends State<FoldersPage> {
     String fileName,
     String date,
     String filetype,
-    String fileSize,
+    int fileSize,
     String fileTypeLogo,
     String fileId,
     String path,

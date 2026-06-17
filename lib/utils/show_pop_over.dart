@@ -59,7 +59,7 @@ class ShowPopOver {
     String? fileId,
     String? fileName,
     String? fileType,
-    String? fileSize,
+    int? fileSize,
     String path,
     String? currentFolderId,
     bool isFolder,
@@ -107,7 +107,7 @@ class ShowPopOver {
     String? folderName,
     String? fileName,
     String? fileType,
-    String? fileSize,
+    int? fileSize,
     String path,
     String? currentFolderId,
     bool isFolder,
@@ -155,7 +155,7 @@ class ShowPopOver {
     String? folderName,
     String? fileName,
     String? fileType,
-    String? fileSize,
+    int? fileSize,
     String path,
     String? currentFolderId,
     bool isFolder,
@@ -210,7 +210,7 @@ class ShowPopOver {
               );
               if (isStarred){
                 isFolder ? 
-              firestoreService.removeFromStarred(uid, folderId!, null, path, isFolder): firestoreService.removeFromStarred(uid, folderId, fileId, path,isFolder);
+              firestoreService.removeFromStarred(uid, folderId!, null, path, null, isFolder): firestoreService.removeFromStarred(uid, folderId, fileId, path, fileSize,isFolder);
 
                     Navigator.pop(context);
               
@@ -317,6 +317,8 @@ class ShowPopOver {
                       uid,
                       folderId!,
                       fileId!,
+                      fileType!,
+                      fileSize!
                       
 
                     );
@@ -365,7 +367,7 @@ class ShowPopOver {
     String? fileId,
     String? fileName,
     String? fileType,
-    String? fileSize,
+    int? fileSize,
     String path,
     String? currentFolderId,
     bool isFolder,
@@ -411,7 +413,7 @@ class ShowPopOver {
     String? fileId,
     String? fileName,
     String? fileType,
-    String? fileSize,
+    int? fileSize,
     String path,
     String? currentFolderId,
     bool isFolder,
@@ -492,6 +494,8 @@ class ShowPopOver {
                       uid,
                       folderId!,
                       fileId!,
+                      fileType!,
+                      fileSize!
                     );
             },
             child: Row(
@@ -794,7 +798,7 @@ class ShowPopOver {
     String? fileId,
     String? fileName,
     String? fileType,
-    String? fileSize,
+    int? fileSize,
     String path,
     String? currentFolderId,
     bool isFolder,
@@ -839,7 +843,7 @@ class ShowPopOver {
             onTap: () {
              
               if (isStarred){
-                 firestoreService.removeFromStarred(uid, folderId, fileId, path,isFolder);
+                 firestoreService.removeFromStarred(uid, folderId, fileId, path, fileSize,isFolder);
 
                     Navigator.pop(context);
               
@@ -932,6 +936,8 @@ class ShowPopOver {
                       uid,
                       folderId!,
                       fileId!,
+                      fileType!,
+                      fileSize!
                     );
             },
             child: Row(
@@ -1023,7 +1029,7 @@ renameFolderBottomSheet(
               // );
               if (isStarred){
               
-              firestoreService.removeFromStarred(uid, folderId!, null, path, isFolder);
+              firestoreService.removeFromStarred(uid, folderId!, null, path, null,isFolder);
 
                     Navigator.pop(context);
               

@@ -12,7 +12,6 @@ class FirebaseAuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   final String _webSdkClientId =
       "725343694902-ok4rab3baj2u0k1efvtkqleqes5jaej7.apps.googleusercontent.com";
-      
 
   final FirebaseFirestoreService _firestoreService = FirebaseFirestoreService();
 
@@ -102,21 +101,16 @@ class FirebaseAuthService {
   Future<void> signInWithGoogle(BuildContext context) async {
     isLoading.value = true;
     try {
-
       await _googleSignIn.initialize(serverClientId: _webSdkClientId);
 
       final GoogleSignInAccount userAccount = await _googleSignIn
           .authenticate();
-
-          
 
       final GoogleSignInAuthentication googleAuth = userAccount.authentication;
 
       final credentials = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
-
-    
 
       final userCredentials = await _auth.signInWithCredential(credentials);
 
@@ -126,8 +120,6 @@ class FirebaseAuthService {
       await SecureStorageService.setEmail(_auth.currentUser!.email.toString());
       await SecureStorageService.setUID(_auth.currentUser!.uid.toString());
 
-
-
       String uid = _auth.currentUser!.uid;
       await FirebaseFirestore.instance.collection("users").doc(uid).set({
         "fullName": userCredentials.user!.displayName.toString(),
@@ -135,11 +127,18 @@ class FirebaseAuthService {
         "email": userCredentials.user!.email.toString(),
       });
 
-      _firestoreService.createDefaultFolders(uid,"photos");
-      _firestoreService.createDefaultFolders(uid,"documents");
-      _firestoreService.createDefaultFolders(uid,"videos");
-      _firestoreService.createDefaultFolders(uid,"music");
-      _firestoreService.createDefaultFolders(uid,"starred");
+      _firestoreService.createDefaultFolders(uid, "photos");
+      _firestoreService.createDefaultFolders(uid, "documents");
+      _firestoreService.createDefaultFolders(uid, "videos");
+      _firestoreService.createDefaultFolders(uid, "music");
+      _firestoreService.createDefaultFolders(uid, "starred");
+      _firestoreService.createOverallMetadataFolders(uid, "photos");
+      _firestoreService.createOverallMetadataFolders(uid, "documents");
+      _firestoreService.createOverallMetadataFolders(uid, "videos");
+      _firestoreService.createOverallMetadataFolders(uid, "music");
+      _firestoreService.createOverallMetadataFolders(uid, "private");
+      _firestoreService.createOverallMetadataFolders(uid, "starred");
+      _firestoreService.createOverallMetadataFolders(uid, "overall");
 
       if (!context.mounted) return;
 
@@ -149,11 +148,11 @@ class FirebaseAuthService {
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
-    }  catch (e, stackTrace) {
-  debugPrint("Google Sign In Error: $e");
-  debugPrintStack(stackTrace: stackTrace);
-  rethrow;
-} finally {
+    } catch (e, stackTrace) {
+      debugPrint("Google Sign In Error: $e");
+      debugPrintStack(stackTrace: stackTrace);
+      rethrow;
+    } finally {
       isLoading.value = false;
     }
   }
@@ -184,11 +183,18 @@ class FirebaseAuthService {
 
       if (!context.mounted) return;
 
-      _firestoreService.createDefaultFolders(uid,"photos");
-      _firestoreService.createDefaultFolders(uid,"documents");
-      _firestoreService.createDefaultFolders(uid,"videos");
-      _firestoreService.createDefaultFolders(uid,"music");
-      _firestoreService.createDefaultFolders(uid,"starred");
+      _firestoreService.createDefaultFolders(uid, "photos");
+      _firestoreService.createDefaultFolders(uid, "documents");
+      _firestoreService.createDefaultFolders(uid, "videos");
+      _firestoreService.createDefaultFolders(uid, "music");
+      _firestoreService.createDefaultFolders(uid, "starred");
+      _firestoreService.createOverallMetadataFolders(uid, "photos");
+      _firestoreService.createOverallMetadataFolders(uid, "documents");
+      _firestoreService.createOverallMetadataFolders(uid, "videos");
+      _firestoreService.createOverallMetadataFolders(uid, "music");
+      _firestoreService.createOverallMetadataFolders(uid, "private");
+      _firestoreService.createOverallMetadataFolders(uid, "starred");
+      _firestoreService.createOverallMetadataFolders(uid, "overall");
 
       isLoading.value = false;
 

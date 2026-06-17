@@ -5,9 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
-import 'package:overcloud/utils/convert_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
-import 'package:overcloud/utils/pick_one_file.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
 class RecentFilesPage extends StatefulWidget {
@@ -255,7 +253,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
     String fileName,
     String date,
     String filetype,
-    String fileSize,
+    int fileSize,
     String path,
     String fileTypeLogo,
 

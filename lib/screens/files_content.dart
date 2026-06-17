@@ -34,6 +34,8 @@ class _FilesContentState extends State<FilesContent> {
     // _firestore.createFile(uid, "3cg4crwncLfUhcoDvn22", "TESTING", "Text", "3.5");
     // // _firestore.getFolderList(uid).asStream();
     // _firestore.createFolder(uid, "Custom Folder6");
+    _firestore.getOverallMetadata(uid,"video");
+    // _firestore.updateOverallMetadata(uid, "video", 3, "45 gb");
     super.initState();
   }
 
@@ -435,21 +437,18 @@ class _FilesContentState extends State<FilesContent> {
     String currentFolderId,
     bool isStarred,
   ) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
+    return GestureDetector(
+      onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
                       FoldersPage(folderName: folderName, folderId: folderId,path: path,),
                 ),
-              );
-            },
-
+              ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10),
             child: Container(
               decoration: BoxDecoration(),
               child: Row(
@@ -485,7 +484,7 @@ class _FilesContentState extends State<FilesContent> {
                       ),
                     ],
                   ),
-
+                  
                   Row(
                     children: [
                       isStarred
@@ -503,7 +502,7 @@ class _FilesContentState extends State<FilesContent> {
                               color: Colors.white70,
                               size: 18,
                             ),
-
+                  
                             onPressed: () {
                               popOver.popOverFilesContent(
                                 buttonContext,
@@ -519,7 +518,7 @@ class _FilesContentState extends State<FilesContent> {
                             },
                           );
                         },
-
+                  
                         // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
                       ),
                     ],
@@ -528,13 +527,13 @@ class _FilesContentState extends State<FilesContent> {
               ),
             ),
           ),
-        ),
-        Divider(
-          color: Colors.white.withValues(alpha: 0.1),
-          height: 2,
-          thickness: 2,
-        ),
-      ],
+          Divider(
+            color: Colors.white.withValues(alpha: 0.1),
+            height: 2,
+            thickness: 2,
+          ),
+        ],
+      ),
     );
   }
 

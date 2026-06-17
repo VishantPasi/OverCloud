@@ -752,7 +752,7 @@ Widget fileStructure(
     String fileName,
     String date,
     String filetype,
-    String fileSize,
+    int fileSize,
     String path,
     String fileTypeLogo,
 
