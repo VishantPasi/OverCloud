@@ -33,13 +33,13 @@ class _FoldersPageState extends State<FoldersPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String uid = _auth.currentUser!.uid;
 
-  final ValueNotifier<int> fileCount = ValueNotifier<int>(0);
+  final ValueNotifier<int> _fileCount = ValueNotifier<int>(0);
 
   final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
 
-  PickOneFile pickOneFile = PickOneFile();
-  ConvertFileSize convertFileSize = ConvertFileSize();
-  ShowPopOver popOver = ShowPopOver();
+  final PickOneFile _pickOneFile = PickOneFile();
+  final ConvertFileSize _convertFileSize = ConvertFileSize();
+  final ShowPopOver _popOver = ShowPopOver();
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class _FoldersPageState extends State<FoldersPage> {
               SizedBox(height: 2),
 
               ValueListenableBuilder<int>(
-                valueListenable: fileCount,
+                valueListenable: _fileCount,
                 builder: (context, itemCount, child) {
                   return Text(
                     "$itemCount items",
@@ -189,7 +189,7 @@ class _FoldersPageState extends State<FoldersPage> {
                     final files = snapshot.data!.docs;
         
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      fileCount.value = files.length;
+                      _fileCount.value = files.length;
                     });
         
                     return ListView.builder(
@@ -252,7 +252,7 @@ class _FoldersPageState extends State<FoldersPage> {
           ),
         ),
       ),
-      floatingActionButton: _getFloatingActionButton(widget.folderId, widget.path!),
+      floatingActionButton: _getFloatingActionButton(widget.folderId, widget.path ?? ""),
     );
   }
 
@@ -286,7 +286,7 @@ class _FoldersPageState extends State<FoldersPage> {
           mini: false,
           heroTag: "file_upload",
           onPressed: () async {
-            PlatformFile? file = await pickOneFile.pickFile(folderId);
+            PlatformFile? file = await _pickOneFile.pickFile(folderId);
 
             if (file != null) {
               _firestore.createFileMetaData(
@@ -294,7 +294,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 widget.folderId,
                 file.name,
                 file.extension,
-                convertFileSize.fileSize(file.size),
+                _convertFileSize.fileSize(file.size),
                 path
               );
             }
@@ -316,7 +316,7 @@ class _FoldersPageState extends State<FoldersPage> {
        FloatingActionButton(
   heroTag: "gallery",
   onPressed: () async {
-     PlatformFile? file = await pickOneFile.pickFile("photos");
+     PlatformFile? file = await _pickOneFile.pickFile("photos");
 
             if (file != null) {
               _firestore.createFileMetaData(
@@ -324,7 +324,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 widget.folderId,
                 file.name,
                 file.extension,
-                convertFileSize.fileSize(file.size),
+              _convertFileSize.fileSize(file.size),
                 path
               );
             }
@@ -413,13 +413,13 @@ class _FoldersPageState extends State<FoldersPage> {
                         ),
                   
                         onPressed: () {
-                          popOver.popOver(
+                          _popOver.popOverFoldersPage(
                             buttonContext,
                             context,
                             uid,
                             widget.folderId,
                             fileId,
-                            null,
+                       
                             fileName,
                             filetype,
                             fileSize,

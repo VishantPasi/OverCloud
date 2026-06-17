@@ -111,6 +111,7 @@ Future<String?> renameFileBottomSheet(
                     return;
                   }
 
+
                   firestore.renameFileName(uid, folderId, fileId, newFileName);
 
                   Navigator.pop(context, newFileName);

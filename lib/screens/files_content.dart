@@ -386,11 +386,11 @@ class _FilesContentState extends State<FilesContent> {
                     }
 
                     final excludedFolders = [
-                      "photos",
-                      "documents",
-                      "videos",
-                      "music",
-                      "starred",
+                      "Photos",
+                      "Documents",
+                      "Videos",
+                      "Music",
+                      "Starred",
                     ];
 
                     final folders = snapshot.data!.docs.where((doc) {
@@ -411,7 +411,8 @@ class _FilesContentState extends State<FilesContent> {
                             folders[index].data()['modifiedOn'],
                           ).toString(),
                           folders[index].reference.path,
-                          folders[index].data()['isStarred'],
+                          folders[index].id,
+                          folders[index].data()['isStarred']
 
                         );
                       },
@@ -431,6 +432,7 @@ class _FilesContentState extends State<FilesContent> {
     String folderName,
     String date,
     String path,
+    String currentFolderId,
     bool isStarred,
   ) {
     return Column(
@@ -503,18 +505,14 @@ class _FilesContentState extends State<FilesContent> {
                             ),
 
                             onPressed: () {
-                              popOver.popOver(
+                              popOver.popOverFilesContent(
                                 buttonContext,
                                 context,
                                 uid,
                                 folderId,
-                                null,
                                 folderName,
-                                null,
-                                null,
-                                null,
                                 path,
-                                folderId,
+                                currentFolderId,
                                 true,
                                 isStarred,
                               );

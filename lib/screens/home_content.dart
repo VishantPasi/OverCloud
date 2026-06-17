@@ -10,6 +10,7 @@ import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/screens/recent_files_page.dart';
 import 'package:overcloud/screens/starred_page.dart';
 import 'package:overcloud/utils/format_date_time.dart';
+import 'package:overcloud/utils/show_pop_over.dart';
 
 class HomeContent extends StatefulWidget {
   final NotchBottomBarController? controller;
@@ -23,9 +24,13 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   String? fullName;
   String? uid;
+  
 
 
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
+  final ShowPopOver _popOver = ShowPopOver();
+ 
+  
 
 
   @override
@@ -38,6 +43,7 @@ class _HomeContentState extends State<HomeContent> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   uid = auth.currentUser!.uid;
   fullName =  auth.currentUser!.displayName;
+  
 
     setState(() {});
   }
@@ -543,11 +549,15 @@ class _HomeContentState extends State<HomeContent> {
                           print(files[index].reference.path);
                         return fileStructure(
                           context,
+                          files[index]['folderId'],
+                          files[index]['fileId'],
                           files[index]['fileName'],
                           formatDateTime(files[index].data()['modifiedOn']),
                           files[index].data()['fileType'],
                           files[index].data()['fileSize'],
-                          fileTypeLogo,
+                          files[index].data()['path'],
+                          fileTypeLogo
+                          
 
 
 
@@ -565,7 +575,7 @@ class _HomeContentState extends State<HomeContent> {
       ),
     );
   }
-}
+
 
 Widget quickAccess(
   String title,
@@ -737,18 +747,17 @@ Widget infoChips(
 
 Widget fileStructure(
     BuildContext context,
+    String folderId,
+    String fileId,
     String fileName,
     String date,
     String filetype,
     String fileSize,
+    String path,
     String fileTypeLogo,
-  
 
-    
   ) {
-    // if (filetype == "Folder" ){
 
-    // }
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
       child: Column(
@@ -761,7 +770,7 @@ Widget fileStructure(
                   SvgPicture.asset("assets/icons/$fileTypeLogo", height: 40),
                   SizedBox(width: 15),
                   SizedBox(
-                    width: 250,
+                    width: 230,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -786,8 +795,39 @@ Widget fileStructure(
                       ],
                     ),
                   ),
+
+                  
                 ],
               ),
+              Builder(
+                    builder: (buttonContext) {
+                      return IconButton(
+                        icon: FaIcon(
+                          FontAwesomeIcons.ellipsisVertical,
+                          color: Colors.white70,
+                          size: 18,
+                        ),
+                  
+                        onPressed: () {
+                          _popOver.popOverRecentFilesPage(
+                            buttonContext,
+                            context,
+                            uid!,
+                            folderId,
+                            fileId,
+                            fileName,
+                            filetype,
+                            fileSize,
+                            path,
+                            "homeContent",
+                            false,
+                          
+                          );
+                          
+                        },
+                      );
+                    },
+                  ),
             ],
           ),
           SizedBox(height: 10),
@@ -800,3 +840,4 @@ Widget fileStructure(
       ),
     );
   }
+}

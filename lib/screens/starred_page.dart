@@ -232,9 +232,8 @@ class _StarredPageState extends State<StarredPage> {
                               ? ""
                               : files[index].data()['fileSize'],
                           fileTypeLogo,
-                          files[index].data()['isFolder']
-                              ? files[index].data()['folderId']
-                              : files[index].data()['fileId'],
+                          files[index].data()["fileId"],
+                          files[index].data()['folderId'],
                           files[index].data()['path'],
                           files[index].data()['isFolder'],
                         );
@@ -257,7 +256,8 @@ class _StarredPageState extends State<StarredPage> {
     String filetype,
     String fileSize,
     String fileTypeLogo,
-    String fileIdOrFolderId,
+    String? fileId,
+    String folderId,
     String filePath,
     bool isFolder,
   ) {
@@ -272,7 +272,7 @@ class _StarredPageState extends State<StarredPage> {
                 MaterialPageRoute(
                   builder: (context) => FoldersPage(
                     folderName: fileNameOrFolderName,
-                    folderId: fileIdOrFolderId,
+                    folderId: folderId,
                   ),
                 ),
               )
@@ -337,12 +337,12 @@ class _StarredPageState extends State<StarredPage> {
                       ),
 
                       onPressed: () {
-                        popOver.popOver(
+                        popOver.popOverStarredPage(
                           buttonContext,
                           context,
                           uid,
-                          fileIdOrFolderId,
-                          fileIdOrFolderId,
+                          folderId,
+                          fileId,
                           fileNameOrFolderName,
                           fileNameOrFolderName,
                           filetype,

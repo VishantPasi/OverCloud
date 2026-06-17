@@ -21,6 +21,7 @@ class FirebaseFirestoreService {
     createDefaultFolders(uid, "documents");
     createDefaultFolders(uid, "videos");
     createDefaultFolders(uid, "music");
+    createDefaultFolders(uid, "starred");
   }
 
   //FOLDER RELATED CRUD
@@ -113,15 +114,15 @@ class FirebaseFirestoreService {
           .doc(folderId);
 
       await folder.delete();
+      removeFromStarred(uid, folderId, null, null, true);
+      deleteRecentFile(uid, folderId, null, true);
+      
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
   //cannot create folders files,photos...
-
-
-
 
   //Files Metadata Crud
   void createFileMetaData(
@@ -130,7 +131,7 @@ class FirebaseFirestoreService {
     String? fileName,
     String? fileType,
     String? fileSize,
-    String? path
+    String? path,
   ) async {
     try {
       DateTime dateTime = DateTime.now();
@@ -150,8 +151,15 @@ class FirebaseFirestoreService {
         "isStarred": false,
       });
 
-
-      createRecentFilesMetaData(uid,fileName,fileType,fileSize,path);
+      createRecentFilesMetaData(
+        uid,
+        folderId,
+        folder.id,
+        fileName,
+        fileType,
+        fileSize,
+        path,
+      );
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -187,6 +195,8 @@ class FirebaseFirestoreService {
           .doc(fileId)
           .update({"fileName": newFileName, "modifiedOn": dateTime.toString()});
 
+      renameRecentFiles(uid, fileId, newFileName);
+
       renameStarredFolderOrFile(uid, null, fileId, null, newFileName, false);
     } catch (e) {
       debugPrint(e.toString());
@@ -204,6 +214,9 @@ class FirebaseFirestoreService {
           .doc(fileId);
 
       await folder.delete();
+
+      removeFromStarred(uid, folderId, fileId, null, false);
+      deleteRecentFile(uid, folderId, fileId, false);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -220,7 +233,6 @@ class FirebaseFirestoreService {
     String? path,
     bool isFolder,
   ) async {
-    print("errorr2: $folderId");
     try {
       DateTime dateTime = DateTime.now();
 
@@ -233,7 +245,6 @@ class FirebaseFirestoreService {
           .doc();
 
       if (isFolder) {
-
         print("started adding");
         DocumentReference update = _firebaseFirestore
             .collection('users')
@@ -266,10 +277,11 @@ class FirebaseFirestoreService {
 
         await starred.set({
           "fileName": fileName,
+          "folderId": folderId,
           "fileId": fileId,
           "fileType": fileType,
           "fileSize": fileSize,
-          "path" : path,
+          "path": path,
           "isFolder": false,
           "modifiedOn": dateTime.toString(),
         });
@@ -348,7 +360,7 @@ class FirebaseFirestoreService {
     String uid,
     String? folderId,
     String? fileId,
-    String filePath,
+    String? filePath,
     bool isFolder,
   ) async {
     try {
@@ -366,7 +378,7 @@ class FirebaseFirestoreService {
           docs.reference.delete();
         }
 
-        DocumentReference update = _firebaseFirestore.doc(filePath);
+        DocumentReference update = _firebaseFirestore.doc(filePath!);
 
         await update.update({"isStarred": false});
       } else {
@@ -383,8 +395,7 @@ class FirebaseFirestoreService {
           docs.reference.delete();
         }
 
-        DocumentReference update = _firebaseFirestore.doc(filePath);
-            
+        DocumentReference update = _firebaseFirestore.doc(filePath!);
 
         await update.update({"isStarred": false});
       }
@@ -393,15 +404,16 @@ class FirebaseFirestoreService {
     }
   }
 
-
   //recent files
 
   void createRecentFilesMetaData(
     String uid,
+    String? folderId,
+    String? fileId,
     String? fileName,
     String? fileType,
     String? fileSize,
-    String? path
+    String? path,
   ) async {
     try {
       DateTime dateTime = DateTime.now();
@@ -412,34 +424,88 @@ class FirebaseFirestoreService {
           .doc();
 
       await folder.set({
+        "folderId": folderId,
+        "fileId": fileId,
         "fileName": fileName,
         "modifiedOn": dateTime.toString(),
         "fileType": fileType,
         "fileSize": fileSize,
-        "path" : path,
+        "path": path,
       });
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
-
-Stream<QuerySnapshot<Map<String, dynamic>>> getRecentFilesMetaDataList(
+  Stream<QuerySnapshot<Map<String, dynamic>>> getRecentFilesMetaDataList(
     String uid,
   ) {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
-        .collection('recents').orderBy('modifiedOn', descending: true).limit(3)
+        .collection('recents')
+        .orderBy('modifiedOn', descending: true)
+        .limit(3)
         .snapshots();
   }
 
+  void renameRecentFiles(
+    String uid,
+    String? fileId,
+    String? newFileName,
+  ) async {
+    try {
+      DateTime dateTime = DateTime.now();
 
+      print("errorrrrrr: $fileId,$newFileName");
 
+      final recents = await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("recents")
+          .where("fileId", isEqualTo: fileId)
+          .get();
 
+      for (var docs in recents.docs) {
+        docs.reference.update({
+          "fileName": newFileName,
+          "modifiedOn": dateTime.toString(),
+        });
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
 
+  void deleteRecentFile(String uid, String folderId, String? fileId, bool isFolder) async {
+    try {
+      if(isFolder){
+        print("dsafd: $folderId");
+        final folder = await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("recents")
+          .where("folderId", isEqualTo: folderId).get();
 
+      for (var docs in folder.docs) {
+        docs.reference.delete();
+      }
+      }
+      else{
+        final folder = await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("recents")
+          .where("fileId", isEqualTo: fileId)
+          .get();
+
+      for (var docs in folder.docs) {
+        docs.reference.delete();
+      }
+      }
+      
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
 }
-
-
-
