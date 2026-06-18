@@ -131,7 +131,7 @@ class _FoldersPageState extends State<FoldersPage> {
                     Container(
                       width: 40,
                       height: 40,
-        
+
                       decoration: BoxDecoration(
                         color: Colors.white10,
                         shape: BoxShape.circle,
@@ -146,20 +146,20 @@ class _FoldersPageState extends State<FoldersPage> {
                     ),
                   ],
                 ),
-        
+
                 SizedBox(height: 20),
-        
+
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: _firestore.getFilesMetaDataList(uid, widget.folderId),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
-        
+
                     if (snapshot.hasError) {
                       return Center(child: Text(snapshot.error.toString()));
                     }
-        
+
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return Container(
                         height: 150,
@@ -185,13 +185,13 @@ class _FoldersPageState extends State<FoldersPage> {
                         ),
                       );
                     }
-        
+
                     final files = snapshot.data!.docs;
-        
+
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       _fileCount.value = files.length;
                     });
-        
+
                     return ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -220,7 +220,7 @@ class _FoldersPageState extends State<FoldersPage> {
                           "gif": "img.svg",
                           "webp": "img.svg",
                         };
-        
+
                         String fileType = files[index]
                             .data()['fileType']
                             .toString()
@@ -228,8 +228,7 @@ class _FoldersPageState extends State<FoldersPage> {
                         String fileTypeLogo =
                             fileIcons[fileType] ?? "unknown.svg";
 
-
-                          print(files[index].reference.path);
+                        print(files[index].reference.path);
                         return fileStructure(
                           context,
                           files[index]['fileName'],
@@ -239,9 +238,7 @@ class _FoldersPageState extends State<FoldersPage> {
                           fileTypeLogo,
                           files[index].id,
                           files[index].reference.path,
-                          files[index].data()['isStarred']
-                          
-                          
+                          files[index].data()['isStarred'],
                         );
                       },
                     );
@@ -252,7 +249,10 @@ class _FoldersPageState extends State<FoldersPage> {
           ),
         ),
       ),
-      floatingActionButton: _getFloatingActionButton(widget.folderId, widget.path ?? ""),
+      floatingActionButton: _getFloatingActionButton(
+        widget.folderId,
+        widget.path ?? "",
+      ),
     );
   }
 
@@ -295,7 +295,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 file.name,
                 file.extension,
                 file.size,
-                path
+                path,
               );
             }
 
@@ -313,10 +313,10 @@ class _FoldersPageState extends State<FoldersPage> {
           backgroundColor: Colors.deepOrange,
           child: FaIcon(FontAwesomeIcons.cameraRetro, color: Colors.white),
         ),
-       FloatingActionButton(
-  heroTag: "gallery",
-  onPressed: () async {
-     PlatformFile? file = await _pickOneFile.pickFile("photos");
+        FloatingActionButton(
+          heroTag: "gallery",
+          onPressed: () async {
+            PlatformFile? file = await _pickOneFile.pickFile("photos");
 
             if (file != null) {
               _firestore.createFileMetaData(
@@ -324,21 +324,20 @@ class _FoldersPageState extends State<FoldersPage> {
                 widget.folderId,
                 file.name,
                 file.extension,
-              file.size,
-                path
+                file.size,
+                path,
               );
             }
-             _isShowDial.value = false;
+            _isShowDial.value = false;
             setState(() {});
-
-  },
-  backgroundColor: Colors.deepOrange,
-   shape: CircleBorder(),
-  child: const FaIcon(
-    FontAwesomeIcons.solidImages,
-    color: Colors.white,
-  ),
-),
+          },
+          backgroundColor: Colors.deepOrange,
+          shape: CircleBorder(),
+          child: const FaIcon(
+            FontAwesomeIcons.solidImages,
+            color: Colors.white,
+          ),
+        ),
       ],
       isSpeedDialFABsMini: false,
       paddingBtwSpeedDialButton: 20.0,
@@ -354,8 +353,7 @@ class _FoldersPageState extends State<FoldersPage> {
     String fileTypeLogo,
     String fileId,
     String path,
-    bool isStarred
-    
+    bool isStarred,
   ) {
     // if (filetype == "Folder" ){
 
@@ -402,7 +400,13 @@ class _FoldersPageState extends State<FoldersPage> {
 
               Row(
                 children: [
-                  isStarred ? FaIcon(FontAwesomeIcons.solidStar, color: const Color.fromRGBO(255, 170, 60, 1), size: 15,) : SizedBox(),
+                  isStarred
+                      ? FaIcon(
+                          FontAwesomeIcons.solidStar,
+                          color: const Color.fromRGBO(255, 170, 60, 1),
+                          size: 15,
+                        )
+                      : SizedBox(),
                   Builder(
                     builder: (buttonContext) {
                       return IconButton(
@@ -411,7 +415,7 @@ class _FoldersPageState extends State<FoldersPage> {
                           color: Colors.white70,
                           size: 18,
                         ),
-                  
+
                         onPressed: () {
                           _popOver.popOverFoldersPage(
                             buttonContext,
@@ -419,16 +423,15 @@ class _FoldersPageState extends State<FoldersPage> {
                             uid,
                             widget.folderId,
                             fileId,
-                       
+
                             fileName,
                             filetype,
                             fileSize,
                             path,
                             widget.folderId,
                             false,
-                            isStarred
+                            isStarred,
                           );
-                          
                         },
                       );
                     },

@@ -9,6 +9,7 @@ import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/screens/recent_files_page.dart';
 import 'package:overcloud/screens/starred_page.dart';
+import 'package:overcloud/utils/convert_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
@@ -24,28 +25,71 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   String? fullName;
   String? uid;
-  
-
+  String? totalSpaceUsed;
+  String? videosTotalCount;
+  String? documentsTotalCount;
+  String? musicTotalCount;
+  String? photosTotalCount;
 
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   final ShowPopOver _popOver = ShowPopOver();
- 
-  
-
+  final ConvertFileSize _fileSize = ConvertFileSize();
 
   @override
   void initState() {
     loadUserData();
+    getTotalSpaceUsed();
+    getTotalCount("videos");
+    getTotalCount("music");
+    getTotalCount("documents");
+    getTotalCount("photos");
     super.initState();
   }
 
   Future<void> loadUserData() async {
-  final FirebaseAuth auth = FirebaseAuth.instance;
-  uid = auth.currentUser!.uid;
-  fullName =  auth.currentUser!.displayName;
-  
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    uid = auth.currentUser!.uid;
+    fullName = auth.currentUser!.displayName;
 
     setState(() {});
+  }
+
+  Future<void> getTotalSpaceUsed() async {
+    final storageUsed = await _firestore.getOverallMetadata(uid!, "overall");
+
+    totalSpaceUsed = _fileSize.fileSize(storageUsed!.data()['totalSize']);
+    setState(() {});
+  }
+
+  Future<void> getTotalCount(String fileType) async {
+    final totalCount = await _firestore.getOverallMetadata(uid!, fileType);
+
+    switch (fileType) {
+      case "videos":
+        videosTotalCount = totalCount!.data()['totalCount'].toString();
+        setState(() {});
+        break;
+      case "music":
+        musicTotalCount = totalCount!.data()['totalCount'].toString();
+        setState(() {});
+        break;
+      case "documents":
+        documentsTotalCount = totalCount!.data()['totalCount'].toString();
+        setState(() {});
+        break;
+      case "photos":
+        photosTotalCount = totalCount!.data()['totalCount'].toString();
+        setState(() {});
+        break;
+
+      default:
+        videosTotalCount = "0";
+        musicTotalCount = "0";
+        documentsTotalCount = "0";
+        photosTotalCount = "0";
+        setState(() {});
+        break;
+    }
   }
 
   Widget greetingText() {
@@ -293,7 +337,7 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                       SizedBox(height: 20),
                       Text(
-                        "75.4 GB Used",
+                        "${totalSpaceUsed ?? 0} Used",
                         style: GoogleFonts.urbanist(
                           color: Color.fromRGBO(255, 250, 245, 1),
                           fontSize: 25,
@@ -351,7 +395,7 @@ class _HomeContentState extends State<HomeContent> {
                       "Photos",
                       FontAwesomeIcons.photoFilm,
 
-                      "120",
+                      photosTotalCount ?? "0",
                       context,
                       "photos",
                     ),
@@ -361,7 +405,7 @@ class _HomeContentState extends State<HomeContent> {
                       "Docs",
                       FontAwesomeIcons.solidFileLines,
 
-                      "45",
+                      documentsTotalCount ?? "0",
                       context,
                       "documents",
                     ),
@@ -371,7 +415,7 @@ class _HomeContentState extends State<HomeContent> {
                       "Videos",
                       FontAwesomeIcons.solidCirclePlay,
 
-                      "23",
+                      videosTotalCount ?? "0",
                       context,
                       "videos",
                     ),
@@ -381,7 +425,7 @@ class _HomeContentState extends State<HomeContent> {
                       "Audio",
                       FontAwesomeIcons.music,
 
-                      "15",
+                      musicTotalCount ?? "0",
                       context,
                       "music",
                     ),
@@ -455,7 +499,12 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: ()=> Navigator.push(context, MaterialPageRoute(builder: (context) => RecentFilesPage())),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecentFilesPage(),
+                      ),
+                    ),
                     child: Text(
                       "View All",
                       style: GoogleFonts.urbanist(
@@ -467,107 +516,99 @@ class _HomeContentState extends State<HomeContent> {
                   ),
                 ],
               ),
-              SizedBox(height: 20,),
+              SizedBox(height: 20),
               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: _firestore.getRecentFilesMetaDataList(uid!),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-        
-                    if (snapshot.hasError) {
-                      return Center(child: Text(snapshot.error.toString()));
-                    }
-        
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Container(
-                height: 150,
-                width: size.width,
-                margin: EdgeInsets.only(top: 15),
-                decoration: BoxDecoration(
-                  color: Color.fromRGBO(25, 25, 25, 1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    width: 1,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    "No recent files",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white38,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              );
-                    }
-        
-                    final files = snapshot.data!.docs;
-        
-                
-        
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: files.length,
-                      itemBuilder: (context, index) {
-                        final Map<String, String> fileIcons = {
-                          "pdf": "pdf.svg",
-                          "xls": "xlsx.svg",
-                          "xlsx": "xlsx.svg",
-                          "doc": "docx.svg",
-                          "docx": "docx.svg",
-                          "ppt": "pptx.svg",
-                          "pptx": "pptx.svg",
-                          "txt": "txt.svg",
-                          "csv": "csv.svg",
-                          "zip": "zip.svg",
-                          "rar": "zip.svg",
-                          "7z": "zip.svg",
-                          "mp3": "audio.svg",
-                          "wav": "audio.svg",
-                          "mp4": "video.svg",
-                          "mkv": "video.svg",
-                          "jpg": "img.svg",
-                          "jpeg": "img.svg",
-                          "png": "img.svg",
-                          "gif": "img.svg",
-                          "webp": "img.svg",
-                        };
-        
-                        String fileType = files[index]
-                            .data()['fileType']
-                            .toString()
-                            .toLowerCase();
-                        String fileTypeLogo =
-                            fileIcons[fileType] ?? "unknown.svg";
+                stream: _firestore.getRecentFilesMetaDataList(uid!),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
+                  if (snapshot.hasError) {
+                    return Center(child: Text(snapshot.error.toString()));
+                  }
 
-                          print(files[index].reference.path);
-                        return fileStructure(
-                          context,
-                          files[index]['folderId'],
-                          files[index]['fileId'],
-                          files[index]['fileName'],
-                          formatDateTime(files[index].data()['modifiedOn']),
-                          files[index].data()['fileType'],
-                          files[index].data()['fileSize'],
-                          files[index].data()['path'],
-                          fileTypeLogo
-                          
-
-
-
-                          
-                        );
-                      },
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Container(
+                      height: 150,
+                      width: size.width,
+                      margin: EdgeInsets.only(top: 15),
+                      decoration: BoxDecoration(
+                        color: Color.fromRGBO(25, 25, 25, 1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          width: 1,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "No recent files",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white38,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
                     );
-                  },
-                ),
-              
+                  }
+
+                  final files = snapshot.data!.docs;
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: files.length,
+                    itemBuilder: (context, index) {
+                      final Map<String, String> fileIcons = {
+                        "pdf": "pdf.svg",
+                        "xls": "xlsx.svg",
+                        "xlsx": "xlsx.svg",
+                        "doc": "docx.svg",
+                        "docx": "docx.svg",
+                        "ppt": "pptx.svg",
+                        "pptx": "pptx.svg",
+                        "txt": "txt.svg",
+                        "csv": "csv.svg",
+                        "zip": "zip.svg",
+                        "rar": "zip.svg",
+                        "7z": "zip.svg",
+                        "mp3": "audio.svg",
+                        "wav": "audio.svg",
+                        "mp4": "video.svg",
+                        "mkv": "video.svg",
+                        "jpg": "img.svg",
+                        "jpeg": "img.svg",
+                        "png": "img.svg",
+                        "gif": "img.svg",
+                        "webp": "img.svg",
+                      };
+
+                      String fileType = files[index]
+                          .data()['fileType']
+                          .toString()
+                          .toLowerCase();
+                      String fileTypeLogo =
+                          fileIcons[fileType] ?? "unknown.svg";
+
+                      print(files[index].reference.path);
+                      return fileStructure(
+                        context,
+                        files[index]['folderId'],
+                        files[index]['fileId'],
+                        files[index]['fileName'],
+                        formatDateTime(files[index].data()['modifiedOn']),
+                        files[index].data()['fileType'],
+                        files[index].data()['fileSize'],
+                        files[index].data()['path'],
+                        fileTypeLogo,
+                      );
+                    },
+                  );
+                },
+              ),
+
               SizedBox(height: 30),
             ],
           ),
@@ -576,176 +617,175 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-
-Widget quickAccess(
-  String title,
-  String subTitle,
-  FaIconData icon,
-  Color iconColor,
-  BuildContext context,
-  String folderId,
-) {
-  return Expanded(
-    child: Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: ((context) => folderId == "files"
-                  ? FoldersPage(folderName: subTitle, folderId: folderId)
-                  : folderId == "private"
-                  ? FoldersPage(folderName: subTitle, folderId: folderId)
-                  : StarredPage(folderName: subTitle, folderId: folderId)),
-            ),
-          );
-        },
-        child: Container(
-          height: 110,
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
-              width: 1,
-            ),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                const Color.fromRGBO(45, 45, 45, 0.95),
-                const Color.fromRGBO(25, 25, 25, 0.95),
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+  Widget quickAccess(
+    String title,
+    String subTitle,
+    FaIconData icon,
+    Color iconColor,
+    BuildContext context,
+    String folderId,
+  ) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: ((context) => folderId == "files"
+                    ? FoldersPage(folderName: subTitle, folderId: folderId)
+                    : folderId == "private"
+                    ? FoldersPage(folderName: subTitle, folderId: folderId)
+                    : StarredPage(folderName: subTitle, folderId: folderId)),
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: FaIcon(icon, color: iconColor, size: 18),
-                    ),
-                  ),
-
-                  FaIcon(
-                    FontAwesomeIcons.chevronRight,
-                    color: Colors.white30,
-                    size: 12,
-                  ),
+            );
+          },
+          child: Container(
+            height: 110,
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.08),
+                width: 1,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color.fromRGBO(45, 45, 45, 0.95),
+                  const Color.fromRGBO(25, 25, 25, 0.95),
                 ],
               ),
-
-              const Spacer(),
-
-              Text(
-                title,
-                style: GoogleFonts.urbanist(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  height: 1,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
-              ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: iconColor.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: FaIcon(icon, color: iconColor, size: 18),
+                      ),
+                    ),
 
-              const SizedBox(height: 6),
-
-              Text(
-                subTitle,
-                style: GoogleFonts.urbanist(
-                  color: Colors.white60,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                    FaIcon(
+                      FontAwesomeIcons.chevronRight,
+                      color: Colors.white30,
+                      size: 12,
+                    ),
+                  ],
                 ),
-              ),
-            ],
+
+                const Spacer(),
+
+                Text(
+                  title,
+                  style: GoogleFonts.urbanist(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  subTitle,
+                  style: GoogleFonts.urbanist(
+                    color: Colors.white60,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget infoChips(
-  Color color,
-  String text,
-  FaIconData icon,
-  String subText,
-  BuildContext context,
-  String folderId,
-) {
-  return GestureDetector(
-    onTap: () => Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FoldersPage(folderName: text, folderId: folderId),
+  Widget infoChips(
+    Color color,
+    String text,
+    FaIconData icon,
+    String subText,
+    BuildContext context,
+    String folderId,
+  ) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              FoldersPage(folderName: text, folderId: folderId),
+        ),
       ),
-    ),
-    child: Container(
-      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-      width: 75,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.white24, width: 0.5),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+        width: 75,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.white24, width: 0.5),
 
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            color.withValues(alpha: 0.125),
-            color.withValues(alpha: 0.020),
-            Color.fromRGBO(40, 40, 40, 1).withValues(alpha: 0.110),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              color.withValues(alpha: 0.125),
+              color.withValues(alpha: 0.020),
+              Color.fromRGBO(40, 40, 40, 1).withValues(alpha: 0.110),
+            ],
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FaIcon(icon, color: color, size: 23),
+            SizedBox(height: 8),
+            Text(
+              text,
+              style: GoogleFonts.urbanist(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            Text(
+              subText,
+              style: GoogleFonts.urbanist(
+                color: Colors.white60,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          FaIcon(icon, color: color, size: 23),
-          SizedBox(height: 8),
-          Text(
-            text,
-            style: GoogleFonts.urbanist(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+    );
+  }
 
-          Text(
-            subText,
-            style: GoogleFonts.urbanist(
-              color: Colors.white60,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-
-Widget fileStructure(
+  Widget fileStructure(
     BuildContext context,
     String folderId,
     String fileId,
@@ -755,9 +795,7 @@ Widget fileStructure(
     int fileSize,
     String path,
     String fileTypeLogo,
-
   ) {
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
       child: Column(
@@ -795,39 +833,35 @@ Widget fileStructure(
                       ],
                     ),
                   ),
-
-                  
                 ],
               ),
               Builder(
-                    builder: (buttonContext) {
-                      return IconButton(
-                        icon: FaIcon(
-                          FontAwesomeIcons.ellipsisVertical,
-                          color: Colors.white70,
-                          size: 18,
-                        ),
-                  
-                        onPressed: () {
-                          _popOver.popOverRecentFilesPage(
-                            buttonContext,
-                            context,
-                            uid!,
-                            folderId,
-                            fileId,
-                            fileName,
-                            filetype,
-                            fileSize,
-                            path,
-                            "homeContent",
-                            false,
-                          
-                          );
-                          
-                        },
+                builder: (buttonContext) {
+                  return IconButton(
+                    icon: FaIcon(
+                      FontAwesomeIcons.ellipsisVertical,
+                      color: Colors.white70,
+                      size: 18,
+                    ),
+
+                    onPressed: () {
+                      _popOver.popOverRecentFilesPage(
+                        buttonContext,
+                        context,
+                        uid!,
+                        folderId,
+                        fileId,
+                        fileName,
+                        filetype,
+                        fileSize,
+                        path,
+                        "homeContent",
+                        false,
                       );
                     },
-                  ),
+                  );
+                },
+              ),
             ],
           ),
           SizedBox(height: 10),

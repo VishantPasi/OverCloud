@@ -12,6 +12,6 @@ class ConvertFileSize {
       return "${(bytes / 1000).toStringAsFixed(2)} KB";
     }
 
-    return "$bytes B";
+    return "$bytes Byte";
   }
 }

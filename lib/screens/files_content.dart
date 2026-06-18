@@ -34,8 +34,9 @@ class _FilesContentState extends State<FilesContent> {
     // _firestore.createFile(uid, "3cg4crwncLfUhcoDvn22", "TESTING", "Text", "3.5");
     // // _firestore.getFolderList(uid).asStream();
     // _firestore.createFolder(uid, "Custom Folder6");
-    _firestore.getOverallMetadata(uid,"video");
+    // _firestore.getOverallMetadata(uid,"video");
     // _firestore.updateOverallMetadata(uid, "video", 3, "45 gb");
+    
     super.initState();
   }
 

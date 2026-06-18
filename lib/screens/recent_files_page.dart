@@ -9,12 +9,7 @@ import 'package:overcloud/utils/format_date_time.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
 class RecentFilesPage extends StatefulWidget {
-
-
-  const RecentFilesPage({
-    super.key,
-
-  });
+  const RecentFilesPage({super.key});
 
   @override
   State<RecentFilesPage> createState() => _RecentFilesPageState();
@@ -27,7 +22,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
 
   final ValueNotifier<int> _fileCount = ValueNotifier<int>(0);
 
-  final  ShowPopOver _popOver = ShowPopOver();
+  final ShowPopOver _popOver = ShowPopOver();
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +114,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                     Container(
                       width: 40,
                       height: 40,
-        
+
                       decoration: BoxDecoration(
                         color: Colors.white10,
                         shape: BoxShape.circle,
@@ -134,20 +129,20 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                     ),
                   ],
                 ),
-        
+
                 SizedBox(height: 20),
-        
+
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: _firestore.getRecentFilesMetaDataList(uid),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
-        
+
                     if (snapshot.hasError) {
                       return Center(child: Text(snapshot.error.toString()));
                     }
-        
+
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return Container(
                         height: 150,
@@ -173,13 +168,13 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                         ),
                       );
                     }
-        
+
                     final files = snapshot.data!.docs;
-        
+
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       _fileCount.value = files.length;
                     });
-        
+
                     return ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -208,7 +203,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                           "gif": "img.svg",
                           "webp": "img.svg",
                         };
-        
+
                         String fileType = files[index]
                             .data()['fileType']
                             .toString()
@@ -216,8 +211,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                         String fileTypeLogo =
                             fileIcons[fileType] ?? "unknown.svg";
 
-
-                          print(files[index].reference.path);
+                        print(files[index].reference.path);
                         return fileStructure(
                           context,
                           files[index]['folderId'],
@@ -227,10 +221,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                           files[index].data()['fileType'],
                           files[index].data()['fileSize'],
                           files[index].data()['path'],
-                          fileTypeLogo
-
-                          
-                          
+                          fileTypeLogo,
                         );
                       },
                     );
@@ -241,12 +232,10 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
           ),
         ),
       ),
-
     );
   }
 
-  
- Widget fileStructure(
+  Widget fileStructure(
     BuildContext context,
     String folderId,
     String fileId,
@@ -256,9 +245,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
     int fileSize,
     String path,
     String fileTypeLogo,
-
   ) {
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
       child: Column(
@@ -296,40 +283,36 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                       ],
                     ),
                   ),
-
-                 
                 ],
               ),
-               Builder(
-                    builder: (buttonContext) {
-                      return IconButton(
-                        icon: FaIcon(
-                          FontAwesomeIcons.ellipsisVertical,
-                          color: Colors.white70,
-                          size: 18,
-                        ),
-                  
-                        onPressed: () {
-                          _popOver.popOverRecentFilesPage(
-                            buttonContext,
-                            context,
-                            
-                            uid!,
-                            folderId,
-                            fileId,
-                            fileName,
-                            filetype,
-                            fileSize,
-                            path,
-                            "homeContent",
-                            false,
-                          
-                          );
-                          
-                        },
+              Builder(
+                builder: (buttonContext) {
+                  return IconButton(
+                    icon: FaIcon(
+                      FontAwesomeIcons.ellipsisVertical,
+                      color: Colors.white70,
+                      size: 18,
+                    ),
+
+                    onPressed: () {
+                      _popOver.popOverRecentFilesPage(
+                        buttonContext,
+                        context,
+
+                        uid!,
+                        folderId,
+                        fileId,
+                        fileName,
+                        filetype,
+                        fileSize,
+                        path,
+                        "homeContent",
+                        false,
                       );
                     },
-                  ),
+                  );
+                },
+              ),
             ],
           ),
           SizedBox(height: 10),
