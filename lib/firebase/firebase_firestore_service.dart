@@ -168,44 +168,61 @@ class FirebaseFirestoreService {
   ) async {
     try {
       DateTime dateTime = DateTime.now();
-      DocumentReference folder = _firebaseFirestore
-          .collection('users')
-          .doc(uid)
-          .collection("folders")
-          .doc(folderId)
-          .collection("files")
-          .doc();
+      if (folderId != "videos" ||
+          folderId != "photos" ||
+          folderId != "music" ||
+          folderId != "documents") {
+        DocumentReference folder = _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc(folderId)
+            .collection("files")
+            .doc();
 
-      await folder.set({
-        "fileName": fileName,
-        "modifiedOn": dateTime.toString(),
-        "fileType": fileType,
-        "fileSize": fileSize,
-        "isStarred": false,
-      });
+        await folder.set({
+          "fileName": fileName,
+          "modifiedOn": dateTime.toString(),
+          "fileType": fileType,
+          "fileSize": fileSize,
+          "isStarred": false,
+        });
 
-      updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
+        createRecentFilesMetaData(
+          uid,
+          folderId,
+          folder.id,
+          fileName,
+          fileType,
+          fileSize,
+          path,
+          isStarred,
+        );
 
-      createRecentFilesMetaData(
-        uid,
-        folderId,
-        folder.id,
-        fileName,
-        fileType,
-        fileSize,
-        path,
-        isStarred,
-      );
+        updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
+      } else {
+        createRecentFilesMetaData(
+          uid,
+          folderId,
+          folderId,
+          fileName,
+          fileType,
+          fileSize,
+          path,
+          isStarred,
+        );
+        updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
 
-      createFileMetaDataForDefaultFolders(
-        uid,
-        folder.id,
-        fileName,
-        fileType,
-        fileSize,
-        path,
-        isStarred,
-      );
+        createFileMetaDataForDefaultFolders(
+          uid,
+          folderId,
+          fileName,
+          fileType,
+          fileSize,
+          path,
+          isStarred,
+        );
+      }
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -504,7 +521,6 @@ class FirebaseFirestoreService {
         DocumentReference update = _firebaseFirestore.doc(filePath!);
 
         await update.update({"isStarred": false});
-        
       } else {
         final folder = await _firebaseFirestore
             .collection('users')

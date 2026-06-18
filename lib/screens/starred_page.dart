@@ -6,7 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
-import 'package:overcloud/utils/convert_file_size.dart';
+import 'package:overcloud/utils/format_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
@@ -30,8 +30,8 @@ class _StarredPageState extends State<StarredPage> {
 
   final ValueNotifier<int> fileCount = ValueNotifier<int>(0);
 
-  ConvertFileSize convertFileSize = ConvertFileSize();
-  ShowPopOver popOver = ShowPopOver();
+  final FormatFileSize _convertFileSize = FormatFileSize();
+  final ShowPopOver _popOver = ShowPopOver();
 
   @override
   Widget build(BuildContext context) {
@@ -335,7 +335,7 @@ class _StarredPageState extends State<StarredPage> {
                       ),
 
                       onPressed: () {
-                        popOver.popOverStarredPage(
+                        _popOver.popOverStarredPage(
                           buttonContext,
                           context,
                           uid,

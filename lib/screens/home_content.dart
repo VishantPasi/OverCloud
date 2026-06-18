@@ -9,7 +9,8 @@ import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/screens/recent_files_page.dart';
 import 'package:overcloud/screens/starred_page.dart';
-import 'package:overcloud/utils/convert_file_size.dart';
+import 'package:overcloud/utils/format_file_count.dart';
+import 'package:overcloud/utils/format_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
@@ -26,6 +27,7 @@ class _HomeContentState extends State<HomeContent> {
   String? fullName;
   String? uid;
   String? totalSpaceUsed;
+  String? overallTotalCount;
   String? videosTotalCount;
   String? documentsTotalCount;
   String? musicTotalCount;
@@ -34,12 +36,14 @@ class _HomeContentState extends State<HomeContent> {
 
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   final ShowPopOver _popOver = ShowPopOver();
-  final ConvertFileSize _fileSize = ConvertFileSize();
+  final FormatFileSize _fileSize = FormatFileSize();
+  final FormatFileCount _fileCount = FormatFileCount();
 
   @override
   void initState() {
     loadUserData();
     getTotalSpaceUsed();
+    getTotalCount("overall");
     getTotalCount("videos");
     getTotalCount("music");
     getTotalCount("documents");
@@ -67,28 +71,33 @@ class _HomeContentState extends State<HomeContent> {
     final totalCount = await _firestore.getOverallMetadata(uid!, fileType);
 
     switch (fileType) {
+      case "overall":
+        overallTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']) ;
+        setState(() {});
+        break;
       case "videos":
-        videosTotalCount = totalCount!.data()['totalCount'].toString();
+        videosTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']) ;
         setState(() {});
         break;
       case "music":
-        musicTotalCount = totalCount!.data()['totalCount'].toString();
+        musicTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']);
         setState(() {});
         break;
       case "documents":
-        documentsTotalCount = totalCount!.data()['totalCount'].toString();
+        documentsTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']);
         setState(() {});
         break;
       case "photos":
-        photosTotalCount = totalCount!.data()['totalCount'].toString();
+        photosTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']);
         setState(() {});
         break;
       case "starred":
-        starredTotalCount = totalCount!.data()['totalCount'].toString();
+        starredTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']);
         setState(() {});
         break;
 
       default:
+      overallTotalCount = "0";
         videosTotalCount = "0";
         musicTotalCount = "0";
         documentsTotalCount = "0";
@@ -461,7 +470,7 @@ class _HomeContentState extends State<HomeContent> {
               Row(
                 children: [
                   quickAccess(
-                    "1.2K",
+                    "${overallTotalCount ?? 0}",
                     "Files",
 
                     FontAwesomeIcons.solidFolderOpen,
