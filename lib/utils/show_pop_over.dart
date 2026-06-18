@@ -318,7 +318,8 @@ class ShowPopOver {
                       folderId!,
                       fileId!,
                       fileType!,
-                      fileSize!
+                      fileSize!,
+                      isStarred
                       
 
                     );
@@ -371,6 +372,7 @@ class ShowPopOver {
     String path,
     String? currentFolderId,
     bool isFolder,
+    bool isStarred
   ) {
     return showPopover(
       context: buttonContext,
@@ -393,7 +395,8 @@ class ShowPopOver {
           fileSize,
           path,
           currentFolderId,
-          isFolder
+          isFolder,
+          isStarred
         ),
       ),
       width: 130 ,
@@ -417,6 +420,7 @@ class ShowPopOver {
     String path,
     String? currentFolderId,
     bool isFolder,
+    bool isStarred
 
   ) {
     return Padding(
@@ -495,7 +499,8 @@ class ShowPopOver {
                       folderId!,
                       fileId!,
                       fileType!,
-                      fileSize!
+                      fileSize!,
+                      isStarred
                     );
             },
             child: Row(
@@ -937,7 +942,8 @@ class ShowPopOver {
                       folderId!,
                       fileId!,
                       fileType!,
-                      fileSize!
+                      fileSize!,
+                      isStarred
                     );
             },
             child: Row(

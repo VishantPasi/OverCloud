@@ -30,6 +30,7 @@ class _HomeContentState extends State<HomeContent> {
   String? documentsTotalCount;
   String? musicTotalCount;
   String? photosTotalCount;
+  String? starredTotalCount;
 
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   final ShowPopOver _popOver = ShowPopOver();
@@ -43,6 +44,7 @@ class _HomeContentState extends State<HomeContent> {
     getTotalCount("music");
     getTotalCount("documents");
     getTotalCount("photos");
+    getTotalCount("starred");
     super.initState();
   }
 
@@ -81,12 +83,17 @@ class _HomeContentState extends State<HomeContent> {
         photosTotalCount = totalCount!.data()['totalCount'].toString();
         setState(() {});
         break;
+      case "starred":
+        starredTotalCount = totalCount!.data()['totalCount'].toString();
+        setState(() {});
+        break;
 
       default:
         videosTotalCount = "0";
         musicTotalCount = "0";
         documentsTotalCount = "0";
         photosTotalCount = "0";
+        starredTotalCount = "0";
         setState(() {});
         break;
     }
@@ -190,7 +197,7 @@ class _HomeContentState extends State<HomeContent> {
       child: Container(
         height: size.height,
         width: size.width,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(color: Color.fromRGBO(15, 15, 15, 1)),
         child: SingleChildScrollView(
           child: Column(
@@ -386,61 +393,59 @@ class _HomeContentState extends State<HomeContent> {
                 ),
               ),
               SizedBox(height: 20),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    infoChips(
-                      Colors.deepOrange,
-                      "Photos",
-                      FontAwesomeIcons.photoFilm,
-
-                      photosTotalCount ?? "0",
-                      context,
-                      "photos",
-                    ),
-                    SizedBox(width: 10),
-                    infoChips(
-                      const Color.fromRGBO(255, 196, 87, 1),
-                      "Docs",
-                      FontAwesomeIcons.solidFileLines,
-
-                      documentsTotalCount ?? "0",
-                      context,
-                      "documents",
-                    ),
-                    SizedBox(width: 10),
-                    infoChips(
-                      const Color.fromARGB(255, 244, 54, 92),
-                      "Videos",
-                      FontAwesomeIcons.solidCirclePlay,
-
-                      videosTotalCount ?? "0",
-                      context,
-                      "videos",
-                    ),
-                    SizedBox(width: 10),
-                    infoChips(
-                      const Color.fromARGB(226, 64, 251, 189),
-                      "Audio",
-                      FontAwesomeIcons.music,
-
-                      musicTotalCount ?? "0",
-                      context,
-                      "music",
-                    ),
-                    SizedBox(width: 10),
-                    infoChips(
-                      const Color.fromARGB(255, 64, 170, 251),
-                      "More",
-                      FontAwesomeIcons.ellipsis,
-
-                      "",
-                      context,
-                      "others",
-                    ),
-                  ],
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  infoChips(
+                    Colors.deepOrange,
+                    "Photos",
+                    FontAwesomeIcons.photoFilm,
+              
+                    photosTotalCount ?? "0",
+                    context,
+                    "photos",
+                  ),
+                  SizedBox(width: 10),
+                  infoChips(
+                    const Color.fromRGBO(255, 196, 87, 1),
+                    "Docs",
+                    FontAwesomeIcons.solidFileLines,
+              
+                    documentsTotalCount ?? "0",
+                    context,
+                    "documents",
+                  ),
+                  SizedBox(width: 10),
+                  infoChips(
+                    const Color.fromARGB(255, 244, 54, 92),
+                    "Videos",
+                    FontAwesomeIcons.solidCirclePlay,
+              
+                    videosTotalCount ?? "0",
+                    context,
+                    "videos",
+                  ),
+                  SizedBox(width: 10),
+                  infoChips(
+                    const Color.fromARGB(226, 64, 251, 189),
+                    "Audio",
+                    FontAwesomeIcons.music,
+              
+                    musicTotalCount ?? "0",
+                    context,
+                    "music",
+                  ),
+                  SizedBox(width: 10),
+                  // infoChips(
+                  //   const Color.fromARGB(255, 64, 170, 251),
+                  //   "More",
+                  //   FontAwesomeIcons.ellipsis,
+              
+                  //   "",
+                  //   context,
+                  //   "others",
+                  // ),
+                ],
               ),
               SizedBox(height: 20),
               Text(
@@ -474,7 +479,7 @@ class _HomeContentState extends State<HomeContent> {
                     "private",
                   ),
                   quickAccess(
-                    "87",
+                    starredTotalCount ?? "0",
                     "Starred",
 
                     FontAwesomeIcons.solidStar,
@@ -603,6 +608,7 @@ class _HomeContentState extends State<HomeContent> {
                         files[index].data()['fileSize'],
                         files[index].data()['path'],
                         fileTypeLogo,
+                        files[index].data()['isStarred'],
                       );
                     },
                   );
@@ -732,54 +738,56 @@ class _HomeContentState extends State<HomeContent> {
     BuildContext context,
     String folderId,
   ) {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              FoldersPage(folderName: text, folderId: folderId),
-        ),
-      ),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-        width: 75,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.white24, width: 0.5),
-
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              color.withValues(alpha: 0.125),
-              color.withValues(alpha: 0.020),
-              Color.fromRGBO(40, 40, 40, 1).withValues(alpha: 0.110),
-            ],
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                FoldersPage(folderName: text, folderId: folderId),
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FaIcon(icon, color: color, size: 23),
-            SizedBox(height: 8),
-            Text(
-              text,
-              style: GoogleFonts.urbanist(
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+          
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Colors.white24, width: 0.5),
+      
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                color.withValues(alpha: 0.125),
+                color.withValues(alpha: 0.020),
+                Color.fromRGBO(40, 40, 40, 1).withValues(alpha: 0.110),
+              ],
             ),
-
-            Text(
-              subText,
-              style: GoogleFonts.urbanist(
-                color: Colors.white60,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FaIcon(icon, color: color, size: 23),
+              SizedBox(height: 8),
+              Text(
+                text,
+                style: GoogleFonts.urbanist(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+      
+              Text(
+                subText,
+                style: GoogleFonts.urbanist(
+                  color: Colors.white60,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -795,6 +803,7 @@ class _HomeContentState extends State<HomeContent> {
     int fileSize,
     String path,
     String fileTypeLogo,
+    bool isStarred,
   ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
@@ -857,6 +866,7 @@ class _HomeContentState extends State<HomeContent> {
                         path,
                         "homeContent",
                         false,
+                        isStarred,
                       );
                     },
                   );

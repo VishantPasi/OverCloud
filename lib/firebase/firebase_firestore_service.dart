@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:overcloud/services/secure_storage_service.dart';
+import 'package:overcloud/utils/file_category.dart';
 
 class FirebaseFirestoreService {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+  final FileCategory _category = FileCategory();
 
   Future storeUserDetails(String uid) async {
     DocumentSnapshot<Map<String, dynamic>> data = await _firebaseFirestore
@@ -114,7 +116,7 @@ class FirebaseFirestoreService {
           .doc(folderId);
 
       await folder.delete();
-      removeFromStarred(uid, folderId, null, null, null,true);
+      removeFromStarred(uid, folderId, null, null, null, true);
       deleteRecentFile(uid, folderId, null, true);
     } catch (e) {
       debugPrint(e.toString());
@@ -131,6 +133,7 @@ class FirebaseFirestoreService {
     String? fileType,
     int? fileSize,
     String? path,
+    bool isStarred,
   ) async {
     try {
       DateTime dateTime = DateTime.now();
@@ -160,7 +163,68 @@ class FirebaseFirestoreService {
         fileType,
         fileSize,
         path,
+        isStarred,
       );
+
+      createFileMetaDataForDefaultFolders(uid,folder.id,fileName,fileType,fileSize,path,isStarred);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void createFileMetaDataForDefaultFolders(
+    String uid,
+    String fileId,
+    String? fileName,
+    String? fileType,
+    int? fileSize,
+    String? path,
+    bool isStarred,
+  ) async {
+
+    String fileCategory =  _category.getFileCategory(fileType!);
+    try {
+      DateTime dateTime = DateTime.now();
+      DocumentReference folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(fileCategory)
+          .collection("files")
+          .doc();
+
+      await folder.set({
+        "fileId": fileId,
+        "fileName": fileName,
+        "modifiedOn": dateTime.toString(),
+        "fileType": fileType,
+        "fileSize": fileSize,
+        "isStarred": false,
+      });
+
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void deleteFileMetaDataForDefaultFolders(
+    String uid,
+    String fileId,
+    String fileType,
+  ) async {
+    String fileCategory =  _category.getFileCategory(fileType!);
+    try {
+      final folder = await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(fileCategory)
+          .collection("files")
+          .where("fileId",isEqualTo: fileId).get();
+
+      for(var doc in folder.docs){
+        doc.reference.delete();
+      }
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -210,6 +274,7 @@ class FirebaseFirestoreService {
     String fileId,
     String fileType,
     int fileSize,
+    bool isStarred,
   ) async {
     try {
       final folder = _firebaseFirestore
@@ -223,9 +288,16 @@ class FirebaseFirestoreService {
       await folder.delete();
 
       updateOverallMetadata(uid, fileType, 1, fileSize, false);
+      updateOverallMetadata(uid, "overall", 1, fileSize, false);
+      isStarred
+          ? updateOverallMetadata(uid, "starred", 1, fileSize, false)
+          : null;
 
-      removeFromStarred(uid, folderId, fileId, null, fileSize,false);
+      removeFromStarred(uid, folderId, fileId, null, fileSize, false);
       deleteRecentFile(uid, folderId, fileId, false);
+
+      print("errorrrrrrrr: $uid,$fileId,$fileType");
+      deleteFileMetaDataForDefaultFolders(uid,fileId,fileType);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -294,8 +366,9 @@ class FirebaseFirestoreService {
           "isFolder": false,
           "modifiedOn": dateTime.toString(),
         });
-
       }
+
+      updateOverallMetadata(uid, "starred", 1, fileSize ?? 0, true);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -391,6 +464,8 @@ class FirebaseFirestoreService {
 
         DocumentReference update = _firebaseFirestore.doc(filePath!);
 
+        updateOverallMetadata(uid, "starred", 1, fileSize ?? 0, false);
+
         await update.update({"isStarred": false});
       } else {
         final folder = await _firebaseFirestore
@@ -410,6 +485,7 @@ class FirebaseFirestoreService {
 
         await update.update({"isStarred": false});
 
+        updateOverallMetadata(uid, "starred", 1, fileSize ?? 0, false);
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -426,6 +502,7 @@ class FirebaseFirestoreService {
     String? fileType,
     int? fileSize,
     String? path,
+    bool isStarred,
   ) async {
     try {
       DateTime dateTime = DateTime.now();
@@ -443,6 +520,7 @@ class FirebaseFirestoreService {
         "fileType": fileType,
         "fileSize": fileSize,
         "path": path,
+        "isStarred": isStarred,
       });
     } catch (e) {
       debugPrint(e.toString());
@@ -646,36 +724,58 @@ class FirebaseFirestoreService {
       //     .where("fileType", isEqualTo: "private")
       //     .get();
 
-      // final starred = await _firebaseFirestore
-      //     .collection("users")
-      //     .doc(uid)
-      //     .collection("overallMetadata")
-      //     .where("fileType", isEqualTo: "private")
-      //     .get();
+      final starred = await _firebaseFirestore
+          .collection("users")
+          .doc(uid)
+          .collection("overallMetadata")
+          .where("fileType", isEqualTo: "starred")
+          .get();
 
-      
+      DateTime dateTime = DateTime.now();
+
+      if (fileType == "starred") {
+        if (starred.docs.isNotEmpty) {
+          if (isIncrementing) {
+            await starred.docs.first.reference.update({
+              "totalCount": FieldValue.increment(newTotalCount),
+              "totalSize": FieldValue.increment(newTotalSize),
+              "modifiedOn": dateTime.toString(),
+            });
+          } else {
+            await starred.docs.first.reference.update({
+              "totalCount": FieldValue.increment(-newTotalCount),
+              "totalSize": FieldValue.increment(-newTotalSize),
+              "modifiedOn": dateTime.toString(),
+            });
+          }
+        }
+      } else {
         if (metadata.docs.isNotEmpty) {
           if (isIncrementing) {
             await metadata.docs.first.reference.update({
               "totalCount": FieldValue.increment(newTotalCount),
               "totalSize": FieldValue.increment(newTotalSize),
+              "modifiedOn": dateTime.toString(),
             });
             await overall.docs.first.reference.update({
               "totalCount": FieldValue.increment(newTotalCount),
               "totalSize": FieldValue.increment(newTotalSize),
+              "modifiedOn": dateTime.toString(),
             });
           } else {
             await metadata.docs.first.reference.update({
               "totalCount": FieldValue.increment(-newTotalCount),
               "totalSize": FieldValue.increment(-newTotalSize),
+              "modifiedOn": dateTime.toString(),
             });
             await overall.docs.first.reference.update({
               "totalCount": FieldValue.increment(-newTotalCount),
               "totalSize": FieldValue.increment(-newTotalSize),
+              "modifiedOn": dateTime.toString(),
             });
           }
         }
-      
+      }
     } catch (e) {
       debugPrint("updateOverallMetadata Error: $e");
     }

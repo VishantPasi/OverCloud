@@ -222,6 +222,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                           files[index].data()['fileSize'],
                           files[index].data()['path'],
                           fileTypeLogo,
+                          files[index].data()['isStarred']
                         );
                       },
                     );
@@ -245,6 +246,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
     int fileSize,
     String path,
     String fileTypeLogo,
+    bool isStarred
   ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
@@ -308,6 +310,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                         path,
                         "homeContent",
                         false,
+                        isStarred
                       );
                     },
                   );

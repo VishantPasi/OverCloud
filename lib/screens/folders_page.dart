@@ -296,6 +296,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 file.extension,
                 file.size,
                 path,
+                false
               );
             }
 
@@ -326,6 +327,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 file.extension,
                 file.size,
                 path,
+                false
               );
             }
             _isShowDial.value = false;
