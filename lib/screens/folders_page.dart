@@ -314,7 +314,7 @@ class _FoldersPageState extends State<FoldersPage> {
           backgroundColor: Colors.deepOrange,
           child: FaIcon(FontAwesomeIcons.cameraRetro, color: Colors.white),
         ),
-        FloatingActionButton(
+         FloatingActionButton(
           heroTag: "gallery",
           onPressed: () async {
             PlatformFile? file = await _pickOneFile.pickFile("photos");
@@ -339,7 +339,7 @@ class _FoldersPageState extends State<FoldersPage> {
             FontAwesomeIcons.solidImages,
             color: Colors.white,
           ),
-        ),
+        ) 
       ],
       isSpeedDialFABsMini: false,
       paddingBtwSpeedDialButton: 20.0,

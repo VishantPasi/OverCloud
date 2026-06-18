@@ -18,12 +18,36 @@ class PickOneFile {
         fileType = FileType.audio;
         break;
 
+      case "documents":
+        fileType = FileType.custom;
+        break;
+
       default:
         fileType = FileType.any;
     }
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: fileType,
+        allowedExtensions: folderId == "documents"
+            ? [
+                'pdf',
+                'doc',
+                'docx',
+                'xls',
+                'xlsx',
+                'ppt',
+                'pptx',
+                'txt',
+                'csv',
+                'zip',
+                'rar',
+                '7z',
+                'rtf',
+                'odt',
+                'ods',
+                'odp',
+              ]
+            : null,
       );
 
       if (result != null) {
