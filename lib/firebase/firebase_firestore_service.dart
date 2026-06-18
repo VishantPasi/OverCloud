@@ -107,16 +107,47 @@ class FirebaseFirestoreService {
     }
   }
 
-  void deleteFolder(String uid, String folderId) async {
+  void deleteFolder(String uid, String folderId, bool isStarred) async {
     try {
-      DocumentReference folder = _firebaseFirestore
+      final folder = await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection('folders')
+          .doc(folderId)
+          .collection('files')
+          .get();
+
+      for (var doc in folder.docs) {
+        print(doc.data());
+
+        deleteFileMetaData(
+          uid,
+          folderId,
+          doc.id,
+          doc.data()['fileType'],
+          doc.data()['fileSize'],
+          doc.data()['isStarred'],
+        );
+        deleteFileMetaDataForDefaultFolders(
+          uid,
+          doc.id,
+          doc.data()['fileType'],
+        );
+      }
+
+      DocumentReference deleteFolder = _firebaseFirestore
           .collection('users')
           .doc(uid)
           .collection("folders")
           .doc(folderId);
 
-      await folder.delete();
-      removeFromStarred(uid, folderId, null, null, null, true);
+      await deleteFolder.delete();
+
+      print(isStarred);
+
+      isStarred
+          ? removeFromStarred(uid, folderId, null, null, null, true)
+          : null;
       deleteRecentFile(uid, folderId, null, true);
     } catch (e) {
       debugPrint(e.toString());
@@ -166,7 +197,15 @@ class FirebaseFirestoreService {
         isStarred,
       );
 
-      createFileMetaDataForDefaultFolders(uid,folder.id,fileName,fileType,fileSize,path,isStarred);
+      createFileMetaDataForDefaultFolders(
+        uid,
+        folder.id,
+        fileName,
+        fileType,
+        fileSize,
+        path,
+        isStarred,
+      );
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -181,8 +220,7 @@ class FirebaseFirestoreService {
     String? path,
     bool isStarred,
   ) async {
-
-    String fileCategory =  _category.getFileCategory(fileType!);
+    String fileCategory = _category.getFileCategory(fileType!);
     try {
       DateTime dateTime = DateTime.now();
       DocumentReference folder = _firebaseFirestore
@@ -201,7 +239,6 @@ class FirebaseFirestoreService {
         "fileSize": fileSize,
         "isStarred": false,
       });
-
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -212,7 +249,7 @@ class FirebaseFirestoreService {
     String fileId,
     String fileType,
   ) async {
-    String fileCategory =  _category.getFileCategory(fileType!);
+    String fileCategory = _category.getFileCategory(fileType!);
     try {
       final folder = await _firebaseFirestore
           .collection('users')
@@ -220,9 +257,10 @@ class FirebaseFirestoreService {
           .collection("folders")
           .doc(fileCategory)
           .collection("files")
-          .where("fileId",isEqualTo: fileId).get();
+          .where("fileId", isEqualTo: fileId)
+          .get();
 
-      for(var doc in folder.docs){
+      for (var doc in folder.docs) {
         doc.reference.delete();
       }
     } catch (e) {
@@ -288,7 +326,7 @@ class FirebaseFirestoreService {
       await folder.delete();
 
       updateOverallMetadata(uid, fileType, 1, fileSize, false);
-      updateOverallMetadata(uid, "overall", 1, fileSize, false);
+
       isStarred
           ? updateOverallMetadata(uid, "starred", 1, fileSize, false)
           : null;
@@ -297,7 +335,7 @@ class FirebaseFirestoreService {
       deleteRecentFile(uid, folderId, fileId, false);
 
       print("errorrrrrrrr: $uid,$fileId,$fileType");
-      deleteFileMetaDataForDefaultFolders(uid,fileId,fileType);
+      // deleteFileMetaDataForDefaultFolders(uid,fileId,fileType);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -461,12 +499,12 @@ class FirebaseFirestoreService {
         for (var docs in folder.docs) {
           docs.reference.delete();
         }
+        updateOverallMetadata(uid, "starred", 1, fileSize ?? 0, false);
 
         DocumentReference update = _firebaseFirestore.doc(filePath!);
 
-        updateOverallMetadata(uid, "starred", 1, fileSize ?? 0, false);
-
         await update.update({"isStarred": false});
+        
       } else {
         final folder = await _firebaseFirestore
             .collection('users')
@@ -666,48 +704,15 @@ class FirebaseFirestoreService {
     int newTotalSize,
     bool isIncrementing,
   ) async {
+    String fileCategory = _category.getFileCategory(fileType);
     try {
       // Normalize file types
-      switch (fileType.toLowerCase()) {
-        case 'pdf':
-        case 'doc':
-        case 'docx':
-        case 'ppt':
-        case 'pptx':
-        case 'xls':
-        case 'xlsx':
-        case 'txt':
-          fileType = 'documents';
-          break;
-
-        case 'jpg':
-        case 'jpeg':
-        case 'png':
-        case 'gif':
-        case 'webp':
-          fileType = 'photos';
-          break;
-
-        case 'mp4':
-        case 'mov':
-        case 'avi':
-        case 'mkv':
-          fileType = 'videos';
-          break;
-
-        case 'mp3':
-        case 'wav':
-        case 'aac':
-        case 'm4a':
-          fileType = 'music';
-          break;
-      }
 
       final metadata = await _firebaseFirestore
           .collection("users")
           .doc(uid)
           .collection("overallMetadata")
-          .where("fileType", isEqualTo: fileType)
+          .where("fileType", isEqualTo: fileCategory)
           .get();
 
       final overall = await _firebaseFirestore

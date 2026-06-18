@@ -312,7 +312,7 @@ class ShowPopOver {
             onTap: () {
               Navigator.pop(context);
               isFolder
-                  ? firestoreService.deleteFolder(uid, folderId!)
+                  ? firestoreService.deleteFolder(uid, folderId!,isStarred)
                   : firestoreService.deleteFileMetaData(
                       uid,
                       folderId!,
@@ -493,7 +493,7 @@ class ShowPopOver {
             onTap: () {
               Navigator.pop(context);
               isFolder
-                  ? firestoreService.deleteFolder(uid, folderId!)
+                  ? firestoreService.deleteFolder(uid, folderId!,isStarred)
                   : firestoreService.deleteFileMetaData(
                       uid,
                       folderId!,
@@ -1125,7 +1125,7 @@ renameFolderBottomSheet(
          currentFolderId != "starred" ?   GestureDetector(
             onTap: () {
               Navigator.pop(context);
-             firestoreService.deleteFolder(uid, folderId!)
+             firestoreService.deleteFolder(uid, folderId!,isStarred)
                   ;
                   
             },
