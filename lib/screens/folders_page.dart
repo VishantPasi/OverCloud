@@ -236,8 +236,9 @@ class _FoldersPageState extends State<FoldersPage> {
                           files[index].data()['fileType'],
                           files[index].data()['fileSize'],
                           fileTypeLogo,
-                          files[index].id,
-                          files[index].reference.path,
+
+                          files[index].data()['fileId'],
+                          files[index].data()['path'],
                           files[index].data()['isStarred'],
                         );
                       },

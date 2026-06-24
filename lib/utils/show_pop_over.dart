@@ -319,6 +319,7 @@ class ShowPopOver {
                       fileId!,
                       fileType!,
                       fileSize!,
+                      path,
                       isStarred
                       
 
@@ -500,6 +501,7 @@ class ShowPopOver {
                       fileId!,
                       fileType!,
                       fileSize!,
+                      path,
                       isStarred
                     );
             },
@@ -943,7 +945,9 @@ class ShowPopOver {
                       fileId!,
                       fileType!,
                       fileSize!,
-                      isStarred
+                      path,
+                      isStarred,
+                      
                     );
             },
             child: Row(

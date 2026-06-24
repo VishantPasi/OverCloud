@@ -126,6 +126,7 @@ class FirebaseFirestoreService {
           doc.id,
           doc.data()['fileType'],
           doc.data()['fileSize'],
+          doc.reference.path,
           doc.data()['isStarred'],
         );
         deleteFileMetaDataForDefaultFolders(
@@ -168,10 +169,23 @@ class FirebaseFirestoreService {
   ) async {
     try {
       DateTime dateTime = DateTime.now();
-      if (folderId != "videos" ||
-          folderId != "photos" ||
-          folderId != "music" ||
-          folderId != "documents") {
+
+      if (folderId == "videos" ||
+          folderId == "photos" ||
+          folderId == "music" ||
+          folderId == "documents") {
+        createFileMetaDataOnlyForDefaultFolders(
+          uid,
+          folderId,
+          fileName,
+          fileType,
+          fileSize,
+          path,
+          isStarred,
+        );
+
+        updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
+      } else {
         DocumentReference folder = _firebaseFirestore
             .collection('users')
             .doc(uid)
@@ -181,9 +195,11 @@ class FirebaseFirestoreService {
             .doc();
 
         await folder.set({
+          "fileId": folder.id,
           "fileName": fileName,
           "modifiedOn": dateTime.toString(),
           "fileType": fileType,
+          "path": "$path/files/${folder.id}",
           "fileSize": fileSize,
           "isStarred": false,
         });
@@ -195,34 +211,67 @@ class FirebaseFirestoreService {
           fileName,
           fileType,
           fileSize,
-          path,
+          "$path/files/${folder.id}",
           isStarred,
         );
-
-        updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
-      } else {
-        createRecentFilesMetaData(
-          uid,
-          folderId,
-          folderId,
-          fileName,
-          fileType,
-          fileSize,
-          path,
-          isStarred,
-        );
-        updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
 
         createFileMetaDataForDefaultFolders(
           uid,
-          folderId,
+          folder.id,
           fileName,
           fileType,
           fileSize,
-          path,
+          "$path/files/${folder.id}",
           isStarred,
         );
+
+        updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
       }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void createFileMetaDataOnlyForDefaultFolders(
+    String uid,
+    String fileId,
+    String? fileName,
+    String? fileType,
+    int? fileSize,
+    String? path,
+    bool isStarred,
+  ) async {
+    String fileCategory = _category.getFileCategory(fileType!);
+    try {
+      DateTime dateTime = DateTime.now();
+      DocumentReference folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(fileCategory)
+          .collection("files")
+          .doc();
+
+      await folder.set({
+        "fileId": folder.id,
+        "fileName": fileName,
+        "path": path,
+        "modifiedOn": dateTime.toString(),
+        "fileType": fileType,
+        "fileSize": fileSize,
+        "isStarred": false,
+      });
+
+      createRecentFilesMetaData(
+        uid,
+        folder.id,
+        folder.id,
+        fileName,
+        fileType,
+        fileSize,
+        path,
+        isStarred,
+      );
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -251,6 +300,7 @@ class FirebaseFirestoreService {
       await folder.set({
         "fileId": fileId,
         "fileName": fileName,
+        "path": path,
         "modifiedOn": dateTime.toString(),
         "fileType": fileType,
         "fileSize": fileSize,
@@ -266,8 +316,9 @@ class FirebaseFirestoreService {
     String fileId,
     String fileType,
   ) async {
-    String fileCategory = _category.getFileCategory(fileType!);
+    String fileCategory = _category.getFileCategory(fileType);
     try {
+      print("From Default delete: $fileId");
       final folder = await _firebaseFirestore
           .collection('users')
           .doc(uid)
@@ -276,6 +327,8 @@ class FirebaseFirestoreService {
           .collection("files")
           .where("fileId", isEqualTo: fileId)
           .get();
+
+      // folder.reference.delete();
 
       for (var doc in folder.docs) {
         doc.reference.delete();
@@ -329,18 +382,22 @@ class FirebaseFirestoreService {
     String fileId,
     String fileType,
     int fileSize,
+    String? path,
     bool isStarred,
   ) async {
     try {
-      final folder = _firebaseFirestore
-          .collection('users')
-          .doc(uid)
-          .collection("folders")
-          .doc(folderId)
-          .collection("files")
-          .doc(fileId);
+      //  if (folderId == "videos" ||
+      //       folderId == "photos" ||
+      //       folderId == "music" ||
+      //       folderId == "documents") {
 
-      await folder.delete();
+      if (path!.isNotEmpty) {
+        final folder = _firebaseFirestore.doc(path);
+
+        print(folder);
+
+        await folder.delete();
+      }
 
       updateOverallMetadata(uid, fileType, 1, fileSize, false);
 
@@ -349,12 +406,16 @@ class FirebaseFirestoreService {
           : null;
 
       removeFromStarred(uid, folderId, fileId, null, fileSize, false);
+      print("delete recent started");
+      print("$fileId");
       deleteRecentFile(uid, folderId, fileId, false);
-
-      print("errorrrrrrrr: $uid,$fileId,$fileType");
-      // deleteFileMetaDataForDefaultFolders(uid,fileId,fileType);
+      print("delete recent ended");
+      print("errorrrrrrrr: $uid,$fileId,$fileType,$folderId, $path");
+      deleteFileMetaDataForDefaultFolders(uid, fileId, fileType);
+      // }
     } catch (e) {
       debugPrint(e.toString());
+      print(path);
     }
   }
 
@@ -641,6 +702,7 @@ class FirebaseFirestoreService {
           docs.reference.delete();
         }
       } else {
+        print("FROM RECENT $fileId");
         final folder = await _firebaseFirestore
             .collection('users')
             .doc(uid)
