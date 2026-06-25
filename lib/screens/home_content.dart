@@ -437,7 +437,7 @@ class _HomeContentState extends State<HomeContent> {
                   SizedBox(width: 10),
                   infoChips(
                     const Color.fromARGB(226, 64, 251, 189),
-                    "Audio",
+                    "Music",
                     FontAwesomeIcons.music,
               
                     musicTotalCount ?? "0",

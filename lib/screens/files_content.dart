@@ -544,62 +544,73 @@ class _FilesContentState extends State<FilesContent> {
     String subTitle,
     String folderId,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
-          width: 1,
+    return GestureDetector(
+      onTap: () {
+         Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                FoldersPage(folderName: title, folderId: folderId),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.08),
+            width: 1,
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.fromRGBO(45, 45, 45, 0.95),
+              Color.fromRGBO(25, 25, 25, 0.95),
+            ],
+          ),
         ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color.fromRGBO(45, 45, 45, 0.95),
-            Color.fromRGBO(25, 25, 25, 0.95),
-          ],
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                FaIcon(icon, color: Colors.deepOrange, size: 30),
-                SizedBox(width: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.urbanist(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  FaIcon(icon, color: Colors.deepOrange, size: 30),
+                  SizedBox(width: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.urbanist(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 3),
-                    Text(
-                      subTitle,
-                      style: GoogleFonts.urbanist(
-                        color: Colors.white70,
-                        fontSize: 12,
+                      SizedBox(height: 3),
+                      Text(
+                        subTitle,
+                        style: GoogleFonts.urbanist(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            FaIcon(
-              FontAwesomeIcons.chevronRight,
-              color: Colors.white30,
-              size: 14,
-            ),
-          ],
+                    ],
+                  ),
+                ],
+              ),
+              FaIcon(
+                FontAwesomeIcons.chevronRight,
+                color: Colors.white30,
+                size: 14,
+              ),
+            ],
+          ),
         ),
       ),
     );

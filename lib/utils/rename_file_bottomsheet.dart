@@ -8,6 +8,8 @@ Future<String?> renameFileBottomSheet(
   String folderId,
   String fileId,
   String fileName,
+  String fileType,
+  String path
 ) async {
   final TextEditingController folderController = TextEditingController(
     text: fileName.split(".").first,
@@ -112,7 +114,7 @@ Future<String?> renameFileBottomSheet(
                   }
 
 
-                  firestore.renameFileName(uid, folderId, fileId, newFileName);
+                  firestore.renameFileName(uid, folderId, fileId, fileType ,newFileName, path);
 
                   Navigator.pop(context, newFileName);
                 },

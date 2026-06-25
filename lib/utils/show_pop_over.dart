@@ -181,6 +181,8 @@ class ShowPopOver {
                       folderId!,
                       fileId!,
                       fileName!,
+                      fileType!,
+                      path
                     );
             },
             child: SizedBox(
@@ -210,7 +212,7 @@ class ShowPopOver {
               );
               if (isStarred){
                 isFolder ? 
-              firestoreService.removeFromStarred(uid, folderId!, null, path, null, isFolder): firestoreService.removeFromStarred(uid, folderId, fileId, path, fileSize,isFolder);
+              firestoreService.removeFromStarred(uid, folderId!, null, path, null, null,isFolder): firestoreService.removeFromStarred(uid, folderId, fileId, path, fileSize, fileType,isFolder);
 
                     Navigator.pop(context);
               
@@ -438,6 +440,8 @@ class ShowPopOver {
                       folderId!,
                       fileId!,
                       fileName!,
+                      fileType!,
+                      path
                     );
             },
             child: SizedBox(
@@ -824,6 +828,8 @@ class ShowPopOver {
                       folderId!,
                       fileId!,
                       fileName!,
+                      fileType!,
+                      path
                     );
             },
             child: SizedBox(
@@ -850,7 +856,7 @@ class ShowPopOver {
             onTap: () {
              
               if (isStarred){
-                 firestoreService.removeFromStarred(uid, folderId, fileId, path, fileSize,isFolder);
+                 firestoreService.removeFromStarred(uid, folderId, fileId, path, fileSize,fileType,isFolder);
 
                     Navigator.pop(context);
               
@@ -1039,7 +1045,7 @@ renameFolderBottomSheet(
               // );
               if (isStarred){
               
-              firestoreService.removeFromStarred(uid, folderId!, null, path, null,isFolder);
+              firestoreService.removeFromStarred(uid, folderId!, null, path, null, null,isFolder);
 
                     Navigator.pop(context);
               

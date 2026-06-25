@@ -147,7 +147,7 @@ class FirebaseFirestoreService {
       print(isStarred);
 
       isStarred
-          ? removeFromStarred(uid, folderId, null, null, null, true)
+          ? removeFromStarred(uid, folderId, null, null, null, null ,true)
           : null;
       deleteRecentFile(uid, folderId, null, true);
     } catch (e) {
@@ -304,8 +304,40 @@ class FirebaseFirestoreService {
         "modifiedOn": dateTime.toString(),
         "fileType": fileType,
         "fileSize": fileSize,
-        "isStarred": false,
+        "isStarred": isStarred,
       });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void renameFileMetaDataForDefaultFolders(
+    String uid,
+    String? fileId,
+    String fileType,
+    String? newFileName,
+  ) async {
+    String fileCategory = _category.getFileCategory(fileType);
+    try {
+      DateTime dateTime = DateTime.now();
+
+      print("errorrrrrr: $fileId,$newFileName");
+
+      final folder = await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc(fileCategory)
+          .collection("files")
+          .where("fileId", isEqualTo: fileId)
+          .get();
+
+      for (var docs in folder.docs) {
+        docs.reference.update({
+          "fileName": newFileName,
+          "modifiedOn": dateTime.toString(),
+        });
+      }
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -355,20 +387,35 @@ class FirebaseFirestoreService {
     String uid,
     String folderId,
     String fileId,
+    String fileType,
     String newFileName,
+    String path,
   ) async {
     try {
       DateTime dateTime = DateTime.now();
-      await _firebaseFirestore
-          .collection('users')
-          .doc(uid)
-          .collection("folders")
-          .doc(folderId)
-          .collection("files")
-          .doc(fileId)
-          .update({"fileName": newFileName, "modifiedOn": dateTime.toString()});
+      //  if (folderId == "videos" ||
+      //       folderId == "photos" ||
+      //       folderId == "music" ||
+      //       folderId == "documents") {
+
+      print(
+        "erorrrr: $uid, $folderId, $fileId, $fileType, $newFileName, $path",
+      );
+
+      if (path!.isNotEmpty) {
+        final folder = _firebaseFirestore.doc(path);
+
+        folder.update({
+          "fileName": newFileName,
+          "modifiedOn": dateTime.toString(),
+        });
+      }
 
       renameRecentFiles(uid, fileId, newFileName);
+
+      print("$fileType is this");
+
+      renameFileMetaDataForDefaultFolders(uid, fileId, fileType, newFileName);
 
       renameStarredFolderOrFile(uid, null, fileId, null, newFileName, false);
     } catch (e) {
@@ -399,13 +446,15 @@ class FirebaseFirestoreService {
         await folder.delete();
       }
 
+      print("dataaaa: $isStarred, ");
+
       updateOverallMetadata(uid, fileType, 1, fileSize, false);
 
       isStarred
           ? updateOverallMetadata(uid, "starred", 1, fileSize, false)
           : null;
 
-      removeFromStarred(uid, folderId, fileId, null, fileSize, false);
+      removeFromStarred(uid, folderId, fileId, null, fileSize, fileType,false);
       print("delete recent started");
       print("$fileId");
       deleteRecentFile(uid, folderId, fileId, false);
@@ -463,12 +512,27 @@ class FirebaseFirestoreService {
         print("ended adding");
       } else {
         DocumentReference update = _firebaseFirestore
+            .doc(path!);
+
+        await update.update({"isStarred": true});
+
+        String fileCategory = _category.getFileCategory(fileType!);
+
+        print("fileedata: $fileType, $fileId");
+
+        final updateDefaultFiles = await _firebaseFirestore
             .collection('users')
             .doc(uid)
             .collection("folders")
-            .doc(folderId)
+            .doc(fileCategory)
             .collection("files")
-            .doc(fileId);
+            .where("fileId", isEqualTo: fileId)
+            .get();
+
+        for (var doc in updateDefaultFiles.docs) {
+          print("docccc ${doc.reference.path}");
+          doc.reference.update({"isStarred": true});
+        }
 
         await update.update({"isStarred": true});
 
@@ -561,6 +625,7 @@ class FirebaseFirestoreService {
     String? fileId,
     String? filePath,
     int? fileSize,
+    String? fileType,
     bool isFolder,
   ) async {
     try {
@@ -594,6 +659,24 @@ class FirebaseFirestoreService {
 
         for (var docs in folder.docs) {
           docs.reference.delete();
+        }
+
+        String fileCategory = _category.getFileCategory(fileType!);
+
+        print("fileedata: $fileType, $fileId");
+
+        final updateDefaultFiles = await _firebaseFirestore
+            .collection('users')
+            .doc(uid)
+            .collection("folders")
+            .doc(fileCategory)
+            .collection("files")
+            .where("fileId", isEqualTo: fileId)
+            .get();
+
+        for (var doc in updateDefaultFiles.docs) {
+          print("docccc ${doc.reference.path}");
+          doc.reference.update({"isStarred": false});
         }
 
         DocumentReference update = _firebaseFirestore.doc(filePath!);
