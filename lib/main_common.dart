@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:overcloud/env_config.dart';
 import 'package:overcloud/screens/login/sign_in_page.dart';
+import 'package:overcloud/services/private_auth_service.dart';
 
 void mainCommon() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       
       title: 'OverCloud',
-      home: SignInPage(),
+      // home: SignInPage(),
+      home: PrivateAuthService()
     );
   }
 }

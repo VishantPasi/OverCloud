@@ -147,7 +147,7 @@ class FirebaseFirestoreService {
       print(isStarred);
 
       isStarred
-          ? removeFromStarred(uid, folderId, null, null, null, null ,true)
+          ? removeFromStarred(uid, folderId, null, null, null, null, true)
           : null;
       deleteRecentFile(uid, folderId, null, true);
     } catch (e) {
@@ -402,7 +402,7 @@ class FirebaseFirestoreService {
         "erorrrr: $uid, $folderId, $fileId, $fileType, $newFileName, $path",
       );
 
-      if (path!.isNotEmpty) {
+      if (path.isNotEmpty) {
         final folder = _firebaseFirestore.doc(path);
 
         folder.update({
@@ -454,7 +454,7 @@ class FirebaseFirestoreService {
           ? updateOverallMetadata(uid, "starred", 1, fileSize, false)
           : null;
 
-      removeFromStarred(uid, folderId, fileId, null, fileSize, fileType,false);
+      removeFromStarred(uid, folderId, fileId, null, fileSize, fileType, false);
       print("delete recent started");
       print("$fileId");
       deleteRecentFile(uid, folderId, fileId, false);
@@ -511,8 +511,7 @@ class FirebaseFirestoreService {
 
         print("ended adding");
       } else {
-        DocumentReference update = _firebaseFirestore
-            .doc(path!);
+        DocumentReference update = _firebaseFirestore.doc(path!);
 
         await update.update({"isStarred": true});
 
