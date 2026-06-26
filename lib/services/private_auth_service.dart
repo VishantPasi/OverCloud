@@ -3,10 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:overcloud/utils/error_dialog.dart';
 import 'package:pinput/pinput.dart';
 
 class PrivateAuthService extends StatefulWidget {
-  const PrivateAuthService({super.key});
+  final String folderName;
+  final String folderId;
+  const PrivateAuthService({super.key, required this.folderName, required this.folderId});
 
   @override
   State<PrivateAuthService> createState() => _PrivateAuthServiceState();
@@ -15,7 +18,7 @@ class PrivateAuthService extends StatefulWidget {
 class _PrivateAuthServiceState extends State<PrivateAuthService> {
   final LocalAuthentication auth = LocalAuthentication();
   final String pin = "1234";
-  final TextEditingController uPIN = TextEditingController(text:"");
+  final TextEditingController uPIN = TextEditingController(text: "");
   bool isBiometricAvailable = false;
   bool isLoading = false;
 
@@ -36,8 +39,10 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
     }
   }
 
+  Future<void> _pinAuthentication() async {}
+
   Future<void> _biometricAuthentication() async {
-    if(!isBiometricAvailable){
+    if (!isBiometricAvailable) {
       return;
     }
     setState(() {
@@ -45,15 +50,38 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
     });
 
     try {
-    
-      bool authenticate = await auth.authenticate(localizedReason: "login Via Biometrics", biometricOnly: true);
+      bool authenticate = await auth.authenticate(
+        localizedReason: "login Via Biometrics",
+        biometricOnly: true,
+      );
 
-      if(authenticate){
+      if (authenticate) {
         print("authentication completed");
       }
-    
-    } catch (e) {
-      debugPrint(e.toString());
+    } on LocalAuthException catch (e) {
+      switch (e.code) {
+        case LocalAuthExceptionCode.temporaryLockout:
+        case LocalAuthExceptionCode.biometricLockout:
+          errorMessage(
+            "Too Many Failed Attempts",
+            "Please try again in a moment.",
+            context,
+          );
+          print("Too many failed attempts. Please try again in a moment.");
+          break;
+
+        case LocalAuthExceptionCode.noBiometricsEnrolled:
+          // Some devices incorrectly return this during a temporary lockout.
+          errorMessage(
+            "Biometrics Locked",
+            "Please try again in a few moments.",
+            context,
+          );
+          break;
+
+        default:
+          print("Authentication failed.");
+      }
     }
   }
 
@@ -142,25 +170,33 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
                     children: [
                       Icon(
                         Icons.circle_outlined,
-                        color: uPIN.text.length >= 1 ? Colors.deepOrange : Colors.white54,
+                        color: uPIN.text.length >= 1
+                            ? Colors.deepOrange
+                            : Colors.white54,
                         size: 20,
                       ),
                       SizedBox(width: 20),
                       Icon(
                         Icons.circle_outlined,
-                        color: uPIN.text.length >= 2 ? Colors.deepOrange : Colors.white54,
+                        color: uPIN.text.length >= 2
+                            ? Colors.deepOrange
+                            : Colors.white54,
                         size: 20,
                       ),
                       SizedBox(width: 20),
                       Icon(
                         Icons.circle_outlined,
-                        color: uPIN.text.length >= 3 ? Colors.deepOrange : Colors.white54,
+                        color: uPIN.text.length >= 3
+                            ? Colors.deepOrange
+                            : Colors.white54,
                         size: 20,
                       ),
                       SizedBox(width: 20),
                       Icon(
                         Icons.circle_outlined,
-                        color: uPIN.text.length == 4 ? Colors.deepOrange : Colors.white54,
+                        color: uPIN.text.length == 4
+                            ? Colors.deepOrange
+                            : Colors.white54,
                         size: 20,
                       ),
                     ],
@@ -229,7 +265,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
                     color: Colors.deepOrange.withValues(alpha: 0.9),
                     width: 0.5,
                   ),
-              
+
                   // border: BorderDirectional(top: BorderSide(color: Colors.deepOrange,width: ),),
                 ),
                 child: Center(
@@ -249,10 +285,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
               onTap: () {
                 uPIN.delete();
                 print("pinnnnn: ${uPIN.text}");
-                setState(() {
-                  
-                });
-
+                setState(() {});
               },
               child: Container(
                 width: 60,
@@ -260,7 +293,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Color.fromRGBO(24, 24, 24, 0.941),
-              
+
                   border: BorderDirectional(
                     top: BorderSide(color: Colors.white10, width: 2),
                   ),
@@ -282,15 +315,12 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
   Widget singleNumberContainer(String number) {
     return GestureDetector(
       onTap: () {
-        if(uPIN.text.length < 4){
-uPIN.text = uPIN.text + number;
+        if (uPIN.text.length < 4) {
+          uPIN.text = uPIN.text + number;
         }
-        
-        
-      setState(() {
-        
-      });
-        
+
+        setState(() {});
+
         print("pinnnnn: ${uPIN.text}");
       },
       child: Container(

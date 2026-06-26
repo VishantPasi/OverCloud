@@ -26,8 +26,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       
       title: 'OverCloud',
-      // home: SignInPage(),
-      home: PrivateAuthService()
+      home: SignInPage(),
+      // home: PrivateAuthService()
     );
   }
 }

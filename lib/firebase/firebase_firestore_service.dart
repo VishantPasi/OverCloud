@@ -9,6 +9,9 @@ class FirebaseFirestoreService {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
   final FileCategory _category = FileCategory();
 
+
+ 
+
   Future storeUserDetails(String uid) async {
     DocumentSnapshot<Map<String, dynamic>> data = await _firebaseFirestore
         .collection("users")
@@ -24,6 +27,7 @@ class FirebaseFirestoreService {
     createDefaultFolders(uid, "videos");
     createDefaultFolders(uid, "music");
     createDefaultFolders(uid, "starred");
+
   }
 
   //FOLDER RELATED CRUD
@@ -944,5 +948,20 @@ class FirebaseFirestoreService {
     } catch (e) {
       debugPrint("updateOverallMetadata Error: $e");
     }
+  }
+
+
+   Future<void> getPrivateFolderDetails(String uid) async {
+    DocumentSnapshot<Map<String, dynamic>> data = await _firebaseFirestore
+        .collection("users")
+        .doc(uid)
+        .get();
+
+    print(data.data());
+
+    SecureStorageService.setIsPrivateEnabled(data.data()?['isPFEnabled']);
+    
+    
+
   }
 }

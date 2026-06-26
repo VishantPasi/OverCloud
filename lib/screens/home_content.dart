@@ -9,6 +9,7 @@ import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/screens/recent_files_page.dart';
 import 'package:overcloud/screens/starred_page.dart';
+import 'package:overcloud/services/private_auth_service.dart';
 import 'package:overcloud/utils/format_file_count.dart';
 import 'package:overcloud/utils/format_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
@@ -33,6 +34,7 @@ class _HomeContentState extends State<HomeContent> {
   String? musicTotalCount;
   String? photosTotalCount;
   String? starredTotalCount;
+  String? privateTotalCount;
 
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   final ShowPopOver _popOver = ShowPopOver();
@@ -49,6 +51,8 @@ class _HomeContentState extends State<HomeContent> {
     getTotalCount("documents");
     getTotalCount("photos");
     getTotalCount("starred");
+    getTotalCount("private");
+    _firestore.getPrivateFolderDetails(uid!);
     super.initState();
   }
 
@@ -72,37 +76,56 @@ class _HomeContentState extends State<HomeContent> {
 
     switch (fileType) {
       case "overall":
-        overallTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']) ;
+        overallTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
         setState(() {});
         break;
       case "videos":
-        videosTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']) ;
+        videosTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
         setState(() {});
         break;
       case "music":
-        musicTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']);
+        musicTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
         setState(() {});
         break;
       case "documents":
-        documentsTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']);
+        documentsTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
         setState(() {});
         break;
       case "photos":
-        photosTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']);
+        photosTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
         setState(() {});
         break;
       case "starred":
-        starredTotalCount = _fileCount.fileCount(totalCount!.data()['totalCount']);
+        starredTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
+        setState(() {});
+        break;
+      case "private":
+        privateTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
         setState(() {});
         break;
 
       default:
-      overallTotalCount = "0";
+        overallTotalCount = "0";
         videosTotalCount = "0";
         musicTotalCount = "0";
         documentsTotalCount = "0";
         photosTotalCount = "0";
         starredTotalCount = "0";
+        privateTotalCount = "0";
         setState(() {});
         break;
     }
@@ -409,7 +432,7 @@ class _HomeContentState extends State<HomeContent> {
                     Colors.deepOrange,
                     "Photos",
                     FontAwesomeIcons.photoFilm,
-              
+
                     photosTotalCount ?? "0",
                     context,
                     "photos",
@@ -419,7 +442,7 @@ class _HomeContentState extends State<HomeContent> {
                     const Color.fromRGBO(255, 196, 87, 1),
                     "Docs",
                     FontAwesomeIcons.solidFileLines,
-              
+
                     documentsTotalCount ?? "0",
                     context,
                     "documents",
@@ -429,7 +452,7 @@ class _HomeContentState extends State<HomeContent> {
                     const Color.fromARGB(255, 244, 54, 92),
                     "Videos",
                     FontAwesomeIcons.solidCirclePlay,
-              
+
                     videosTotalCount ?? "0",
                     context,
                     "videos",
@@ -439,7 +462,7 @@ class _HomeContentState extends State<HomeContent> {
                     const Color.fromARGB(226, 64, 251, 189),
                     "Music",
                     FontAwesomeIcons.music,
-              
+
                     musicTotalCount ?? "0",
                     context,
                     "music",
@@ -449,7 +472,7 @@ class _HomeContentState extends State<HomeContent> {
                   //   const Color.fromARGB(255, 64, 170, 251),
                   //   "More",
                   //   FontAwesomeIcons.ellipsis,
-              
+
                   //   "",
                   //   context,
                   //   "others",
@@ -479,7 +502,7 @@ class _HomeContentState extends State<HomeContent> {
                     "OverAllFiles",
                   ),
                   quickAccess(
-                    "24",
+                    privateTotalCount ?? "0",
                     "Private",
 
                     FontAwesomeIcons.userLock,
@@ -652,7 +675,10 @@ class _HomeContentState extends State<HomeContent> {
                 builder: ((context) => folderId == "files"
                     ? FoldersPage(folderName: subTitle, folderId: folderId)
                     : folderId == "private"
-                    ? FoldersPage(folderName: subTitle, folderId: folderId)
+                    ? PrivateAuthService(
+                        folderName: subTitle,
+                        folderId: folderId,
+                      )
                     : StarredPage(folderName: subTitle, folderId: folderId)),
               ),
             );
@@ -758,11 +784,11 @@ class _HomeContentState extends State<HomeContent> {
         ),
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-          
+
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             border: Border.all(color: Colors.white24, width: 0.5),
-      
+
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -786,7 +812,7 @@ class _HomeContentState extends State<HomeContent> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-      
+
               Text(
                 subText,
                 style: GoogleFonts.urbanist(
