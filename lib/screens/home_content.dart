@@ -10,6 +10,7 @@ import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/screens/recent_files_page.dart';
 import 'package:overcloud/screens/starred_page.dart';
 import 'package:overcloud/services/private_auth_service.dart';
+import 'package:overcloud/services/secure_storage_service.dart';
 import 'package:overcloud/utils/format_file_count.dart';
 import 'package:overcloud/utils/format_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
@@ -35,8 +36,10 @@ class _HomeContentState extends State<HomeContent> {
   String? photosTotalCount;
   String? starredTotalCount;
   String? privateTotalCount;
+  bool? isPFEnabled;
 
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
+  final SecureStorageService _storageService = SecureStorageService();
   final ShowPopOver _popOver = ShowPopOver();
   final FormatFileSize _fileSize = FormatFileSize();
   final FormatFileCount _fileCount = FormatFileCount();
@@ -52,7 +55,7 @@ class _HomeContentState extends State<HomeContent> {
     getTotalCount("photos");
     getTotalCount("starred");
     getTotalCount("private");
-    _firestore.getPrivateFolderDetails(uid!);
+
     super.initState();
   }
 
@@ -60,6 +63,9 @@ class _HomeContentState extends State<HomeContent> {
     final FirebaseAuth auth = FirebaseAuth.instance;
     uid = auth.currentUser!.uid;
     fullName = auth.currentUser!.displayName;
+    isPFEnabled = await _firestore.getPrivateFolderDetails(uid!);
+
+    print("thiss is : $isPFEnabled");
 
     setState(() {});
   }
@@ -676,7 +682,9 @@ class _HomeContentState extends State<HomeContent> {
                     ? FoldersPage(folderName: subTitle, folderId: folderId)
                     : folderId == "private"
                     ? PrivateAuthService(
-                        folderName: subTitle,
+                        uid: uid!,
+                        isPFEnabled: isPFEnabled!,
+                        folderName: "Private Folder",
                         folderId: folderId,
                       )
                     : StarredPage(folderName: subTitle, folderId: folderId)),

@@ -9,9 +9,6 @@ class FirebaseFirestoreService {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
   final FileCategory _category = FileCategory();
 
-
- 
-
   Future storeUserDetails(String uid) async {
     DocumentSnapshot<Map<String, dynamic>> data = await _firebaseFirestore
         .collection("users")
@@ -27,7 +24,6 @@ class FirebaseFirestoreService {
     createDefaultFolders(uid, "videos");
     createDefaultFolders(uid, "music");
     createDefaultFolders(uid, "starred");
-
   }
 
   //FOLDER RELATED CRUD
@@ -950,18 +946,34 @@ class FirebaseFirestoreService {
     }
   }
 
+  Future<bool> getPrivateFolderDetails(String uid) async {
+    DocumentSnapshot<Map<String, dynamic>> data = await _firebaseFirestore
+        .collection("users")
+        .doc(uid)
+        .get();
+    SecureStorageService.setIsPrivateEnabled(data.data()?['isPFEnabled']);
 
-   Future<void> getPrivateFolderDetails(String uid) async {
+    return data.data()?['isPFEnabled'];
+  }
+
+  Future<void> updatePFDetails(String uid, String pin) async {
     DocumentSnapshot<Map<String, dynamic>> data = await _firebaseFirestore
         .collection("users")
         .doc(uid)
         .get();
 
-    print(data.data());
+    await data.reference.update({"isPFEnabled": true, "PFPIN": pin});
 
-    SecureStorageService.setIsPrivateEnabled(data.data()?['isPFEnabled']);
-    
-    
-
+    SecureStorageService.setIsPrivateEnabled(true);
   }
 }
+
+
+
+
+
+
+
+
+
+

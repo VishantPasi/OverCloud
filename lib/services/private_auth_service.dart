@@ -1,15 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:overcloud/firebase/firebase_auth_service.dart';
+import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/screens/folders_page.dart';
+import 'package:overcloud/screens/private_folder_page.dart';
 import 'package:overcloud/utils/error_dialog.dart';
 import 'package:pinput/pinput.dart';
 
 class PrivateAuthService extends StatefulWidget {
+  final String uid;
+  final bool isPFEnabled;
   final String folderName;
   final String folderId;
-  const PrivateAuthService({super.key, required this.folderName, required this.folderId});
+  const PrivateAuthService({
+    super.key,
+    required this.uid,
+    required this.isPFEnabled,
+    required this.folderName,
+    required this.folderId,
+  });
 
   @override
   State<PrivateAuthService> createState() => _PrivateAuthServiceState();
@@ -21,11 +35,59 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
   final TextEditingController uPIN = TextEditingController(text: "");
   bool isBiometricAvailable = false;
   bool isLoading = false;
+  int failedAttempts = 0;
+  bool isLocked = false;
+  int remainingSeconds = 30;
+
+  Timer? _lockTimer;
+
+  final FirebaseFirestoreService _firestoreService = FirebaseFirestoreService();
+
+  void startLockTimer() {
+    isLocked = true;
+    remainingSeconds = 30;
+
+    setState(() {});
+
+    _lockTimer?.cancel();
+
+    _lockTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (remainingSeconds == 0) {
+        timer.cancel();
+
+        setState(() {
+          isLocked = false;
+          failedAttempts = 0;
+        });
+      } else {
+        setState(() {
+          remainingSeconds--;
+        });
+      }
+    });
+  }
 
   @override
   void initState() {
     _checkBiometricAvailability();
+    widget.isPFEnabled ? uPIN.addListener(_pinListener) : null;
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _lockTimer?.cancel();
+    uPIN.removeListener(_pinListener);
+    uPIN.dispose();
+    super.dispose();
+  }
+
+  void _pinListener() {
+    setState(() {});
+
+    if (uPIN.text.length == 4) {
+      _pinAuthentication();
+    }
   }
 
   Future<void> _checkBiometricAvailability() async {
@@ -39,10 +101,46 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
     }
   }
 
-  Future<void> _pinAuthentication() async {}
+  Future<void> _pinAuthentication() async {
+    if (isLocked) return;
+
+    if (uPIN.text == pin) {
+      failedAttempts = 0;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FoldersPage(
+            folderName: widget.folderName,
+            folderId: widget.folderId,
+          ),
+        ),
+      );
+    } else {
+      failedAttempts++;
+
+      uPIN.clear();
+
+      if (failedAttempts >= 3) {
+        startLockTimer();
+      } else {
+        errorMessage(
+          "Invalid PIN",
+          "Please enter the correct PIN.\n${3 - failedAttempts} attempt(s) remaining.",
+          context,
+        );
+      }
+
+      setState(() {});
+    }
+  }
 
   Future<void> _biometricAuthentication() async {
     if (!isBiometricAvailable) {
+      return;
+    }
+
+    if (isLocked) {
       return;
     }
     setState(() {
@@ -56,7 +154,15 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
       );
 
       if (authenticate) {
-        print("authentication completed");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PrivateFolderPage(
+              folderName: widget.folderName,
+              folderId: widget.folderId,
+            ),
+          ),
+        );
       }
     } on LocalAuthException catch (e) {
       switch (e.code) {
@@ -135,7 +241,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
             SizedBox(height: 20),
 
             Container(
-              width: 200,
+              width: widget.isPFEnabled ? 200 : 250,
               padding: const EdgeInsets.symmetric(
                 horizontal: 10.0,
                 vertical: 15,
@@ -156,51 +262,69 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
               child: Column(
                 children: [
                   Text(
-                    "Enter your PIN",
+                    isLocked
+                        ? "Try again in $remainingSeconds seconds"
+                        : "Enter your PIN",
                     style: GoogleFonts.urbanist(
-                      color: Colors.white70,
+                      color: isLocked ? Colors.deepOrange : Colors.white70,
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       letterSpacing: 2,
                     ),
                   ),
                   SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.circle_outlined,
-                        color: uPIN.text.length >= 1
-                            ? Colors.deepOrange
-                            : Colors.white54,
-                        size: 20,
-                      ),
-                      SizedBox(width: 20),
-                      Icon(
-                        Icons.circle_outlined,
-                        color: uPIN.text.length >= 2
-                            ? Colors.deepOrange
-                            : Colors.white54,
-                        size: 20,
-                      ),
-                      SizedBox(width: 20),
-                      Icon(
-                        Icons.circle_outlined,
-                        color: uPIN.text.length >= 3
-                            ? Colors.deepOrange
-                            : Colors.white54,
-                        size: 20,
-                      ),
-                      SizedBox(width: 20),
-                      Icon(
-                        Icons.circle_outlined,
-                        color: uPIN.text.length == 4
-                            ? Colors.deepOrange
-                            : Colors.white54,
-                        size: 20,
-                      ),
-                    ],
-                  ),
+                  widget.isPFEnabled
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(4, (index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              child: Icon(
+                                Icons.circle_outlined,
+                                color: uPIN.text.length > index
+                                    ? Colors.deepOrange
+                                    : Colors.white54,
+                                size: 20,
+                              ),
+                            );
+                          }),
+                        )
+                      : Pinput(
+                          controller: uPIN,
+                          length: 4,
+                          autofocus: true,
+                          readOnly: true, // Since you're using your own keypad
+                          defaultPinTheme: PinTheme(
+                            width: 55,
+                            height: 55,
+                            textStyle: GoogleFonts.urbanist(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(24, 24, 24, 1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white10),
+                            ),
+                          ),
+                          focusedPinTheme: PinTheme(
+                            width: 45,
+                            height: 55,
+                            textStyle: GoogleFonts.urbanist(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(24, 24, 24, 1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.deepOrange),
+                            ),
+                          ),
+                        ),
                 ],
               ),
             ),
@@ -253,56 +377,94 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            GestureDetector(
-              onTap: () => _biometricAuthentication(),
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color.fromRGBO(24, 24, 24, 0.941),
-                  border: Border.all(
-                    color: Colors.deepOrange.withValues(alpha: 0.9),
-                    width: 0.5,
-                  ),
-
-                  // border: BorderDirectional(top: BorderSide(color: Colors.deepOrange,width: ),),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.fingerprint,
-                    color: Colors.deepOrange.withValues(alpha: 0.9),
-                    size: 35,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 40),
-            singleNumberContainer("0"),
-
-            SizedBox(width: 40),
+            // Left Button
             GestureDetector(
               onTap: () {
-                uPIN.delete();
-                print("pinnnnn: ${uPIN.text}");
-                setState(() {});
+                if (widget.isPFEnabled) {
+                  _biometricAuthentication();
+                } else {
+                  uPIN.delete();
+                  setState(() {});
+                }
               },
               child: Container(
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color.fromRGBO(24, 24, 24, 0.941),
+                  color: const Color.fromRGBO(24, 24, 24, 0.941),
+                  border: Border.all(
+                    color: widget.isPFEnabled
+                        ? Colors.deepOrange.withValues(alpha: .9)
+                        : Colors.white10,
+                    width: widget.isPFEnabled ? .5 : 2,
+                  ),
+                ),
+                child: Center(
+                  child: widget.isPFEnabled
+                      ? Icon(
+                          Icons.fingerprint,
+                          color: Colors.deepOrange.withValues(alpha: .9),
+                          size: 35,
+                        )
+                      : const FaIcon(
+                          FontAwesomeIcons.deleteLeft,
+                          color: Colors.white60,
+                        ),
+                ),
+              ),
+            ),
 
-                  border: BorderDirectional(
+            const SizedBox(width: 40),
+
+            singleNumberContainer("0"),
+
+            const SizedBox(width: 40),
+
+            // Right Button
+            GestureDetector(
+              onTap: () {
+                if (widget.isPFEnabled) {
+                  uPIN.delete();
+                  setState(() {});
+                } else {
+                  if (uPIN.text.length == 4) {
+                    _firestoreService.updatePFDetails(widget.uid, uPIN.text);
+                    setState(() {
+                      
+                    });
+
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PrivateFolderPage(folderName: widget.folderName, folderId: widget.folderId)));
+                  } else {
+                    errorMessage(
+                      "Complete PIN Required",
+                      "Enter your 4-digit PIN to continue.",
+                      context,
+                    );
+                  }
+                }
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color.fromRGBO(24, 24, 24, 0.941),
+                  border: const BorderDirectional(
                     top: BorderSide(color: Colors.white10, width: 2),
                   ),
                 ),
                 child: Center(
-                  child: FaIcon(
-                    FontAwesomeIcons.deleteLeft,
-                    color: Colors.white60,
-                  ),
+                  child: widget.isPFEnabled
+                      ? const FaIcon(
+                          FontAwesomeIcons.deleteLeft,
+                          color: Colors.white60,
+                        )
+                      : const Icon(
+                          Icons.check,
+                          color: Colors.deepOrange,
+                          size: 30,
+                        ),
                 ),
               ),
             ),
@@ -315,6 +477,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
   Widget singleNumberContainer(String number) {
     return GestureDetector(
       onTap: () {
+        if (isLocked) return;
         if (uPIN.text.length < 4) {
           uPIN.text = uPIN.text + number;
         }
