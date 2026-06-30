@@ -209,7 +209,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
 
     try {
       bool authenticate = await auth.authenticate(
-        localizedReason: "Authenticate to access your Private Folder",
+        localizedReason: "Scan your fingerprints",
         biometricOnly: true,
       );
 

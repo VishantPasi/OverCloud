@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/retrofit/retro_service.dart';
 import 'package:overcloud/utils/format_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 import 'package:overcloud/utils/pick_one_file.dart';
@@ -290,6 +292,12 @@ class _FoldersPageState extends State<FoldersPage> {
             PlatformFile? file = await _pickOneFile.pickFile(folderId);
 
             if (file != null) {
+              final multipartFile = await MultipartFile.fromFile(
+                file.path!,
+                filename: file.name,
+              );
+
+              await RetrofitService.getClient().uploadFile(uid, multipartFile);
               _firestore.createFileMetaData(
                 uid,
                 widget.folderId,
@@ -299,6 +307,8 @@ class _FoldersPageState extends State<FoldersPage> {
                 path,
                 false,
               );
+
+              
             }
 
             _isShowDial.value = false;
