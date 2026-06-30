@@ -24,6 +24,7 @@ class FirebaseFirestoreService {
     createDefaultFolders(uid, "videos");
     createDefaultFolders(uid, "music");
     createDefaultFolders(uid, "starred");
+    createDefaultFolders(uid, "private");
   }
 
   //FOLDER RELATED CRUD
@@ -547,6 +548,17 @@ class FirebaseFirestoreService {
         });
       }
 
+      final updateRecentfiles = await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("recents")
+          .where("fileId", isEqualTo: fileId)
+          .get();
+
+      for (var doc in updateRecentfiles.docs) {
+        doc.reference.update({'isStarred': true});
+      }
+
       updateOverallMetadata(uid, "starred", 1, fileSize ?? 0, true);
     } catch (e) {
       debugPrint(e.toString());
@@ -882,12 +894,12 @@ class FirebaseFirestoreService {
           .where("fileType", isEqualTo: "overall")
           .get();
 
-      // final private = await _firebaseFirestore
-      //     .collection("users")
-      //     .doc(uid)
-      //     .collection("overallMetadata")
-      //     .where("fileType", isEqualTo: "private")
-      //     .get();
+      final private = await _firebaseFirestore
+          .collection("users")
+          .doc(uid)
+          .collection("overallMetadata")
+          .where("fileType", isEqualTo: "private")
+          .get();
 
       final starred = await _firebaseFirestore
           .collection("users")
@@ -908,6 +920,22 @@ class FirebaseFirestoreService {
             });
           } else {
             await starred.docs.first.reference.update({
+              "totalCount": FieldValue.increment(-newTotalCount),
+              "totalSize": FieldValue.increment(-newTotalSize),
+              "modifiedOn": dateTime.toString(),
+            });
+          }
+        }
+      } else if (fileType == "private") {
+        if (private.docs.isNotEmpty) {
+          if (isIncrementing) {
+            await private.docs.first.reference.update({
+              "totalCount": FieldValue.increment(newTotalCount),
+              "totalSize": FieldValue.increment(newTotalSize),
+              "modifiedOn": dateTime.toString(),
+            });
+          } else {
+            await private.docs.first.reference.update({
               "totalCount": FieldValue.increment(-newTotalCount),
               "totalSize": FieldValue.increment(-newTotalSize),
               "modifiedOn": dateTime.toString(),
@@ -946,14 +974,22 @@ class FirebaseFirestoreService {
     }
   }
 
-  Future<bool> getPrivateFolderDetails(String uid) async {
-    DocumentSnapshot<Map<String, dynamic>> data = await _firebaseFirestore
+  //Private folder
+
+  Stream<bool> getPrivateFolderStatus(String uid) {
+    return _firebaseFirestore
         .collection("users")
         .doc(uid)
-        .get();
-    SecureStorageService.setIsPrivateEnabled(data.data()?['isPFEnabled']);
+        .snapshots()
+        .map((snapshot) => snapshot.data()?['isPFEnabled'] ?? false);
+  }
 
-    return data.data()?['isPFEnabled'];
+  Stream<String> getPrivateFolderPin(String uid) {
+    return _firebaseFirestore
+        .collection("users")
+        .doc(uid)
+        .snapshots()
+        .map((snapshot) => snapshot.data()?['PFPIN'] ?? "");
   }
 
   Future<void> updatePFDetails(String uid, String pin) async {
@@ -966,14 +1002,95 @@ class FirebaseFirestoreService {
 
     SecureStorageService.setIsPrivateEnabled(true);
   }
+
+  void createFileMetaDataForPrivateFolder(
+    String uid,
+    String fileId,
+    String? fileName,
+    String? fileType,
+    int? fileSize,
+    String? path,
+  ) async {
+    try {
+      DateTime dateTime = DateTime.now();
+      DocumentReference folder = _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc("private")
+          .collection("files")
+          .doc();
+
+      await folder.set({
+        "fileId": folder.id,
+        "fileName": fileName,
+        "modifiedOn": dateTime.toString(),
+        "fileType": fileType,
+        "fileSize": fileSize,
+        "isStarred": false,
+      });
+
+      updateOverallMetadata(uid, "private", 1, fileSize!, true);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void deleteFileMetaDataForPrivateFolder(
+    String uid,
+    String fileId,
+    String fileType,
+    int fileSize,
+  ) async {
+    try {
+      print("From Default delete: $fileId");
+      final folder = await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc("private")
+          .collection("files")
+          .where("fileId", isEqualTo: fileId)
+          .get();
+
+      // folder.reference.delete();
+
+      for (var doc in folder.docs) {
+        doc.reference.delete();
+      }
+
+      updateOverallMetadata(uid, "private", 1, fileSize, false);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void renameFileNameForPrivateFolder(
+    String uid,
+    String fileId,
+    String fileType,
+    String newFileName,
+  ) async {
+    try {
+      DateTime dateTime = DateTime.now();
+
+      final folder = await _firebaseFirestore
+          .collection('users')
+          .doc(uid)
+          .collection("folders")
+          .doc("private")
+          .collection("files")
+          .where("fileId", isEqualTo: fileId)
+          .get();
+
+      for (var doc in folder.docs) {
+        doc.reference.update({
+          "fileName": newFileName,
+          "modifiedOn": dateTime.toString(),
+        });
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
 }
-
-
-
-
-
-
-
-
-
-

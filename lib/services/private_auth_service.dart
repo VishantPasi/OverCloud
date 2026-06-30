@@ -5,10 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:overcloud/firebase/firebase_auth_service.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/screens/private_folder_page.dart';
+import 'package:overcloud/services/secure_storage_service.dart';
 import 'package:overcloud/utils/error_dialog.dart';
 import 'package:pinput/pinput.dart';
 
@@ -31,11 +31,13 @@ class PrivateAuthService extends StatefulWidget {
 
 class _PrivateAuthServiceState extends State<PrivateAuthService> {
   final LocalAuthentication auth = LocalAuthentication();
-  final String pin = "1234";
+  late String pin;
   final TextEditingController uPIN = TextEditingController(text: "");
+  final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   bool isBiometricAvailable = false;
   bool isLoading = false;
   int failedAttempts = 0;
+  DateTime? lockUntil;
   bool isLocked = false;
   int remainingSeconds = 30;
 
@@ -44,24 +46,30 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
   final FirebaseFirestoreService _firestoreService = FirebaseFirestoreService();
 
   void startLockTimer() {
-    isLocked = true;
-    remainingSeconds = 30;
-
-    setState(() {});
-
     _lockTimer?.cancel();
 
-    _lockTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (remainingSeconds == 0) {
+    _lockTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      final millis = int.parse(
+        await SecureStorageService.getLockUntil() ?? "0",
+      );
+
+      final seconds = DateTime.fromMillisecondsSinceEpoch(
+        millis,
+      ).difference(DateTime.now()).inSeconds;
+
+      if (seconds <= 0) {
         timer.cancel();
+
+        await SecureStorageService.clearLockTimer();
 
         setState(() {
           isLocked = false;
           failedAttempts = 0;
+          remainingSeconds = 0;
         });
       } else {
         setState(() {
-          remainingSeconds--;
+          remainingSeconds = seconds;
         });
       }
     });
@@ -69,9 +77,34 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
 
   @override
   void initState() {
-    _checkBiometricAvailability();
-    widget.isPFEnabled ? uPIN.addListener(_pinListener) : null;
+    _initialize();
+
     super.initState();
+  }
+
+  Future<void> _initialize() async {
+    final millis = int.parse(await SecureStorageService.getLockUntil() ?? "0");
+
+    print(millis);
+
+    if (millis != null) {
+      final endTime = DateTime.fromMillisecondsSinceEpoch(millis);
+
+      if (DateTime.now().isBefore(endTime)) {
+        isLocked = true;
+        remainingSeconds = endTime.difference(DateTime.now()).inSeconds;
+
+        startLockTimer();
+      }
+    }
+
+    if (widget.isPFEnabled) {
+      uPIN.addListener(_pinListener);
+    }
+
+    _firestore.getPrivateFolderPin(widget.uid).listen((str) {
+      pin = str;
+    });
   }
 
   @override
@@ -90,16 +123,16 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
     }
   }
 
-  Future<void> _checkBiometricAvailability() async {
-    try {
-      bool isAvailable = await auth.canCheckBiometrics;
-      setState(() {
-        isBiometricAvailable = isAvailable;
-      });
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
+  // Future<void> _checkBiometricAvailability() async {
+  //   try {
+  //     bool isAvailable = await auth.canCheckBiometrics;
+  //     setState(() {
+  //       isBiometricAvailable = isAvailable;
+  //     });
+  //   } catch (e) {
+  //     debugPrint(e.toString());
+  //   }
+  // }
 
   Future<void> _pinAuthentication() async {
     if (isLocked) return;
@@ -110,7 +143,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => FoldersPage(
+          builder: (context) => PrivateFolderPage(
             folderName: widget.folderName,
             folderId: widget.folderId,
           ),
@@ -122,6 +155,15 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
       uPIN.clear();
 
       if (failedAttempts >= 3) {
+        final endTime = DateTime.now().add(const Duration(seconds: 30));
+
+        await SecureStorageService.setLockUntil(endTime.millisecondsSinceEpoch);
+
+        setState(() {
+          isLocked = true;
+          remainingSeconds = 30;
+        });
+
         startLockTimer();
       } else {
         errorMessage(
@@ -136,11 +178,29 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
   }
 
   Future<void> _biometricAuthentication() async {
-    if (!isBiometricAvailable) {
+    if (isLocked) {
       return;
     }
 
-    if (isLocked) {
+    final canCheckBiometrics = await auth.canCheckBiometrics;
+    final isDeviceSupported = await auth.isDeviceSupported();
+    final availableBiometrics = await auth.getAvailableBiometrics();
+
+    if (!isDeviceSupported || !canCheckBiometrics) {
+      errorMessage(
+        "Biometrics Unavailable",
+        "This device doesn't support biometric authentication.",
+        context,
+      );
+      return;
+    }
+
+    if (availableBiometrics.isEmpty) {
+      errorMessage(
+        "No Biometrics Found",
+        "Set up a fingerprint or face recognition in your device settings.",
+        context,
+      );
       return;
     }
     setState(() {
@@ -149,7 +209,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
 
     try {
       bool authenticate = await auth.authenticate(
-        localizedReason: "login Via Biometrics",
+        localizedReason: "Authenticate to access your Private Folder",
         biometricOnly: true,
       );
 
@@ -215,7 +275,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
               ],
             ),
             Text(
-              "PRIVATE FOLDER",
+              widget.isPFEnabled ? "PRIVATE FOLDER" : "SETUP PRIVATE FOLDER",
               style: GoogleFonts.urbanist(
                 color: Colors.white,
                 fontSize: 16,
@@ -227,7 +287,9 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50.0),
               child: Text(
-                "Your files. Your Privacy. Protected.",
+                widget.isPFEnabled
+                    ? "Your files. Your privacy. Protected."
+                    : "Create a secure 4-digit PIN to protect your private files.",
                 maxLines: 2,
                 style: GoogleFonts.urbanist(
                   color: Colors.white60,
@@ -241,7 +303,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
             SizedBox(height: 20),
 
             Container(
-              width: widget.isPFEnabled ? 200 : 250,
+              width: widget.isPFEnabled ? 230 : 250,
               padding: const EdgeInsets.symmetric(
                 horizontal: 10.0,
                 vertical: 15,
@@ -264,7 +326,9 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
                   Text(
                     isLocked
                         ? "Try again in $remainingSeconds seconds"
-                        : "Enter your PIN",
+                        : widget.isPFEnabled
+                        ? "ENTER YOUR PIN"
+                        : "CREATE A 4-DIGIT PIN",
                     style: GoogleFonts.urbanist(
                       color: isLocked ? Colors.deepOrange : Colors.white70,
                       fontSize: 12,
@@ -430,11 +494,17 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
                 } else {
                   if (uPIN.text.length == 4) {
                     _firestoreService.updatePFDetails(widget.uid, uPIN.text);
-                    setState(() {
-                      
-                    });
+                    setState(() {});
 
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PrivateFolderPage(folderName: widget.folderName, folderId: widget.folderId)));
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PrivateFolderPage(
+                          folderName: widget.folderName,
+                          folderId: widget.folderId,
+                        ),
+                      ),
+                    );
                   } else {
                     errorMessage(
                       "Complete PIN Required",

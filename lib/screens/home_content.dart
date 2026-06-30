@@ -63,9 +63,11 @@ class _HomeContentState extends State<HomeContent> {
     final FirebaseAuth auth = FirebaseAuth.instance;
     uid = auth.currentUser!.uid;
     fullName = auth.currentUser!.displayName;
-    isPFEnabled = await _firestore.getPrivateFolderDetails(uid!);
-
-    print("thiss is : $isPFEnabled");
+    _firestore.getPrivateFolderStatus(uid!).listen((value) {
+      SecureStorageService.setIsPrivateEnabled(value);
+      isPFEnabled = value;
+      print("this is $isPFEnabled");
+    });
 
     setState(() {});
   }
@@ -684,7 +686,7 @@ class _HomeContentState extends State<HomeContent> {
                     ? PrivateAuthService(
                         uid: uid!,
                         isPFEnabled: isPFEnabled!,
-                        folderName: "Private Folder",
+                        folderName: subTitle,
                         folderId: folderId,
                       )
                     : StarredPage(folderName: subTitle, folderId: folderId)),
@@ -897,6 +899,7 @@ class _HomeContentState extends State<HomeContent> {
                     ),
 
                     onPressed: () {
+                      print("thi $isStarred");
                       _popOver.popOverRecentFilesPage(
                         buttonContext,
                         context,

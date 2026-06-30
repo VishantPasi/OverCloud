@@ -121,7 +121,7 @@ class FirebaseAuthService {
       await SecureStorageService.setUID(_auth.currentUser!.uid.toString());
 
       String uid = _auth.currentUser!.uid;
-      await FirebaseFirestore.instance.collection("users").doc(uid).set({
+      await FirebaseFirestore.instance.collection("users").doc(uid).update({
         "fullName": userCredentials.user!.displayName.toString(),
         "phoneNumber": userCredentials.user!.phoneNumber.toString(),
         "email": userCredentials.user!.email.toString(),
@@ -132,6 +132,7 @@ class FirebaseAuthService {
       _firestoreService.createDefaultFolders(uid, "videos");
       _firestoreService.createDefaultFolders(uid, "music");
       _firestoreService.createDefaultFolders(uid, "starred");
+      _firestoreService.createDefaultFolders(uid, "private");
       _firestoreService.createOverallMetadataFolders(uid, "photos");
       _firestoreService.createOverallMetadataFolders(uid, "documents");
       _firestoreService.createOverallMetadataFolders(uid, "videos");
@@ -188,6 +189,7 @@ class FirebaseAuthService {
       _firestoreService.createDefaultFolders(uid, "videos");
       _firestoreService.createDefaultFolders(uid, "music");
       _firestoreService.createDefaultFolders(uid, "starred");
+      _firestoreService.createDefaultFolders(uid, "private");
       _firestoreService.createOverallMetadataFolders(uid, "photos");
       _firestoreService.createOverallMetadataFolders(uid, "documents");
       _firestoreService.createOverallMetadataFolders(uid, "videos");

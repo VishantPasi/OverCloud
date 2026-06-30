@@ -54,15 +54,20 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                ElevatedButton(onPressed: () async {
-                  await SecureStorageService.clearStorageData();
-                  await  FirebaseAuthService().signOut();
+                ElevatedButton(
+                  onPressed: () async {
+                    await SecureStorageService.clearStorageData();
+                    await FirebaseAuthService().signOut();
 
-                  if(!context.mounted) return;
+                    if (!context.mounted) return;
 
-                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> SignInPage()));
-
-                }, child: Text("Sign Out")),
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignInPage()),
+                    );
+                  },
+                  child: Text("Sign Out"),
+                ),
               ],
             ),
           ),

@@ -7,6 +7,7 @@ class SecureStorageService {
   static const _keyEmail = "email";
   static const _keyUID = "userUID";
   static const _isPrivateEnabled = "isPFEnabled";
+  static const _lockTimer = "lockTimer";
 
 
   static Future setFullName(String fullName) async => await _storage.write(key: _keyfullName, value: fullName);
@@ -24,6 +25,14 @@ class SecureStorageService {
   static Future setIsPrivateEnabled(bool isEnabled) async => await _storage.write(key: _isPrivateEnabled, value: isEnabled.toString());
 
   static Future<String?> getIsPrivateEnabled() async => await _storage.read(key: _isPrivateEnabled);
+
+  static Future setLockUntil(int lockTimer) async => await _storage.write(key: _lockTimer, value: lockTimer.toString());
+
+  static Future<String?> getLockUntil() async => await _storage.read(key: _lockTimer);
+
+  static Future clearLockTimer() async => await _storage.delete(key: _lockTimer);
+
+
 
 
   

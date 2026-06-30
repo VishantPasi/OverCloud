@@ -297,6 +297,7 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                     ),
 
                     onPressed: () {
+                     print("thi $isStarred");
                       _popOver.popOverRecentFilesPage(
                         buttonContext,
                         context,

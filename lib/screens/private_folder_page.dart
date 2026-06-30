@@ -21,7 +21,6 @@ class PrivateFolderPage extends StatefulWidget {
     super.key,
     required this.folderName,
     required this.folderId,
- 
   });
 
   @override
@@ -236,7 +235,7 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
                           fileTypeLogo,
 
                           files[index].data()['fileId'],
-                          files[index].data()['path'],
+
                           files[index].data()['isStarred'],
                         );
                       },
@@ -248,10 +247,7 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
           ),
         ),
       ),
-      floatingActionButton: _getFloatingActionButton(
-        widget.folderId,
-
-      ),
+      floatingActionButton: _getFloatingActionButton(widget.folderId),
     );
   }
 
@@ -288,14 +284,13 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
             PlatformFile? file = await _pickOneFile.pickFile(folderId);
 
             if (file != null) {
-              _firestore.createFileMetaData(
+              _firestore.createFileMetaDataForPrivateFolder(
                 uid,
                 widget.folderId,
                 file.name,
                 file.extension,
                 file.size,
                 "",
-                false,
               );
             }
 
@@ -319,14 +314,13 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
             PlatformFile? file = await _pickOneFile.pickFile("photos");
 
             if (file != null) {
-              _firestore.createFileMetaData(
+              _firestore.createFileMetaDataForPrivateFolder(
                 uid,
                 widget.folderId,
                 file.name,
                 file.extension,
                 file.size,
                 "",
-                false,
               );
             }
             _isShowDial.value = false;
@@ -353,7 +347,6 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
     int fileSize,
     String fileTypeLogo,
     String fileId,
-    String path,
     bool isStarred,
   ) {
     // if (filetype == "Folder" ){
@@ -418,20 +411,14 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
                         ),
 
                         onPressed: () {
-                          _popOver.popOverFoldersPage(
+                          _popOver.popOverPrivatePage(
                             buttonContext,
                             context,
                             uid,
-                            widget.folderId,
                             fileId,
-
                             fileName,
                             filetype,
                             fileSize,
-                            path,
-                            widget.folderId,
-                            false,
-                            isStarred,
                           );
                         },
                       );

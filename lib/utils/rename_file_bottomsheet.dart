@@ -9,7 +9,7 @@ Future<String?> renameFileBottomSheet(
   String fileId,
   String fileName,
   String fileType,
-  String path
+  String? path,
 ) async {
   final TextEditingController folderController = TextEditingController(
     text: fileName.split(".").first,
@@ -78,7 +78,7 @@ Future<String?> renameFileBottomSheet(
               autofocus: true,
               cursorColor: Colors.deepOrange,
               style: GoogleFonts.urbanist(color: Colors.white),
-              
+
               decoration: InputDecoration(
                 hintText: "File Name",
                 hintStyle: GoogleFonts.urbanist(color: Colors.white38),
@@ -89,7 +89,7 @@ Future<String?> renameFileBottomSheet(
                   borderSide: BorderSide.none,
                 ),
                 suffixText: "    .${fileName.split(".").last}",
-                suffixStyle: GoogleFonts.urbanist(color: Colors.white)
+                suffixStyle: GoogleFonts.urbanist(color: Colors.white),
               ),
             ),
 
@@ -106,15 +106,31 @@ Future<String?> renameFileBottomSheet(
                   ),
                 ),
                 onPressed: () async {
-                  final newFileName = "${folderController.text.trim()}.${fileName.split(".").last}";
+                  final newFileName =
+                      "${folderController.text.trim()}.${fileName.split(".").last}";
 
                   if (newFileName.isEmpty || newFileName == fileName) {
                     Navigator.pop(context);
                     return;
                   }
 
-
-                  firestore.renameFileName(uid, folderId, fileId, fileType ,newFileName, path);
+                  if (folderId == "private") {
+                    firestore.renameFileNameForPrivateFolder(
+                      uid,
+                      fileId,
+                      fileType,
+                      newFileName,
+                    );
+                  } else {
+                    firestore.renameFileName(
+                      uid,
+                      folderId,
+                      fileId,
+                      fileType,
+                      newFileName,
+                      path!,
+                    );
+                  }
 
                   Navigator.pop(context, newFileName);
                 },

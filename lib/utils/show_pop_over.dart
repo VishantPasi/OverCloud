@@ -42,14 +42,13 @@ class ShowPopOver {
           isStarred,
         ),
       ),
-      width: currentFolderId == "starred" ? 130 : 150 ,
+      width: currentFolderId == "starred" ? 130 : 150,
       height: currentFolderId == "starred" ? 155 : 210,
       direction: PopoverDirection.bottom,
       radius: 20,
       backgroundColor: Color.fromRGBO(50, 50, 50, 0.945),
     );
   }
-
 
   Future<Object?> popOverFoldersPage(
     BuildContext buttonContext,
@@ -90,7 +89,7 @@ class ShowPopOver {
           isStarred,
         ),
       ),
-      width: currentFolderId == "starred" ? 130 : 150 ,
+      width: currentFolderId == "starred" ? 130 : 150,
       height: currentFolderId == "starred" ? 155 : 210,
       direction: PopoverDirection.bottom,
       radius: 20,
@@ -139,11 +138,169 @@ class ShowPopOver {
           isStarred,
         ),
       ),
-      width: currentFolderId == "starred" ? 130 : 150 ,
+      width: currentFolderId == "starred" ? 130 : 150,
       height: currentFolderId == "starred" ? 155 : 210,
       direction: PopoverDirection.bottom,
       radius: 20,
       backgroundColor: Color.fromRGBO(50, 50, 50, 0.945),
+    );
+  }
+
+  Future<Object?> popOverPrivatePage(
+    BuildContext buttonContext,
+    BuildContext context,
+    String uid,
+    String? fileId,
+    String? fileName,
+    String? fileType,
+    int? fileSize,
+  ) {
+    return showPopover(
+      context: buttonContext,
+      bodyBuilder: (_) => Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+        child: menuItemsPrivatePage(
+          context,
+          uid,
+          fileId,
+          fileName,
+          fileType,
+          fileSize!,
+        ),
+      ),
+      width: 140,
+      height: 175,
+      direction: PopoverDirection.bottom,
+      radius: 20,
+      backgroundColor: Color.fromRGBO(50, 50, 50, 0.945),
+    );
+  }
+
+  Widget menuItemsPrivatePage(
+    BuildContext context,
+    String uid,
+    String? fileId,
+    String? fileName,
+    String? fileType,
+    int? fileSize,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+              renameFileBottomSheet(
+                context,
+                uid,
+                "private",
+                fileId!,
+                fileName!,
+                fileType!,
+                null,
+              );
+            },
+            child: SizedBox(
+              height: 40,
+
+              child: Row(
+                children: [
+                  Icon(Icons.edit, color: Colors.white70, size: 23),
+                  SizedBox(width: 15),
+                  Text(
+                    "Rename",
+                    style: GoogleFonts.urbanist(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 5),
+
+          SizedBox(height: 5),
+          SizedBox(
+            height: 40,
+
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  color: Colors.white70,
+                  size: 23,
+                ),
+                SizedBox(width: 15),
+                Text(
+                  "Details",
+                  style: GoogleFonts.urbanist(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 10),
+          Divider(
+            color: Colors.white.withValues(alpha: 0.1),
+            height: 2,
+            thickness: 2,
+          ),
+
+          SizedBox(height: 10),
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+              firestoreService.deleteFileMetaDataForPrivateFolder(
+                uid,
+
+                fileId!,
+                fileType!,
+                fileSize!,
+              );
+            },
+            child: Row(
+              children: [
+                SizedBox(width: 5),
+                SizedBox(
+                  height: 40,
+
+                  child: Row(
+                    children: [
+                      FaIcon(
+                        FontAwesomeIcons.trashCan,
+                        color: Colors.red,
+                        size: 18,
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        "Delete",
+                        style: GoogleFonts.urbanist(
+                          color: Colors.red,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -182,7 +339,7 @@ class ShowPopOver {
                       fileId!,
                       fileName!,
                       fileType!,
-                      path
+                      path,
                     );
             },
             child: SizedBox(
@@ -210,77 +367,100 @@ class ShowPopOver {
               print(
                 "errorr: $folderId, $folderName, $fileId, $fileName, $fileType, $fileSize $isStarred,$isFolder",
               );
-              if (isStarred){
-                isFolder ? 
-              firestoreService.removeFromStarred(uid, folderId!, null, path, null, null,isFolder): firestoreService.removeFromStarred(uid, folderId, fileId, path, fileSize, fileType,isFolder);
-
-                    Navigator.pop(context);
-              
-              }else{
+              if (isStarred) {
                 isFolder
-                  ? firestoreService.addToStarred(
-                      uid,
-                      folderId!,
-                      folderName,
-                      fileId,
-                      fileName,
-                      fileType,
-                      fileSize,
-                      path,
-                      true,
-                    )
-                  : firestoreService.addToStarred(
-                      uid,
-                      folderId!,
-                      folderName,
-                      fileId,
-                      fileName,
-                      fileType,
-                      fileSize,
-                      path,
-                      false,
-                    );
+                    ? firestoreService.removeFromStarred(
+                        uid,
+                        folderId!,
+                        null,
+                        path,
+                        null,
+                        null,
+                        isFolder,
+                      )
+                    : firestoreService.removeFromStarred(
+                        uid,
+                        folderId,
+                        fileId,
+                        path,
+                        fileSize,
+                        fileType,
+                        isFolder,
+                      );
 
-                    Navigator.pop(context);
+                Navigator.pop(context);
+              } else {
+                isFolder
+                    ? firestoreService.addToStarred(
+                        uid,
+                        folderId!,
+                        folderName,
+                        fileId,
+                        fileName,
+                        fileType,
+                        fileSize,
+                        path,
+                        true,
+                      )
+                    : firestoreService.addToStarred(
+                        uid,
+                        folderId!,
+                        folderName,
+                        fileId,
+                        fileName,
+                        fileType,
+                        fileSize,
+                        path,
+                        false,
+                      );
+
+                Navigator.pop(context);
               }
-              
             },
             child: SizedBox(
               height: 40,
 
               child: Row(
                 children: [
-                  isStarred ? Icon(
-                    Icons.star_border_outlined,
-                    color: Colors.white70,
-                    size: 23,
-                  ): Row(
-                    children: [
-                      SizedBox(width: 4,),
-                      FaIcon(FontAwesomeIcons.solidStar, color: Colors.white70, size: 16,),
-                    ],
-                  ),
+                  isStarred
+                      ? Icon(
+                          Icons.star_border_outlined,
+                          color: Colors.white70,
+                          size: 23,
+                        )
+                      : Row(
+                          children: [
+                            SizedBox(width: 4),
+                            FaIcon(
+                              FontAwesomeIcons.solidStar,
+                              color: Colors.white70,
+                              size: 16,
+                            ),
+                          ],
+                        ),
                   SizedBox(width: 15),
-                  isStarred ? Text(
-                    "Unstar",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ): Text(
-                    "Starred",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  isStarred
+                      ? Text(
+                          "Unstar",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : Text(
+                          "Starred",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ],
               ),
             ),
           ),
-       SizedBox(height: 5),
+          SizedBox(height: 5),
           SizedBox(
             height: 40,
 
@@ -303,67 +483,70 @@ class ShowPopOver {
               ],
             ),
           ),
-          currentFolderId != "starred" ?  SizedBox(height: 10) : SizedBox(),
-         currentFolderId != "starred" ?  Divider(
-            color: Colors.white.withValues(alpha: 0.1),
-            height: 2,
-            thickness: 2,
-          ) : SizedBox() ,
-         currentFolderId != "starred" ?  SizedBox(height: 5) : SizedBox(),
-         currentFolderId != "starred" ?   GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-              isFolder
-                  ? firestoreService.deleteFolder(uid, folderId!,isStarred)
-                  : firestoreService.deleteFileMetaData(
-                      uid,
-                      folderId!,
-                      fileId!,
-                      fileType!,
-                      fileSize!,
-                      path,
-                      isStarred
-                      
-
-                    );
-            },
-            child: Row(
-              children: [
-                SizedBox(width: 5),
-                SizedBox(
-                  height: 40,
-
+          currentFolderId != "starred" ? SizedBox(height: 10) : SizedBox(),
+          currentFolderId != "starred"
+              ? Divider(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  height: 2,
+                  thickness: 2,
+                )
+              : SizedBox(),
+          currentFolderId != "starred" ? SizedBox(height: 5) : SizedBox(),
+          currentFolderId != "starred"
+              ? GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    isFolder
+                        ? firestoreService.deleteFolder(
+                            uid,
+                            folderId!,
+                            isStarred,
+                          )
+                        : firestoreService.deleteFileMetaData(
+                            uid,
+                            folderId!,
+                            fileId!,
+                            fileType!,
+                            fileSize!,
+                            path,
+                            isStarred,
+                          );
+                  },
                   child: Row(
                     children: [
-                      FaIcon(
-                        FontAwesomeIcons.trashCan,
-                        color: Colors.red,
-                        size: 18,
-                      ),
-                      SizedBox(width: 15),
-                      Text(
-                        "Delete",
-                        style: GoogleFonts.urbanist(
-                          color: Colors.red,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(width: 5),
+                      SizedBox(
+                        height: 40,
+
+                        child: Row(
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.trashCan,
+                              color: Colors.red,
+                              size: 18,
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              "Delete",
+                              style: GoogleFonts.urbanist(
+                                color: Colors.red,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ) : SizedBox(),
+                )
+              : SizedBox(),
         ],
       ),
     );
   }
 
-
-
-
-   Future<Object?> popOverRecentFilesPage(
+  Future<Object?> popOverRecentFilesPage(
     BuildContext buttonContext,
     BuildContext context,
     String uid,
@@ -375,7 +558,7 @@ class ShowPopOver {
     String path,
     String? currentFolderId,
     bool isFolder,
-    bool isStarred
+    bool isStarred,
   ) {
     return showPopover(
       context: buttonContext,
@@ -399,10 +582,10 @@ class ShowPopOver {
           path,
           currentFolderId,
           isFolder,
-          isStarred
+          isStarred,
         ),
       ),
-      width: 130 ,
+      width: 130,
       height: 170,
       direction: PopoverDirection.bottom,
       radius: 20,
@@ -423,8 +606,7 @@ class ShowPopOver {
     String path,
     String? currentFolderId,
     bool isFolder,
-    bool isStarred
-
+    bool isStarred,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
@@ -433,16 +615,16 @@ class ShowPopOver {
           GestureDetector(
             onTap: () {
               Navigator.pop(context);
-              print("contexttt:  $folderId, $fileId, $fileName");
-               renameFileBottomSheet(
-                      context,
-                      uid,
-                      folderId!,
-                      fileId!,
-                      fileName!,
-                      fileType!,
-                      path
-                    );
+              print("contexttt:  $folderId, $fileId, $fileName, $isStarred");
+              renameFileBottomSheet(
+                context,
+                uid,
+                folderId!,
+                fileId!,
+                fileName!,
+                fileType!,
+                path,
+              );
             },
             child: SizedBox(
               height: 40,
@@ -463,8 +645,8 @@ class ShowPopOver {
               ),
             ),
           ),
-          
-       SizedBox(height: 5),
+
+          SizedBox(height: 5),
           SizedBox(
             height: 40,
 
@@ -487,61 +669,65 @@ class ShowPopOver {
               ],
             ),
           ),
-          currentFolderId != "starred" ?  SizedBox(height: 10) : SizedBox(),
-         currentFolderId != "starred" ?  Divider(
-            color: Colors.white.withValues(alpha: 0.1),
-            height: 2,
-            thickness: 2,
-          ) : SizedBox() ,
-         currentFolderId != "starred" ?  SizedBox(height: 5) : SizedBox(),
-         currentFolderId != "starred" ?   GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-              isFolder
-                  ? firestoreService.deleteFolder(uid, folderId!,isStarred)
-                  : firestoreService.deleteFileMetaData(
+          currentFolderId != "starred" ? SizedBox(height: 10) : SizedBox(),
+          currentFolderId != "starred"
+              ? Divider(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  height: 2,
+                  thickness: 2,
+                )
+              : SizedBox(),
+          currentFolderId != "starred" ? SizedBox(height: 5) : SizedBox(),
+          currentFolderId != "starred"
+              ? GestureDetector(
+                  onTap: () {
+                    print(
+                      "contexttt:  $folderId, $fileId, $fileName, $isStarred",
+                    );
+                    Navigator.pop(context);
+                    firestoreService.deleteFileMetaData(
                       uid,
                       folderId!,
                       fileId!,
                       fileType!,
                       fileSize!,
                       path,
-                      isStarred
+                      isStarred,
                     );
-            },
-            child: Row(
-              children: [
-                SizedBox(width: 5),
-                SizedBox(
-                  height: 40,
-
+                  },
                   child: Row(
                     children: [
-                      FaIcon(
-                        FontAwesomeIcons.trashCan,
-                        color: Colors.red,
-                        size: 18,
-                      ),
-                      SizedBox(width: 15),
-                      Text(
-                        "Delete",
-                        style: GoogleFonts.urbanist(
-                          color: Colors.red,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(width: 5),
+                      SizedBox(
+                        height: 40,
+
+                        child: Row(
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.trashCan,
+                              color: Colors.red,
+                              size: 18,
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              "Delete",
+                              style: GoogleFonts.urbanist(
+                                color: Colors.red,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ) : SizedBox(),
+                )
+              : SizedBox(),
         ],
       ),
     );
   }
-
 
   //  Future<Object?> popOver(
   //   BuildContext buttonContext,
@@ -656,11 +842,11 @@ class ShowPopOver {
   //               "errorr: $folderId, $folderName, $fileId, $fileName, $fileType, $fileSize $isStarred,$isFolder",
   //             );
   //             if (isStarred){
-  //               isFolder ? 
+  //               isFolder ?
   //             firestoreService.removeFromStarred(uid, folderId!, null, path, isFolder): firestoreService.removeFromStarred(uid, folderId, fileId, path,isFolder);
 
   //                   Navigator.pop(context);
-              
+
   //             }else{
   //               isFolder
   //                 ? firestoreService.addToStarred(
@@ -688,7 +874,7 @@ class ShowPopOver {
 
   //                   Navigator.pop(context);
   //             }
-              
+
   //           },
   //           child: SizedBox(
   //             height: 40,
@@ -799,10 +985,7 @@ class ShowPopOver {
   //   );
   // }
 
-
-
-
- Widget menuItemsFoldersPage(
+  Widget menuItemsFoldersPage(
     BuildContext context,
     String uid,
     String? folderId,
@@ -823,14 +1006,14 @@ class ShowPopOver {
             onTap: () {
               Navigator.pop(context);
               renameFileBottomSheet(
-                      context,
-                      uid,
-                      folderId!,
-                      fileId!,
-                      fileName!,
-                      fileType!,
-                      path
-                    );
+                context,
+                uid,
+                folderId!,
+                fileId!,
+                fileName!,
+                fileType!,
+                path,
+              );
             },
             child: SizedBox(
               height: 40,
@@ -854,65 +1037,78 @@ class ShowPopOver {
           SizedBox(height: 5),
           GestureDetector(
             onTap: () {
-             
-              if (isStarred){
-                 firestoreService.removeFromStarred(uid, folderId, fileId, path, fileSize,fileType,isFolder);
+              if (isStarred) {
+                firestoreService.removeFromStarred(
+                  uid,
+                  folderId,
+                  fileId,
+                  path,
+                  fileSize,
+                  fileType,
+                  isFolder,
+                );
 
-                    Navigator.pop(context);
-              
-              }else{
+                Navigator.pop(context);
+              } else {
                 firestoreService.addToStarred(
-                      uid,
-                      folderId!,
-                      null,
-                      fileId,
-                      fileName,
-                      fileType,
-                      fileSize,
-                      path,
-                      false,
-                    );
+                  uid,
+                  folderId!,
+                  null,
+                  fileId,
+                  fileName,
+                  fileType,
+                  fileSize,
+                  path,
+                  false,
+                );
 
-                    Navigator.pop(context);
+                Navigator.pop(context);
               }
-              
             },
             child: SizedBox(
               height: 40,
 
               child: Row(
                 children: [
-                  isStarred ? Icon(
-                    Icons.star_border_outlined,
-                    color: Colors.white70,
-                    size: 23,
-                  ): Row(
-                    children: [
-                      SizedBox(width: 4,),
-                      FaIcon(FontAwesomeIcons.solidStar, color: Colors.white70, size: 16,),
-                    ],
-                  ),
+                  isStarred
+                      ? Icon(
+                          Icons.star_border_outlined,
+                          color: Colors.white70,
+                          size: 23,
+                        )
+                      : Row(
+                          children: [
+                            SizedBox(width: 4),
+                            FaIcon(
+                              FontAwesomeIcons.solidStar,
+                              color: Colors.white70,
+                              size: 16,
+                            ),
+                          ],
+                        ),
                   SizedBox(width: 15),
-                  isStarred ? Text(
-                    "Unstar",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ): Text(
-                    "Starred",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  isStarred
+                      ? Text(
+                          "Unstar",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : Text(
+                          "Starred",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ],
               ),
             ),
           ),
-       SizedBox(height: 5),
+          SizedBox(height: 5),
           SizedBox(
             height: 40,
 
@@ -935,17 +1131,20 @@ class ShowPopOver {
               ],
             ),
           ),
-          currentFolderId != "starred" ?  SizedBox(height: 10) : SizedBox(),
-         currentFolderId != "starred" ?  Divider(
-            color: Colors.white.withValues(alpha: 0.1),
-            height: 2,
-            thickness: 2,
-          ) : SizedBox() ,
-         currentFolderId != "starred" ?  SizedBox(height: 5) : SizedBox(),
-         currentFolderId != "starred" ?   GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-              firestoreService.deleteFileMetaData(
+          currentFolderId != "starred" ? SizedBox(height: 10) : SizedBox(),
+          currentFolderId != "starred"
+              ? Divider(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  height: 2,
+                  thickness: 2,
+                )
+              : SizedBox(),
+          currentFolderId != "starred" ? SizedBox(height: 5) : SizedBox(),
+          currentFolderId != "starred"
+              ? GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    firestoreService.deleteFileMetaData(
                       uid,
                       folderId!,
                       fileId!,
@@ -953,45 +1152,41 @@ class ShowPopOver {
                       fileSize!,
                       path,
                       isStarred,
-                      
                     );
-            },
-            child: Row(
-              children: [
-                SizedBox(width: 5),
-                SizedBox(
-                  height: 40,
-
+                  },
                   child: Row(
                     children: [
-                      FaIcon(
-                        FontAwesomeIcons.trashCan,
-                        color: Colors.red,
-                        size: 18,
-                      ),
-                      SizedBox(width: 15),
-                      Text(
-                        "Delete",
-                        style: GoogleFonts.urbanist(
-                          color: Colors.red,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(width: 5),
+                      SizedBox(
+                        height: 40,
+
+                        child: Row(
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.trashCan,
+                              color: Colors.red,
+                              size: 18,
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              "Delete",
+                              style: GoogleFonts.urbanist(
+                                color: Colors.red,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ) : SizedBox(),
+                )
+              : SizedBox(),
         ],
       ),
     );
   }
-
-
-
-
 
   Widget menuItemsFilesContent(
     BuildContext context,
@@ -1010,13 +1205,7 @@ class ShowPopOver {
           GestureDetector(
             onTap: () {
               Navigator.pop(context);
-renameFolderBottomSheet(
-                      context,
-                      uid,
-                      folderId!,
-                      folderName!,
-                    );
-                 
+              renameFolderBottomSheet(context, uid, folderId!, folderName!);
             },
             child: SizedBox(
               height: 40,
@@ -1043,66 +1232,78 @@ renameFolderBottomSheet(
               // print(
               //   // "errorr: $folderId, $folderName, $fileId, $fileName, $fileType, $fileSize $isStarred,$isFolder",
               // );
-              if (isStarred){
-              
-              firestoreService.removeFromStarred(uid, folderId!, null, path, null, null,isFolder);
+              if (isStarred) {
+                firestoreService.removeFromStarred(
+                  uid,
+                  folderId!,
+                  null,
+                  path,
+                  null,
+                  null,
+                  isFolder,
+                );
 
-                    Navigator.pop(context);
-              
-              }else{
+                Navigator.pop(context);
+              } else {
                 firestoreService.addToStarred(
-                      uid,
-                      folderId!,
-                      folderName,
-                      null,
-                      null,
-                      null,
-                     null,
-                      path,
-                      true,
-                    )
-                  ;
+                  uid,
+                  folderId!,
+                  folderName,
+                  null,
+                  null,
+                  null,
+                  null,
+                  path,
+                  true,
+                );
 
-                    Navigator.pop(context);
+                Navigator.pop(context);
               }
-              
             },
             child: SizedBox(
               height: 40,
 
               child: Row(
                 children: [
-                  isStarred ? Icon(
-                    Icons.star_border_outlined,
-                    color: Colors.white70,
-                    size: 23,
-                  ): Row(
-                    children: [
-                      SizedBox(width: 4,),
-                      FaIcon(FontAwesomeIcons.solidStar, color: Colors.white70, size: 16,),
-                    ],
-                  ),
+                  isStarred
+                      ? Icon(
+                          Icons.star_border_outlined,
+                          color: Colors.white70,
+                          size: 23,
+                        )
+                      : Row(
+                          children: [
+                            SizedBox(width: 4),
+                            FaIcon(
+                              FontAwesomeIcons.solidStar,
+                              color: Colors.white70,
+                              size: 16,
+                            ),
+                          ],
+                        ),
                   SizedBox(width: 15),
-                  isStarred ? Text(
-                    "Unstar",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ): Text(
-                    "Starred",
-                    style: GoogleFonts.urbanist(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  isStarred
+                      ? Text(
+                          "Unstar",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : Text(
+                          "Starred",
+                          style: GoogleFonts.urbanist(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ],
               ),
             ),
           ),
-       SizedBox(height: 5),
+          SizedBox(height: 5),
           SizedBox(
             height: 40,
 
@@ -1125,52 +1326,52 @@ renameFolderBottomSheet(
               ],
             ),
           ),
-          currentFolderId != "starred" ?  SizedBox(height: 10) : SizedBox(),
-         currentFolderId != "starred" ?  Divider(
-            color: Colors.white.withValues(alpha: 0.1),
-            height: 2,
-            thickness: 2,
-          ) : SizedBox() ,
-         currentFolderId != "starred" ?  SizedBox(height: 5) : SizedBox(),
-         currentFolderId != "starred" ?   GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-             firestoreService.deleteFolder(uid, folderId!,isStarred)
-                  ;
-                  
-            },
-            child: Row(
-              children: [
-                SizedBox(width: 5),
-                SizedBox(
-                  height: 40,
-
+          currentFolderId != "starred" ? SizedBox(height: 10) : SizedBox(),
+          currentFolderId != "starred"
+              ? Divider(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  height: 2,
+                  thickness: 2,
+                )
+              : SizedBox(),
+          currentFolderId != "starred" ? SizedBox(height: 5) : SizedBox(),
+          currentFolderId != "starred"
+              ? GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    firestoreService.deleteFolder(uid, folderId!, isStarred);
+                  },
                   child: Row(
                     children: [
-                      FaIcon(
-                        FontAwesomeIcons.trashCan,
-                        color: Colors.red,
-                        size: 18,
-                      ),
-                      SizedBox(width: 15),
-                      Text(
-                        "Delete",
-                        style: GoogleFonts.urbanist(
-                          color: Colors.red,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(width: 5),
+                      SizedBox(
+                        height: 40,
+
+                        child: Row(
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.trashCan,
+                              color: Colors.red,
+                              size: 18,
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              "Delete",
+                              style: GoogleFonts.urbanist(
+                                color: Colors.red,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ) : SizedBox(),
+                )
+              : SizedBox(),
         ],
       ),
     );
   }
 }
-
-

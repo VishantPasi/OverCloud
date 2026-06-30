@@ -9,6 +9,7 @@ import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/utils/create_folder_bottomsheet.dart';
 import 'package:overcloud/utils/format_date_time.dart';
+import 'package:overcloud/utils/format_file_count.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
 class FilesContent extends StatefulWidget {
@@ -21,11 +22,16 @@ class FilesContent extends StatefulWidget {
 }
 
 class _FilesContentState extends State<FilesContent> {
+  String? videosTotalCount;
+  String? documentsTotalCount;
+  String? musicTotalCount;
+  String? photosTotalCount;
   final ValueNotifier<int> _tabIndexIconButton = ValueNotifier(0);
 
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String uid = _auth.currentUser!.uid;
+  final FormatFileCount _fileCount = FormatFileCount();
 
   ShowPopOver popOver = ShowPopOver();
 
@@ -36,8 +42,52 @@ class _FilesContentState extends State<FilesContent> {
     // _firestore.createFolder(uid, "Custom Folder6");
     // _firestore.getOverallMetadata(uid,"video");
     // _firestore.updateOverallMetadata(uid, "video", 3, "45 gb");
-    
+
+    getTotalCount("videos");
+    getTotalCount("music");
+    getTotalCount("documents");
+    getTotalCount("photos");
+
     super.initState();
+  }
+
+  Future<void> getTotalCount(String fileType) async {
+    final totalCount = await _firestore.getOverallMetadata(uid!, fileType);
+
+    switch (fileType) {
+      case "videos":
+        videosTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
+        setState(() {});
+        break;
+      case "music":
+        musicTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
+        setState(() {});
+        break;
+      case "documents":
+        documentsTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
+        setState(() {});
+        break;
+      case "photos":
+        photosTotalCount = _fileCount.fileCount(
+          totalCount!.data()['totalCount'],
+        );
+        setState(() {});
+        break;
+
+      default:
+        videosTotalCount = "0";
+        musicTotalCount = "0";
+        documentsTotalCount = "0";
+        photosTotalCount = "0";
+        setState(() {});
+        break;
+    }
   }
 
   List<DataTab> get _listIconTabToggle => [
@@ -240,26 +290,26 @@ class _FilesContentState extends State<FilesContent> {
                           gridContainerForCountTwo(
                             FontAwesomeIcons.photoFilm,
                             "Photos",
-                            "243 items",
+                            "${photosTotalCount ?? 0} items",
                             "photos",
                           ),
 
                           gridContainerForCountTwo(
                             FontAwesomeIcons.solidFileLines,
                             "Documents",
-                            "126 items",
+                            "${documentsTotalCount ?? 0} items",
                             "documents",
                           ),
                           gridContainerForCountTwo(
                             FontAwesomeIcons.clapperboard,
                             "Videos",
-                            "43 items",
+                            "${videosTotalCount ?? 0} items",
                             "videos",
                           ),
                           gridContainerForCountTwo(
                             FontAwesomeIcons.music,
                             "Music",
-                            "152 items",
+                            "${musicTotalCount ?? 0} items",
                             "music",
                           ),
                         ]
@@ -267,26 +317,26 @@ class _FilesContentState extends State<FilesContent> {
                           gridContainerForCountOne(
                             FontAwesomeIcons.photoFilm,
                             "Photos",
-                            "243 items",
+                            "${photosTotalCount ?? 0} items",
                             "photos",
                           ),
 
                           gridContainerForCountOne(
                             FontAwesomeIcons.solidFileLines,
                             "Documents",
-                            "126 items",
+                            "${documentsTotalCount ?? 0} items",
                             "documents",
                           ),
                           gridContainerForCountOne(
                             FontAwesomeIcons.clapperboard,
                             "Videos",
-                            "43 items",
+                            "${videosTotalCount ?? 0} items",
                             "videos",
                           ),
                           gridContainerForCountOne(
                             FontAwesomeIcons.music,
                             "Music",
-                            "152 items",
+                            "${musicTotalCount ?? 0} items",
                             "music",
                           ),
                         ],
@@ -362,7 +412,7 @@ class _FilesContentState extends State<FilesContent> {
 
                     if (!snapshot.hasData ||
                         snapshot.data!.docs.isEmpty ||
-                        snapshot.data!.docs.length == 5) {
+                        snapshot.data!.docs.length == 6) {
                       return Container(
                         height: 150,
                         width: size.width,
@@ -394,6 +444,7 @@ class _FilesContentState extends State<FilesContent> {
                       "Videos",
                       "Music",
                       "Starred",
+                      "Private",
                     ];
 
                     final folders = snapshot.data!.docs.where((doc) {
@@ -415,8 +466,7 @@ class _FilesContentState extends State<FilesContent> {
                           ).toString(),
                           folders[index].reference.path,
                           folders[index].id,
-                          folders[index].data()['isStarred']
-
+                          folders[index].data()['isStarred'],
                         );
                       },
                     );
@@ -440,12 +490,15 @@ class _FilesContentState extends State<FilesContent> {
   ) {
     return GestureDetector(
       onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      FoldersPage(folderName: folderName, folderId: folderId,path: path,),
-                ),
-              ),
+        context,
+        MaterialPageRoute(
+          builder: (context) => FoldersPage(
+            folderName: folderName,
+            folderId: folderId,
+            path: path,
+          ),
+        ),
+      ),
       child: Column(
         children: [
           Padding(
@@ -485,7 +538,7 @@ class _FilesContentState extends State<FilesContent> {
                       ),
                     ],
                   ),
-                  
+
                   Row(
                     children: [
                       isStarred
@@ -503,7 +556,7 @@ class _FilesContentState extends State<FilesContent> {
                               color: Colors.white70,
                               size: 18,
                             ),
-                  
+
                             onPressed: () {
                               popOver.popOverFilesContent(
                                 buttonContext,
@@ -519,7 +572,7 @@ class _FilesContentState extends State<FilesContent> {
                             },
                           );
                         },
-                  
+
                         // _firestore.deleteFileMetaData(uid, widget.folderId, fileId);
                       ),
                     ],
@@ -546,7 +599,7 @@ class _FilesContentState extends State<FilesContent> {
   ) {
     return GestureDetector(
       onTap: () {
-         Navigator.push(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
@@ -571,7 +624,9 @@ class _FilesContentState extends State<FilesContent> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+          padding: title == "Documents"
+              ? const EdgeInsets.only(left: 20, top: 15, bottom: 15, right: 15)
+              : const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
