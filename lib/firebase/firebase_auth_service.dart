@@ -121,11 +121,11 @@ class FirebaseAuthService {
       await SecureStorageService.setUID(_auth.currentUser!.uid.toString());
 
       String uid = _auth.currentUser!.uid;
-      await FirebaseFirestore.instance.collection("users").doc(uid).update({
-        "fullName": userCredentials.user!.displayName.toString(),
-        "phoneNumber": userCredentials.user!.phoneNumber.toString(),
-        "email": userCredentials.user!.email.toString(),
-      });
+      await FirebaseFirestore.instance.collection("users").doc(uid).set({
+  "fullName": userCredentials.user?.displayName,
+  "phoneNumber": userCredentials.user?.phoneNumber,
+  "email": userCredentials.user?.email,
+}, SetOptions(merge: true));
 
       _firestoreService.createDefaultFolders(uid, "photos");
       _firestoreService.createDefaultFolders(uid, "documents");

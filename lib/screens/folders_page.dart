@@ -292,12 +292,7 @@ class _FoldersPageState extends State<FoldersPage> {
             PlatformFile? file = await _pickOneFile.pickFile(folderId);
 
             if (file != null) {
-              final multipartFile = await MultipartFile.fromFile(
-                file.path!,
-                filename: file.name,
-              );
-
-              await RetrofitService.getClient().uploadFile(uid, multipartFile);
+              
               _firestore.createFileMetaData(
                 uid,
                 widget.folderId,
@@ -305,6 +300,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 file.extension,
                 file.size,
                 path,
+                file,
                 false,
               );
 
@@ -338,6 +334,7 @@ class _FoldersPageState extends State<FoldersPage> {
                 file.extension,
                 file.size,
                 path,
+                file,
                 false,
               );
             }
