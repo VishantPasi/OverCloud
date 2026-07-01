@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/models/RequestModels/download_file_request_model.dart';
+import 'package:overcloud/retrofit/retro_service.dart';
+import 'package:overcloud/services/download_file_service.dart';
 import 'package:overcloud/utils/format_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 import 'package:overcloud/utils/pick_one_file.dart';
@@ -226,18 +230,19 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
                             fileIcons[fileType] ?? "unknown.svg";
 
                         print(files[index].reference.path);
-                        return fileStructure(
-                          context,
-                          files[index]['fileName'],
-                          formatDateTime(files[index].data()['modifiedOn']),
-                          files[index].data()['fileType'],
-                          files[index].data()['fileSize'],
+                        return files[index].data()['isUploading'] == false
+                            ? fileStructure(
+                                context,
+                                files[index]['fileName'],
+                                formatDateTime(files[index].data()['modifiedOn']),
+                                files[index].data()['fileType'],
+                                files[index].data()['fileSize'],
                           fileTypeLogo,
 
                           files[index].data()['fileId'],
 
                           files[index].data()['isStarred'],
-                        );
+                        ): null;
                       },
                     );
                   },
@@ -291,6 +296,7 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
                 file.extension,
                 file.size,
                 "",
+                file
               );
             }
 
@@ -321,6 +327,7 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
                 file.extension,
                 file.size,
                 "",
+                file
               );
             }
             _isShowDial.value = false;
@@ -352,89 +359,105 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
     // if (filetype == "Folder" ){
 
     // }
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  SvgPicture.asset("assets/icons/$fileTypeLogo", height: 40),
-                  SizedBox(width: 15),
-                  SizedBox(
-                    width: 215,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          fileName,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.urbanist(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          date,
-                          style: GoogleFonts.urbanist(
-                            color: Colors.white70,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              Row(
-                children: [
-                  isStarred
-                      ? FaIcon(
-                          FontAwesomeIcons.solidStar,
-                          color: const Color.fromRGBO(255, 170, 60, 1),
-                          size: 15,
-                        )
-                      : SizedBox(),
-                  Builder(
-                    builder: (buttonContext) {
-                      return IconButton(
-                        icon: FaIcon(
-                          FontAwesomeIcons.ellipsisVertical,
-                          color: Colors.white70,
-                          size: 18,
-                        ),
-
-                        onPressed: () {
-                          _popOver.popOverPrivatePage(
-                            buttonContext,
-                            context,
-                            uid,
-                            fileId,
+    return GestureDetector(
+      onTap: () async{
+       await DownloadService.downloadFile(
+  uid: uid,
+  folderId: "private",
+  fileId: "$fileId.$filetype",
+  fileName: fileName,
+  onProgress: (received, total) {
+    if (total != -1) {
+      print("${(received / total * 100).toStringAsFixed(1)}%");
+    }
+  },
+);
+        
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    SvgPicture.asset("assets/icons/$fileTypeLogo", height: 40),
+                    SizedBox(width: 15),
+                    SizedBox(
+                      width: 215,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
                             fileName,
-                            filetype,
-                            fileSize,
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 10),
-          Divider(
-            color: Colors.white.withValues(alpha: 0.1),
-            height: 2,
-            thickness: 2,
-          ),
-        ],
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.urbanist(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            date,
+                            style: GoogleFonts.urbanist(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+      
+                Row(
+                  children: [
+                    isStarred
+                        ? FaIcon(
+                            FontAwesomeIcons.solidStar,
+                            color: const Color.fromRGBO(255, 170, 60, 1),
+                            size: 15,
+                          )
+                        : SizedBox(),
+                    Builder(
+                      builder: (buttonContext) {
+                        return IconButton(
+                          icon: FaIcon(
+                            FontAwesomeIcons.ellipsisVertical,
+                            color: Colors.white70,
+                            size: 18,
+                          ),
+      
+                          onPressed: () {
+                            _popOver.popOverPrivatePage(
+                              buttonContext,
+                              context,
+                              uid,
+                              fileId,
+                              fileName,
+                              filetype,
+                              fileSize,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Divider(
+              color: Colors.white.withValues(alpha: 0.1),
+              height: 2,
+              thickness: 2,
+            ),
+          ],
+        ),
       ),
     );
   }

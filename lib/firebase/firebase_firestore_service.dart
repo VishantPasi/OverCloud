@@ -93,6 +93,10 @@ class FirebaseFirestoreService {
         "modifiedOn": dateTime.toString(),
         "isStarred": false,
       });
+
+      await RetrofitService.getClient().createFolder(
+        CreateFolderRequestModel(uid: uid, folderName: folder.id),
+      );
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -196,7 +200,9 @@ class FirebaseFirestoreService {
           fileSize,
           path,
           isStarred,
+          file
         );
+        
 
         updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
       } else {
@@ -208,12 +214,7 @@ class FirebaseFirestoreService {
             .collection("files")
             .doc();
 
-        final multipartFile = await MultipartFile.fromFile(
-          file!.path!,
-          filename: "${folder.id}.${file.extension}",
-        );
-
-        await RetrofitService.getClient().uploadFile(uid, multipartFile);
+        
 
         await folder.set({
           "fileId": folder.id,
@@ -223,7 +224,10 @@ class FirebaseFirestoreService {
           "path": "$path/files/${folder.id}",
           "fileSize": fileSize,
           "isStarred": false,
+          "isUploading": true
         });
+
+        
 
         createRecentFilesMetaData(
           uid,
@@ -246,6 +250,15 @@ class FirebaseFirestoreService {
           isStarred,
         );
 
+        final multipartFile = await MultipartFile.fromFile(
+          file!.path!,
+          filename: "${folder.id}.${file.extension}",
+        );
+
+        await RetrofitService.getClient().uploadFile(uid, folderId, multipartFile);
+
+        folder.update({"isUploading": false});
+
         updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
       }
     } catch (e) {
@@ -261,6 +274,7 @@ class FirebaseFirestoreService {
     int? fileSize,
     String? path,
     bool isStarred,
+    PlatformFile? file,
   ) async {
     String fileCategory = _category.getFileCategory(fileType!);
     try {
@@ -273,6 +287,7 @@ class FirebaseFirestoreService {
           .collection("files")
           .doc();
 
+      
       await folder.set({
         "fileId": folder.id,
         "fileName": fileName,
@@ -281,7 +296,10 @@ class FirebaseFirestoreService {
         "fileType": fileType,
         "fileSize": fileSize,
         "isStarred": false,
+        "isUploading": true
       });
+
+
 
       createRecentFilesMetaData(
         uid,
@@ -293,6 +311,15 @@ class FirebaseFirestoreService {
         path,
         isStarred,
       );
+
+      final multipartFile = await MultipartFile.fromFile(
+          file!.path!,
+          filename: "${folder.id}.${file.extension}",
+        );
+        
+        await RetrofitService.getClient().uploadFile(uid, fileCategory, multipartFile);
+
+      folder.update({"isUploading": false});
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -1030,6 +1057,7 @@ class FirebaseFirestoreService {
     String? fileType,
     int? fileSize,
     String? path,
+    PlatformFile? file
   ) async {
     try {
       DateTime dateTime = DateTime.now();
@@ -1048,7 +1076,18 @@ class FirebaseFirestoreService {
         "fileType": fileType,
         "fileSize": fileSize,
         "isStarred": false,
+        "isUploading": true,
+        
       });
+
+      final multipartFile = await MultipartFile.fromFile(
+          file!.path!,
+          filename: "${folder.id}.${file.extension}",
+        );
+
+        await RetrofitService.getClient().uploadFile(uid, "private", multipartFile);
+
+        folder.update({"isUploading": false});
 
       updateOverallMetadata(uid, "private", 1, fileSize!, true);
     } catch (e) {

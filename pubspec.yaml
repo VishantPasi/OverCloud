@@ -55,6 +55,7 @@ dependencies:
   retrofit: ^4.9.2
   retrofit_generator: ^10.2.7
   json_annotation: ^4.12.0
+  path_provider: ^2.1.6
 
 
 

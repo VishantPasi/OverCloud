@@ -231,18 +231,19 @@ class _FoldersPageState extends State<FoldersPage> {
                             fileIcons[fileType] ?? "unknown.svg";
 
                         print(files[index].reference.path);
-                        return fileStructure(
-                          context,
-                          files[index]['fileName'],
-                          formatDateTime(files[index].data()['modifiedOn']),
-                          files[index].data()['fileType'],
-                          files[index].data()['fileSize'],
+                        return files[index].data()['isUploading'] == false
+                            ? fileStructure(
+                                context,
+                                files[index]['fileName'],
+                                formatDateTime(files[index].data()['modifiedOn']),
+                                files[index].data()['fileType'],
+                                files[index].data()['fileSize'],
                           fileTypeLogo,
 
                           files[index].data()['fileId'],
                           files[index].data()['path'],
                           files[index].data()['isStarred'],
-                        );
+                        ):null;
                       },
                     );
                   },
@@ -407,7 +408,7 @@ class _FoldersPageState extends State<FoldersPage> {
                   ),
                 ],
               ),
-
+    
               Row(
                 children: [
                   isStarred
@@ -425,7 +426,7 @@ class _FoldersPageState extends State<FoldersPage> {
                           color: Colors.white70,
                           size: 18,
                         ),
-
+    
                         onPressed: () {
                           _popOver.popOverFoldersPage(
                             buttonContext,
@@ -433,7 +434,7 @@ class _FoldersPageState extends State<FoldersPage> {
                             uid,
                             widget.folderId,
                             fileId,
-
+    
                             fileName,
                             filetype,
                             fileSize,
