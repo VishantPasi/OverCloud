@@ -366,11 +366,7 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
   folderId: "private",
   fileId: "$fileId.$filetype",
   fileName: fileName,
-  onProgress: (received, total) {
-    if (total != -1) {
-      print("${(received / total * 100).toStringAsFixed(1)}%");
-    }
-  },
+  
 );
         
       },
