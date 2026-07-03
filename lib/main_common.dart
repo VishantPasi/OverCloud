@@ -32,7 +32,7 @@ void mainCommon() async {
     
   running: const TaskNotification(
     '{filename}',
-    '{progress}%',
+    '{progress}',
   ),
 
   complete: const TaskNotification(

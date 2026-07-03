@@ -12,12 +12,12 @@ abstract class AppEnvironment {
 
     switch (_environment) {
       case Environment.dev:
-        baseUrl = "API BASE URL";
+        baseUrl = "http://192.168.7.12:8000";
         environmentName = "DEV";
         break;
 
       case Environment.prod:
-        baseUrl = "API BASE URL";
+        baseUrl = "http://192.168.7.12:8000";
         environmentName = "PROD";
         break;
     }

@@ -62,7 +62,8 @@ class DownloadService {
           "&folderId=$folderId"
           "&fileId=$fileId",
       filename: fileName,
-      directory: "mediastore://downloads/OverCloud",
+      baseDirectory: BaseDirectory.publicDownloads,
+      directory: "OverCloud",
       updates: Updates.statusAndProgress,
       allowPause: true,
     );

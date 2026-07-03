@@ -51,15 +51,15 @@ class FirebaseFirestoreService {
           .get();
 
 
-      await RetrofitService.getClient().createFolder(
-        CreateFolderRequestModel(uid: uid, folderName: folderName),
-      );
+     
       
       if (existingFolders.exists) {
         return;
       }
 
-      
+       await RetrofitService.getClient().createFolder(
+        CreateFolderRequestModel(uid: uid, folderName: folderName),
+      );
 
       DateTime dateTime = DateTime.now();
       DocumentReference folder = _firebaseFirestore

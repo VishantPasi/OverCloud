@@ -1,5 +1,7 @@
+import 'package:overcloud/env_config.dart';
+
 class ApiConstants {
-  static const String baseUrl = "http://192.168.7.12:8000";
+  static String baseUrl = AppEnvironment.baseUrl;
 
 
   static const String createFolder = "/createFolder";
