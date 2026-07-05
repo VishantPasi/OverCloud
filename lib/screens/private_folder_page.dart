@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +8,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
-import 'package:overcloud/models/RequestModels/download_file_request_model.dart';
-import 'package:overcloud/retrofit/retro_service.dart';
 import 'package:overcloud/services/download_file_service.dart';
 import 'package:overcloud/utils/format_file_size.dart';
 import 'package:overcloud/utils/format_date_time.dart';
@@ -230,8 +227,7 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
                             fileIcons[fileType] ?? "unknown.svg";
 
                         print(files[index].reference.path);
-                        return files[index].data()['isUploading'] == false
-                            ? fileStructure(
+                        return fileStructure(
                                 context,
                                 files[index]['fileName'],
                                 formatDateTime(files[index].data()['modifiedOn']),
@@ -242,7 +238,7 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
                           files[index].data()['fileId'],
 
                           files[index].data()['isStarred'],
-                        ): null;
+                        );
                       },
                     );
                   },

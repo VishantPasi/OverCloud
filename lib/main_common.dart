@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:overcloud/env_config.dart';
 import 'package:overcloud/screens/login/sign_in_page.dart';
-import 'package:overcloud/services/download_file_service.dart';
+import 'package:overcloud/services/transfer_service.dart';
 
 void mainCommon() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +15,7 @@ void mainCommon() async {
 
   await Firebase.initializeApp();
 
-  DownloadService.initialize();
+  TransferService.initialize();
 
 
   await FileDownloader().permissions.request(
@@ -32,7 +32,7 @@ void mainCommon() async {
     
   running: const TaskNotification(
     '{filename}',
-    '{progress}',
+    'Downloading - {progress}',
   ),
 
   complete: const TaskNotification(
@@ -54,6 +54,28 @@ void mainCommon() async {
     'Download Cancelled',
     '{filename}',
   ),
+
+  uploadRunning: const TaskNotification(
+    '{filename}',
+    'Uploading - {progress}',
+  ),
+
+  uploadComplete: const TaskNotification(
+    'Upload Complete',
+    '{filename}',
+  ),
+
+  uploadError: const TaskNotification(
+    'Upload Failed',
+    '{filename}',
+  ),
+
+  uploadCanceled: const TaskNotification(
+    'Upload Cancelled',
+    '{filename}',
+  ),
+
+
 
   progressBar: true,
   tapOpensFile: true,
