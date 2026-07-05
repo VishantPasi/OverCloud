@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:overcloud/models/RequestModels/create_folder_request_model.dart';
-import 'package:overcloud/models/RequestModels/download_file_request_model.dart';
+import 'package:overcloud/models/RequestModels/delete_file_request_model.dart';
+import 'package:overcloud/models/RequestModels/delete_folder_request_model.dart';
 import 'package:overcloud/models/ResponseModels/create_folder_response_model.dart';
+import 'package:overcloud/models/ResponseModels/delete_file_response_model.dart';
+import 'package:overcloud/models/ResponseModels/delete_folder_response_model.dart';
 import 'package:overcloud/services/api_constants.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -33,10 +36,24 @@ abstract class RestClient {
 
  
 
-  @GET(ApiConstants.downloadFile)
-   Future<void> downloadFile(
-    @Body() DownloadFileRequestModel request
+  // @GET(ApiConstants.downloadFile)
+  //  Future<void> downloadFile(
+  //   @Body() DownloadFileRequestModel request
+  // );
+  
+  @DELETE(ApiConstants.deleteFolder)
+  Future<DeleteFolderResponseModel> deleteFolder(
+    @Body() DeleteFolderRequestModel request
   );
+
+  @DELETE(ApiConstants.delete)
+  Future<DeleteFileResponseModel> delete(
+    @Body() DeleteFileRequestModel request
+  );
+
+
+
+
 
 }
 

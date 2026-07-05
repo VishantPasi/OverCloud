@@ -1,11 +1,11 @@
-class DownloadFileRequestModel {
+class DeleteFileRequestModel {
   String? uid;
   String? folderId;
   String? fileId;
 
-  DownloadFileRequestModel({this.uid, this.folderId, this.fileId});
+  DeleteFileRequestModel({this.uid, this.folderId, this.fileId});
 
-  DownloadFileRequestModel.fromJson(Map<String, dynamic> json) {
+  DeleteFileRequestModel.fromJson(Map<String, dynamic> json) {
     uid = json['uid'];
     folderId = json['folderId'];
     fileId = json['fileId'];

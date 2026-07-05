@@ -5,6 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:overcloud/models/RequestModels/create_folder_request_model.dart';
+import 'package:overcloud/models/RequestModels/delete_file_request_model.dart';
+import 'package:overcloud/models/RequestModels/delete_folder_request_model.dart';
 import 'package:overcloud/retrofit/retro_service.dart';
 import 'package:overcloud/services/secure_storage_service.dart';
 import 'package:overcloud/services/upload_file_service.dart';
@@ -132,6 +134,8 @@ class FirebaseFirestoreService {
           .collection('files')
           .get();
 
+      
+
       for (var doc in folder.docs) {
         print(doc.data());
 
@@ -148,7 +152,10 @@ class FirebaseFirestoreService {
           uid,
           doc.id,
           doc.data()['fileType'],
+          doc.data()['fileSize']
         );
+
+        updateOverallMetadata(uid, doc.data()['fileType'], 1, doc.data()['fileSize'], false);
       }
 
       DocumentReference deleteFolder = _firebaseFirestore
@@ -156,6 +163,8 @@ class FirebaseFirestoreService {
           .doc(uid)
           .collection("folders")
           .doc(folderId);
+
+      await RetrofitService.getClient().deleteFolder(DeleteFolderRequestModel(uid: uid, folderId: folderId));
 
       await deleteFolder.delete();
 
@@ -405,6 +414,7 @@ class FirebaseFirestoreService {
     String uid,
     String fileId,
     String fileType,
+    int fileSize,
   ) async {
     String fileCategory = _category.getFileCategory(fileType);
     try {
@@ -419,6 +429,7 @@ class FirebaseFirestoreService {
           .get();
 
       // folder.reference.delete();
+
 
       for (var doc in folder.docs) {
         doc.reference.delete();
@@ -504,6 +515,8 @@ class FirebaseFirestoreService {
         await folder.delete();
       }
 
+      await RetrofitService.getClient().delete(DeleteFileRequestModel(uid: uid,folderId: folderId, fileId: "$fileId.$fileType"));
+
       print("dataaaa: $isStarred, ");
 
       updateOverallMetadata(uid, fileType, 1, fileSize, false);
@@ -518,7 +531,7 @@ class FirebaseFirestoreService {
       deleteRecentFile(uid, folderId, fileId, false);
       print("delete recent ended");
       print("errorrrrrrrr: $uid,$fileId,$fileType,$folderId, $path");
-      deleteFileMetaDataForDefaultFolders(uid, fileId, fileType);
+      deleteFileMetaDataForDefaultFolders(uid, fileId, fileType, fileSize);
       // }
     } catch (e) {
       debugPrint(e.toString());
@@ -1148,6 +1161,8 @@ class FirebaseFirestoreService {
           .collection("files")
           .where("fileId", isEqualTo: fileId)
           .get();
+      
+       await RetrofitService.getClient().delete(DeleteFileRequestModel(uid: uid,folderId: "private", fileId: "$fileId.$fileType"));
 
       // folder.reference.delete();
 
