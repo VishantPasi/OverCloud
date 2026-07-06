@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:background_downloader/background_downloader.dart';
+import 'package:flutter/cupertino.dart';
 
 class TransferService {
   static StreamSubscription? _updatesSubscription;
@@ -15,7 +16,7 @@ class TransferService {
       if (update is TaskProgressUpdate) {
         final progress = update.progress;
 
-        print(
+        debugPrint(
           "Task: ${update.task.taskId} | "
           "Progress: ${(progress * 100).toStringAsFixed(2)}%",
         );
@@ -24,7 +25,7 @@ class TransferService {
       }
 
       if (update is TaskStatusUpdate) {
-        print(
+        debugPrint(
           "Task: ${update.task.taskId} | "
           "Status: ${update.status}",
         );

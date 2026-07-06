@@ -52,7 +52,7 @@ class _FilesContentState extends State<FilesContent> {
   }
 
   Future<void> getTotalCount(String fileType) async {
-    final totalCount = await _firestore.getOverallMetadata(uid!, fileType);
+    final totalCount = await _firestore.getOverallMetadata(uid, fileType);
 
     switch (fileType) {
       case "videos":

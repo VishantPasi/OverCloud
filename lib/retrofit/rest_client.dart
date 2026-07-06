@@ -27,19 +27,6 @@ abstract class RestClient {
     @Part(name: "folderId") String folderId,
     @Part(name: "file") MultipartFile file,
   );
-
-  // @POST(ApiConstants.createFolder)
-  //  Future<Map<String, dynamic>> createFolder(
-  //   @Query("uid") String uid,
-  //   @Query("folder_name") String folderName,
-  // );
-
- 
-
-  // @GET(ApiConstants.downloadFile)
-  //  Future<void> downloadFile(
-  //   @Body() DownloadFileRequestModel request
-  // );
   
   @DELETE(ApiConstants.deleteFolder)
   Future<DeleteFolderResponseModel> deleteFolder(
@@ -50,10 +37,6 @@ abstract class RestClient {
   Future<DeleteFileResponseModel> delete(
     @Body() DeleteFileRequestModel request
   );
-
-
-
-
 
 }
 

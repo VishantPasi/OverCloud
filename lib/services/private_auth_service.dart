@@ -6,7 +6,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
-import 'package:overcloud/screens/folders_page.dart';
 import 'package:overcloud/screens/private_folder_page.dart';
 import 'package:overcloud/services/secure_storage_service.dart';
 import 'package:overcloud/utils/error_dialog.dart';
@@ -85,17 +84,15 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
   Future<void> _initialize() async {
     final millis = int.parse(await SecureStorageService.getLockUntil() ?? "0");
 
-    print(millis);
 
-    if (millis != null) {
-      final endTime = DateTime.fromMillisecondsSinceEpoch(millis);
 
-      if (DateTime.now().isBefore(endTime)) {
-        isLocked = true;
-        remainingSeconds = endTime.difference(DateTime.now()).inSeconds;
+    final endTime = DateTime.fromMillisecondsSinceEpoch(millis);
 
-        startLockTimer();
-      }
+    if (DateTime.now().isBefore(endTime)) {
+      isLocked = true;
+      remainingSeconds = endTime.difference(DateTime.now()).inSeconds;
+
+      startLockTimer();
     }
 
     if (widget.isPFEnabled) {
@@ -233,7 +230,6 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
             "Please try again in a moment.",
             context,
           );
-          print("Too many failed attempts. Please try again in a moment.");
           break;
 
         case LocalAuthExceptionCode.noBiometricsEnrolled:
@@ -246,7 +242,11 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
           break;
 
         default:
-          print("Authentication failed.");
+           errorMessage(
+            "Authentication Failed",
+            "Please try again in a few moments.",
+            context,
+          );
       }
     }
   }
@@ -554,7 +554,6 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
 
         setState(() {});
 
-        print("pinnnnn: ${uPIN.text}");
       },
       child: Container(
         width: 60,

@@ -10,9 +10,9 @@ class CreateFolderRequestModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['uid'] = this.uid;
-    data['folderName'] = this.folderName;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['uid'] = uid;
+    data['folderName'] = folderName;
     return data;
   }
 }

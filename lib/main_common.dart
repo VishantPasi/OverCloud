@@ -28,7 +28,7 @@ void mainCommon() async {
   ],
   );
 
-  await FileDownloader().configureNotification(
+  FileDownloader().configureNotification(
     
   running: const TaskNotification(
     '{filename}',
@@ -78,7 +78,7 @@ void mainCommon() async {
 
 
   progressBar: true,
-  tapOpensFile: true,
+  tapOpensFile: false,
 );
 
   runApp(const MyApp());

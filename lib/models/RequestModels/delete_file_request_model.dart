@@ -12,10 +12,10 @@ class DeleteFileRequestModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['uid'] = this.uid;
-    data['folderId'] = this.folderId;
-    data['fileId'] = this.fileId;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['uid'] = uid;
+    data['folderId'] = folderId;
+    data['fileId'] = fileId;
     return data;
   }
 }

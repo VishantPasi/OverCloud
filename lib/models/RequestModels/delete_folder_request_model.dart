@@ -10,9 +10,9 @@ class DeleteFolderRequestModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['uid'] = this.uid;
-    data['folderId'] = this.folderId;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['uid'] = uid;
+    data['folderId'] = folderId;
     return data;
   }
 }

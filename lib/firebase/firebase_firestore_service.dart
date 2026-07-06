@@ -87,16 +87,23 @@ class FirebaseFirestoreService {
           .doc(uid)
           .collection("folders")
           .doc();
-
-      await folder.set({
-        "folderName": folderName,
-        "modifiedOn": dateTime.toString(),
-        "isStarred": false,
-      });
-
-      await RetrofitService.getClient().createFolder(
-        CreateFolderRequestModel(uid: uid, folderName: folder.id),
-      );
+      RetrofitService.getClient()
+          .createFolder(
+            CreateFolderRequestModel(uid: uid, folderName: folder.id),
+          )
+          .then((_) {
+            return folder.set({
+              "folderName": folderName,
+              "modifiedOn": dateTime.toString(),
+              "isStarred": false,
+            });
+          })
+          .then((_) {
+            debugPrint("Folder created successfully.");
+          })
+          .catchError((e) {
+            debugPrint("Failed to create folder: $e");
+          });
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -134,12 +141,8 @@ class FirebaseFirestoreService {
           .collection('files')
           .get();
 
-      
-
       for (var doc in folder.docs) {
-        print(doc.data());
-
-        deleteFileMetaData(
+        await deleteFileMetaData(
           uid,
           folderId,
           doc.id,
@@ -148,14 +151,37 @@ class FirebaseFirestoreService {
           doc.reference.path,
           doc.data()['isStarred'],
         );
-        deleteFileMetaDataForDefaultFolders(
+        await deleteFileMetaDataForDefaultFolders(
           uid,
           doc.id,
           doc.data()['fileType'],
-          doc.data()['fileSize']
+          doc.data()['fileSize'],
         );
 
-        updateOverallMetadata(uid, doc.data()['fileType'], 1, doc.data()['fileSize'], false);
+        // doc.data()['isStarred'] ? await removeFromStarred(
+        //   uid,
+        //   folderId,
+        //   doc.id,
+        //   doc.reference.path,
+        //   doc.data()['fileSize'],
+        //   doc.data()['fileType'],
+        //   false,
+        // ) : null;
+
+        // await updateOverallMetadata(
+        //   uid,
+        //   doc.data()['fileType'],
+        //   1,
+        //   doc.data()['fileSize'],
+        //   false,
+        // );
+        // doc.data()['isStarred'] ?  await updateOverallMetadata(
+        //   uid,
+        //   "starred",
+        //   1,
+        //   doc.data()['fileSize'],
+        //   false,
+        // ): null;
       }
 
       DocumentReference deleteFolder = _firebaseFirestore
@@ -164,16 +190,15 @@ class FirebaseFirestoreService {
           .collection("folders")
           .doc(folderId);
 
-      await RetrofitService.getClient().deleteFolder(DeleteFolderRequestModel(uid: uid, folderId: folderId));
-
-      await deleteFolder.delete();
-
-      print(isStarred);
-
-      isStarred
-          ? removeFromStarred(uid, folderId, null, null, null, null, true)
-          : null;
-      deleteRecentFile(uid, folderId, null, true);
+      await RetrofitService.getClient()
+          .deleteFolder(DeleteFolderRequestModel(uid: uid, folderId: folderId))
+          .then((_) async {
+            await deleteFolder.delete();
+            isStarred
+                ? removeFromStarred(uid, folderId, null, null, null, null, true)
+                : null;
+            deleteRecentFile(uid, folderId, null, true);
+          });
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -260,18 +285,6 @@ class FirebaseFirestoreService {
             updateOverallMetadata(uid, fileType!, 1, fileSize ?? 0, true);
           },
         );
-
-        // final multipartFile = await MultipartFile.fromFile(
-        //   file!.path!,
-        //   filename: "${folder.id}.${file.extension}",
-        // );
-
-        // await RetrofitService.getClient().uploadFile(
-        //   uid,
-        //   folderId,
-        //   "${folder.id}.${file.extension}",
-        //   multipartFile,
-        // );
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -327,18 +340,6 @@ class FirebaseFirestoreService {
           );
         },
       );
-
-      // final multipartFile = await MultipartFile.fromFile(
-      //   file!.path!,
-      //   filename: "${folder.id}.${file.extension}",
-      // );
-
-      // await RetrofitService.getClient().uploadFile(
-      //   uid,
-      //   fileCategory,
-      //   "${folder.id}.${file.extension}",
-      //   multipartFile,
-      // );
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -388,8 +389,6 @@ class FirebaseFirestoreService {
     try {
       DateTime dateTime = DateTime.now();
 
-      print("errorrrrrr: $fileId,$newFileName");
-
       final folder = await _firebaseFirestore
           .collection('users')
           .doc(uid)
@@ -410,7 +409,7 @@ class FirebaseFirestoreService {
     }
   }
 
-  void deleteFileMetaDataForDefaultFolders(
+  Future<void> deleteFileMetaDataForDefaultFolders(
     String uid,
     String fileId,
     String fileType,
@@ -418,7 +417,6 @@ class FirebaseFirestoreService {
   ) async {
     String fileCategory = _category.getFileCategory(fileType);
     try {
-      print("From Default delete: $fileId");
       final folder = await _firebaseFirestore
           .collection('users')
           .doc(uid)
@@ -427,9 +425,6 @@ class FirebaseFirestoreService {
           .collection("files")
           .where("fileId", isEqualTo: fileId)
           .get();
-
-      // folder.reference.delete();
-
 
       for (var doc in folder.docs) {
         doc.reference.delete();
@@ -462,14 +457,6 @@ class FirebaseFirestoreService {
   ) async {
     try {
       DateTime dateTime = DateTime.now();
-      //  if (folderId == "videos" ||
-      //       folderId == "photos" ||
-      //       folderId == "music" ||
-      //       folderId == "documents") {
-
-      print(
-        "erorrrr: $uid, $folderId, $fileId, $fileType, $newFileName, $path",
-      );
 
       if (path.isNotEmpty) {
         final folder = _firebaseFirestore.doc(path);
@@ -481,18 +468,14 @@ class FirebaseFirestoreService {
       }
 
       renameRecentFiles(uid, fileId, newFileName);
-
-      print("$fileType is this");
-
       renameFileMetaDataForDefaultFolders(uid, fileId, fileType, newFileName);
-
       renameStarredFolderOrFile(uid, null, fileId, null, newFileName, false);
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
-  void deleteFileMetaData(
+  Future<void> deleteFileMetaData(
     String uid,
     String folderId,
     String fileId,
@@ -502,40 +485,45 @@ class FirebaseFirestoreService {
     bool isStarred,
   ) async {
     try {
-      //  if (folderId == "videos" ||
-      //       folderId == "photos" ||
-      //       folderId == "music" ||
-      //       folderId == "documents") {
-
       if (path!.isNotEmpty) {
         final folder = _firebaseFirestore.doc(path);
-
-        print(folder);
-
         await folder.delete();
       }
 
-      await RetrofitService.getClient().delete(DeleteFileRequestModel(uid: uid,folderId: folderId, fileId: "$fileId.$fileType"));
+      await RetrofitService.getClient()
+          .delete(
+            DeleteFileRequestModel(
+              uid: uid,
+              folderId: folderId,
+              fileId: "$fileId.$fileType",
+            ),
+          )
+          .then((_) {
+            updateOverallMetadata(uid, fileType, 1, fileSize, false);
 
-      print("dataaaa: $isStarred, ");
+            isStarred
+                ? updateOverallMetadata(uid, "starred", 1, fileSize, false)
+                : null;
 
-      updateOverallMetadata(uid, fileType, 1, fileSize, false);
-
-      isStarred
-          ? updateOverallMetadata(uid, "starred", 1, fileSize, false)
-          : null;
-
-      removeFromStarred(uid, folderId, fileId, null, fileSize, fileType, false);
-      print("delete recent started");
-      print("$fileId");
-      deleteRecentFile(uid, folderId, fileId, false);
-      print("delete recent ended");
-      print("errorrrrrrrr: $uid,$fileId,$fileType,$folderId, $path");
-      deleteFileMetaDataForDefaultFolders(uid, fileId, fileType, fileSize);
-      // }
+            removeFromStarred(
+              uid,
+              folderId,
+              fileId,
+              null,
+              fileSize,
+              fileType,
+              false,
+            );
+            deleteRecentFile(uid, folderId, fileId, false);
+            deleteFileMetaDataForDefaultFolders(
+              uid,
+              fileId,
+              fileType,
+              fileSize,
+            );
+          });
     } catch (e) {
       debugPrint(e.toString());
-      print(path);
     }
   }
 
@@ -562,7 +550,6 @@ class FirebaseFirestoreService {
           .doc();
 
       if (isFolder) {
-        print("started adding");
         DocumentReference update = _firebaseFirestore
             .collection('users')
             .doc(uid)
@@ -570,7 +557,6 @@ class FirebaseFirestoreService {
             .doc(folderId);
 
         await update.update({"isStarred": true});
-        print("don update");
 
         await starred.set({
           "folderName": folderName,
@@ -579,16 +565,12 @@ class FirebaseFirestoreService {
           "path": path,
           "modifiedOn": dateTime.toString(),
         });
-
-        print("ended adding");
       } else {
         DocumentReference update = _firebaseFirestore.doc(path!);
 
         await update.update({"isStarred": true});
 
         String fileCategory = _category.getFileCategory(fileType!);
-
-        print("fileedata: $fileType, $fileId");
 
         final updateDefaultFiles = await _firebaseFirestore
             .collection('users')
@@ -600,7 +582,6 @@ class FirebaseFirestoreService {
             .get();
 
         for (var doc in updateDefaultFiles.docs) {
-          print("docccc ${doc.reference.path}");
           doc.reference.update({"isStarred": true});
         }
 
@@ -658,10 +639,6 @@ class FirebaseFirestoreService {
     try {
       DateTime dateTime = DateTime.now();
 
-      print(
-        "errorrrrrr: $folderId,$fileId,$newFolderName,$newFileName,$isFolder",
-      );
-
       if (isFolder) {
         final starred = await _firebaseFirestore
             .collection('users')
@@ -700,7 +677,7 @@ class FirebaseFirestoreService {
     }
   }
 
-  void removeFromStarred(
+  Future<void> removeFromStarred(
     String uid,
     String? folderId,
     String? fileId,
@@ -744,8 +721,6 @@ class FirebaseFirestoreService {
 
         String fileCategory = _category.getFileCategory(fileType!);
 
-        print("fileedata: $fileType, $fileId");
-
         final updateDefaultFiles = await _firebaseFirestore
             .collection('users')
             .doc(uid)
@@ -756,7 +731,6 @@ class FirebaseFirestoreService {
             .get();
 
         for (var doc in updateDefaultFiles.docs) {
-          print("docccc ${doc.reference.path}");
           doc.reference.update({"isStarred": false});
         }
 
@@ -826,8 +800,6 @@ class FirebaseFirestoreService {
     try {
       DateTime dateTime = DateTime.now();
 
-      print("errorrrrrr: $fileId,$newFileName");
-
       final recents = await _firebaseFirestore
           .collection('users')
           .doc(uid)
@@ -854,7 +826,6 @@ class FirebaseFirestoreService {
   ) async {
     try {
       if (isFolder) {
-        print("dsafd: $folderId");
         final folder = await _firebaseFirestore
             .collection('users')
             .doc(uid)
@@ -866,7 +837,6 @@ class FirebaseFirestoreService {
           docs.reference.delete();
         }
       } else {
-        print("FROM RECENT $fileId");
         final folder = await _firebaseFirestore
             .collection('users')
             .doc(uid)
@@ -939,7 +909,7 @@ class FirebaseFirestoreService {
     return null;
   }
 
-  void updateOverallMetadata(
+  Future<void> updateOverallMetadata(
     String uid,
     String fileType,
     int newTotalCount,
@@ -948,8 +918,6 @@ class FirebaseFirestoreService {
   ) async {
     String fileCategory = _category.getFileCategory(fileType);
     try {
-      // Normalize file types
-
       final metadata = await _firebaseFirestore
           .collection("users")
           .doc(uid)
@@ -1100,28 +1068,6 @@ class FirebaseFirestoreService {
           .collection("files")
           .doc();
 
-      // await folder.set({
-      //   "fileId": folder.id,
-      //   "fileName": fileName,
-      //   "modifiedOn": dateTime.toString(),
-      //   "fileType": fileType,
-      //   "fileSize": fileSize,
-      //   "isStarred": false,
-      //   "isUploading": true,
-      // });
-
-      // final multipartFile = await MultipartFile.fromFile(
-      //   file!.path!,
-      //   filename: "${folder.id}.${file.extension}",
-      // );
-
-      // await RetrofitService.getClient().uploadFile(
-      //   uid,
-      //   "private",
-      //   "${folder.id}.${file.extension}",
-      //   multipartFile,
-      // );
-
       await UploadService.uploadFile(
         uid: uid,
         folderId: "private",
@@ -1152,7 +1098,6 @@ class FirebaseFirestoreService {
     int fileSize,
   ) async {
     try {
-      print("From Default delete: $fileId");
       final folder = await _firebaseFirestore
           .collection('users')
           .doc(uid)
@@ -1161,16 +1106,21 @@ class FirebaseFirestoreService {
           .collection("files")
           .where("fileId", isEqualTo: fileId)
           .get();
-      
-       await RetrofitService.getClient().delete(DeleteFileRequestModel(uid: uid,folderId: "private", fileId: "$fileId.$fileType"));
 
-      // folder.reference.delete();
-
-      for (var doc in folder.docs) {
-        doc.reference.delete();
-      }
-
-      updateOverallMetadata(uid, "private", 1, fileSize, false);
+      await RetrofitService.getClient()
+          .delete(
+            DeleteFileRequestModel(
+              uid: uid,
+              folderId: "private",
+              fileId: "$fileId.$fileType",
+            ),
+          )
+          .then((_) {
+            for (var doc in folder.docs) {
+              doc.reference.delete();
+            }
+            updateOverallMetadata(uid, "private", 1, fileSize, false);
+          });
     } catch (e) {
       debugPrint(e.toString());
     }

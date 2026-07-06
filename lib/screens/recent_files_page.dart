@@ -211,7 +211,6 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                         String fileTypeLogo =
                             fileIcons[fileType] ?? "unknown.svg";
 
-                        print(files[index].reference.path);
                         return fileStructure(
                           context,
                           files[index]['folderId'],
@@ -297,12 +296,11 @@ class _RecentFilesPageState extends State<RecentFilesPage> {
                     ),
 
                     onPressed: () {
-                     print("thi $isStarred");
                       _popOver.popOverRecentFilesPage(
                         buttonContext,
                         context,
 
-                        uid!,
+                        uid,
                         folderId,
                         fileId,
                         fileName,

@@ -6,7 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
 import 'package:overcloud/screens/folders_page.dart';
-import 'package:overcloud/utils/format_file_size.dart';
+import 'package:overcloud/services/download_file_service.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
 
@@ -30,7 +30,6 @@ class _StarredPageState extends State<StarredPage> {
 
   final ValueNotifier<int> fileCount = ValueNotifier<int>(0);
 
-  final FormatFileSize _convertFileSize = FormatFileSize();
   final ShowPopOver _popOver = ShowPopOver();
 
   @override
@@ -261,9 +260,8 @@ class _StarredPageState extends State<StarredPage> {
     String filePath,
     bool isFolder,
   ) {
-
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         isFolder
             ? Navigator.push(
                 context,
@@ -274,7 +272,13 @@ class _StarredPageState extends State<StarredPage> {
                   ),
                 ),
               )
-            : null;
+            : await DownloadService.downloadFile(
+                uid: uid,
+                folderId: folderId,
+                fileId: "$fileId.$filetype",
+                fileName: fileNameOrFolderName,
+              );
+        ;
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 10.0),

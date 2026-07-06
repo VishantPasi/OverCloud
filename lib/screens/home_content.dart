@@ -39,7 +39,6 @@ class _HomeContentState extends State<HomeContent> {
   bool? isPFEnabled;
 
   final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
-  final SecureStorageService _storageService = SecureStorageService();
   final ShowPopOver _popOver = ShowPopOver();
   final FormatFileSize _fileSize = FormatFileSize();
   final FormatFileCount _fileCount = FormatFileCount();
@@ -66,7 +65,6 @@ class _HomeContentState extends State<HomeContent> {
     _firestore.getPrivateFolderStatus(uid!).listen((value) {
       SecureStorageService.setIsPrivateEnabled(value);
       isPFEnabled = value;
-      print("this is $isPFEnabled");
     });
 
     setState(() {});
@@ -637,7 +635,6 @@ class _HomeContentState extends State<HomeContent> {
                       String fileTypeLogo =
                           fileIcons[fileType] ?? "unknown.svg";
 
-                      print(files[index].reference.path);
                       return fileStructure(
                         context,
                         files[index]['folderId'],
@@ -899,7 +896,6 @@ class _HomeContentState extends State<HomeContent> {
                     ),
 
                     onPressed: () {
-                      print("thi $isStarred");
                       _popOver.popOverRecentFilesPage(
                         buttonContext,
                         context,

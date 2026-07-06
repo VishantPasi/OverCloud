@@ -364,9 +364,6 @@ class ShowPopOver {
           SizedBox(height: 5),
           GestureDetector(
             onTap: () {
-              print(
-                "errorr: $folderId, $folderName, $fileId, $fileName, $fileType, $fileSize $isStarred,$isFolder",
-              );
               if (isStarred) {
                 isFolder
                     ? firestoreService.removeFromStarred(
@@ -615,7 +612,6 @@ class ShowPopOver {
           GestureDetector(
             onTap: () {
               Navigator.pop(context);
-              print("contexttt:  $folderId, $fileId, $fileName, $isStarred");
               renameFileBottomSheet(
                 context,
                 uid,
@@ -681,9 +677,6 @@ class ShowPopOver {
           currentFolderId != "starred"
               ? GestureDetector(
                   onTap: () {
-                    print(
-                      "contexttt:  $folderId, $fileId, $fileName, $isStarred",
-                    );
                     Navigator.pop(context);
                     firestoreService.deleteFileMetaData(
                       uid,
