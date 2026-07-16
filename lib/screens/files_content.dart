@@ -374,7 +374,7 @@ class _FilesContentState extends State<FilesContent> {
                         ),
                         SizedBox(width: 10),
                         GestureDetector(
-                          onTap: () => createFolderBottomSheet(context, uid, ""),
+                          onTap: () => createFolderBottomSheet(context, uid, "",),
                           child: Container(
                             width: 35,
                             height: 35,
@@ -488,7 +488,7 @@ class _FilesContentState extends State<FilesContent> {
         Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => FoldersPage(folderName: name, folderId: id, parentId: id),
+          builder: (context) => FoldersPage(folderName: name, folderId: id, parentId: id,currentPath: name,),
         ),
       );
       },
@@ -602,7 +602,7 @@ class _FilesContentState extends State<FilesContent> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                FoldersPage(folderName: title, folderId: folderId, parentId: "",),
+                FoldersPage(folderName: title, folderId: folderId, parentId: folderId, currentPath: title,),
           ),
         );
       },
@@ -682,7 +682,7 @@ class _FilesContentState extends State<FilesContent> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                FoldersPage(folderName: title, folderId: folderId, parentId: "",),
+                FoldersPage(folderName: title, folderId: folderId, parentId: "",currentPath: title,),
           ),
         );
       },

@@ -678,7 +678,7 @@ class _HomeContentState extends State<HomeContent> {
               context,
               MaterialPageRoute(
                 builder: ((context) => folderId == "files"
-                    ? FoldersPage(folderName: subTitle, folderId: folderId, parentId: "",)
+                    ? FoldersPage(folderName: subTitle, folderId: folderId, parentId: "",currentPath: folderId,)
                     : folderId == "private"
                     ? PrivateAuthService(
                         uid: uid!,
@@ -787,7 +787,7 @@ class _HomeContentState extends State<HomeContent> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                FoldersPage(folderName: text, folderId: folderId, parentId: "",),
+                FoldersPage(folderName: text, folderId: folderId, parentId: folderId, currentPath: folderId,),
           ),
         ),
         child: Container(

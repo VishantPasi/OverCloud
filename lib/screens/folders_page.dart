@@ -20,11 +20,14 @@ class FoldersPage extends StatefulWidget {
   final String folderName;
   final String folderId;
   final String parentId;
+  final String currentPath;
+
   const FoldersPage({
     super.key,
     required this.folderName,
     required this.folderId,
     required this.parentId,
+    required this.currentPath
   });
 
   @override
@@ -40,10 +43,25 @@ class _FoldersPageState extends State<FoldersPage> {
 
   // final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
   bool _isShowDial = false;
+  bool _showFab = false;
 
   final PickOneFile _pickOneFile = PickOneFile();
   final ShowPopOver _popOver = ShowPopOver();
   final FirestoreCreateOperations _create = FirestoreCreateOperations();
+  // @override
+  // void initState() {
+
+  //   WidgetsBinding.instance.addPostFrameCallback((_) async {
+  //     await Future.delayed(const Duration(milliseconds: 250));
+
+  //     if (!mounted) return;
+
+  //     setState(() {
+  //       _showFab = true;
+  //     });
+  //   });
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -259,7 +277,8 @@ class _FoldersPageState extends State<FoldersPage> {
           ),
         ),
       ),
-      floatingActionButton: _getFloatingActionButton(widget.folderId),
+      floatingActionButton: _getFloatingActionButton(widget.folderId)
+          
     );
   }
 
@@ -295,6 +314,10 @@ class _FoldersPageState extends State<FoldersPage> {
           heroTag: "file_upload",
           onPressed: () async {
             PlatformFile? file = await _pickOneFile.pickFile(folderId);
+
+            String path = "this is path ${widget.parentId!}/$folderId";
+
+            print(path);
 
             if (file != null) {
               _create.createFile(
@@ -388,11 +411,15 @@ class _FoldersPageState extends State<FoldersPage> {
 
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  FoldersPage(folderName: name, folderId: id, parentId: id),
+            PageRouteBuilder(
+              pageBuilder: (_, __, ___) =>
+                  FoldersPage(folderName: name, folderId: id, parentId: id, currentPath: "${widget.currentPath}/$name",),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
             ),
           );
+
+          print("fdsfds ${widget.currentPath}/$name");
         } else {
           await DownloadService.downloadFile(
             uid: uid,

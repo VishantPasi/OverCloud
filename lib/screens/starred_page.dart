@@ -272,6 +272,7 @@ class _StarredPageState extends State<StarredPage> {
                     folderName: fileNameOrFolderName,
                     folderId: folderId,
                     parentId: widget.parentId,
+                    currentPath: folderId,
                   ),
                 ),
               )
