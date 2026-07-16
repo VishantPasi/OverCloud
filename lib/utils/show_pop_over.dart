@@ -15,7 +15,7 @@ class ShowPopOver {
     String uid,
     String? folderId,
     String? folderName,
-    String path,
+    String? path,
     String? currentFolderId,
     bool isFolder,
     bool isStarred,
@@ -36,7 +36,7 @@ class ShowPopOver {
           uid,
           folderId,
           folderName,
-          path,
+          path!,
           currentFolderId,
           isFolder,
           isStarred,
@@ -497,6 +497,7 @@ class ShowPopOver {
                         ? firestoreService.deleteFolder(
                             uid,
                             folderId!,
+                            folderName!,
                             isStarred,
                           )
                         : firestoreService.deleteFileMetaData(
@@ -1332,7 +1333,7 @@ class ShowPopOver {
               ? GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
-                    firestoreService.deleteFolder(uid, folderId!, isStarred);
+                    firestoreService.deleteFolder(uid, folderId!, folderName!, isStarred);
                   },
                   child: Row(
                     children: [

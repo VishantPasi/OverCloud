@@ -678,15 +678,16 @@ class _HomeContentState extends State<HomeContent> {
               context,
               MaterialPageRoute(
                 builder: ((context) => folderId == "files"
-                    ? FoldersPage(folderName: subTitle, folderId: folderId)
+                    ? FoldersPage(folderName: subTitle, folderId: folderId, parentId: "",)
                     : folderId == "private"
                     ? PrivateAuthService(
                         uid: uid!,
                         isPFEnabled: isPFEnabled!,
                         folderName: subTitle,
                         folderId: folderId,
+                        parentId: "",
                       )
-                    : StarredPage(folderName: subTitle, folderId: folderId)),
+                    : StarredPage(folderName: subTitle, folderId: folderId, parentId: "",)),
               ),
             );
           },
@@ -786,7 +787,7 @@ class _HomeContentState extends State<HomeContent> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                FoldersPage(folderName: text, folderId: folderId),
+                FoldersPage(folderName: text, folderId: folderId, parentId: "",),
           ),
         ),
         child: Container(

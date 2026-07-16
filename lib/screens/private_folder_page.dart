@@ -16,11 +16,13 @@ import 'package:overcloud/utils/show_pop_over.dart';
 class PrivateFolderPage extends StatefulWidget {
   final String folderName;
   final String folderId;
+  final String parentId;
 
   const PrivateFolderPage({
     super.key,
     required this.folderName,
     required this.folderId,
+    required this.parentId
   });
 
   @override
@@ -146,7 +148,7 @@ class _PrivateFolderPageState extends State<PrivateFolderPage> {
                 SizedBox(height: 20),
 
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: _firestore.getFilesMetaDataList(uid, widget.folderId),
+                  stream: _firestore.getFilesMetaDataList(uid, widget.folderId, widget.parentId),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());

@@ -13,10 +13,12 @@ import 'package:overcloud/utils/show_pop_over.dart';
 class StarredPage extends StatefulWidget {
   final String folderName;
   final String folderId;
+  final String parentId;
   const StarredPage({
     super.key,
     required this.folderName,
     required this.folderId,
+    required this.parentId
   });
 
   @override
@@ -269,6 +271,7 @@ class _StarredPageState extends State<StarredPage> {
                   builder: (context) => FoldersPage(
                     folderName: fileNameOrFolderName,
                     folderId: folderId,
+                    parentId: widget.parentId,
                   ),
                 ),
               )

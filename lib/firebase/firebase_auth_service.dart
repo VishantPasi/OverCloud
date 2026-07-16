@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/firebase/firestore_default_folders_creation.dart';
 import 'package:overcloud/services/secure_storage_service.dart';
 import 'package:overcloud/utils/error_dialog.dart';
 import 'package:overcloud/screens/home_page.dart';
@@ -99,6 +100,7 @@ class FirebaseAuthService {
   }
 
   Future<void> signInWithGoogle(BuildContext context) async {
+    final FirestoreDefaultFoldersCreation firestore = FirestoreDefaultFoldersCreation();
     isLoading.value = true;
     try {
       await _googleSignIn.initialize(serverClientId: _webSdkClientId);
@@ -127,12 +129,14 @@ class FirebaseAuthService {
   "email": userCredentials.user?.email,
 }, SetOptions(merge: true));
 
-      _firestoreService.createDefaultFolders(uid, "photos");
-      _firestoreService.createDefaultFolders(uid, "documents");
-      _firestoreService.createDefaultFolders(uid, "videos");
-      _firestoreService.createDefaultFolders(uid, "music");
-      _firestoreService.createDefaultFolders(uid, "starred");
-      _firestoreService.createDefaultFolders(uid, "private");
+
+
+      firestore.createDefaultFolders(uid, "photos");
+      firestore.createDefaultFolders(uid, "documents");
+      firestore.createDefaultFolders(uid, "videos");
+      firestore.createDefaultFolders(uid, "music");
+      firestore.createDefaultFolders(uid, "starred");
+      firestore.createDefaultFolders(uid, "private");
       _firestoreService.createOverallMetadataFolders(uid, "photos");
       _firestoreService.createOverallMetadataFolders(uid, "documents");
       _firestoreService.createOverallMetadataFolders(uid, "videos");

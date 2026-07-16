@@ -12,7 +12,6 @@ import 'package:overcloud/services/secure_storage_service.dart';
 import 'package:overcloud/services/upload_file_service.dart';
 import 'package:overcloud/utils/error_dialog.dart';
 import 'package:overcloud/utils/file_category.dart';
-import 'package:path/path.dart';
 
 class FirebaseFirestoreService {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
@@ -42,7 +41,7 @@ class FirebaseFirestoreService {
     return _firebaseFirestore
         .collection('users')
         .doc(uid)
-        .collection('folders')
+        .collection('folders').where("parentId",isEqualTo: "")
         .snapshots();
   }
 
@@ -81,7 +80,11 @@ class FirebaseFirestoreService {
     }
   }
 
-  void isFolderExists(String uid, String folderName, BuildContext context) async {
+  void isFolderExists(
+    String uid,
+    String folderName,
+    BuildContext context,
+  ) async {
     try {
       DocumentSnapshot existingFolders = await _firebaseFirestore
           .collection("users")
@@ -91,7 +94,12 @@ class FirebaseFirestoreService {
           .get();
 
       if (existingFolders.exists) {
-        errorMessage("Folder Already Exists", "A folder with the same name already exists.", context);
+        print(existingFolders.data());
+        errorMessage(
+          "Folder Already Exists",
+          "A folder with the same name already exists.",
+          context,
+        );
       } else {
         debugPrint("Folder does not exist.");
       }
@@ -102,13 +110,13 @@ class FirebaseFirestoreService {
 
   void createFolder(String uid, String folderName, BuildContext context) async {
     try {
-      isFolderExists(uid, folderName,context);
+      isFolderExists(uid, folderName, context);
       DateTime dateTime = DateTime.now();
       DocumentReference folder = _firebaseFirestore
           .collection('users')
           .doc(uid)
           .collection("folders")
-          .doc();
+          .doc(folderName);
       RetrofitService.getClient()
           .createFolder(
             CreateFolderRequestModel(uid: uid, folderName: folderName),
@@ -153,7 +161,12 @@ class FirebaseFirestoreService {
     }
   }
 
-  void deleteFolder(String uid, String folderId, bool isStarred) async {
+  void deleteFolder(
+    String uid,
+    String folderId,
+    String folderName,
+    bool isStarred,
+  ) async {
     try {
       final folder = await _firebaseFirestore
           .collection('users')
@@ -210,10 +223,12 @@ class FirebaseFirestoreService {
           .collection('users')
           .doc(uid)
           .collection("folders")
-          .doc(folderId);
+          .doc(folderName);
 
       await RetrofitService.getClient()
-          .deleteFolder(DeleteFolderRequestModel(uid: uid, folderId: folderId))
+          .deleteFolder(
+            DeleteFolderRequestModel(uid: uid, folderName: folderName),
+          )
           .then((_) async {
             await deleteFolder.delete();
             isStarred
@@ -459,13 +474,12 @@ class FirebaseFirestoreService {
   Stream<QuerySnapshot<Map<String, dynamic>>> getFilesMetaDataList(
     String uid,
     String folderId,
+    String parentId
   ) {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
-        .collection('folders')
-        .doc(folderId)
-        .collection("files")
+        .collection('folders').where("parentId", isEqualTo: parentId)
         .snapshots();
   }
 

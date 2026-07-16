@@ -8,7 +8,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/firebase/firebase_internal_folders_operations.dart';
+import 'package:overcloud/firebase/firestore_create_operations.dart';
 import 'package:overcloud/services/download_file_service.dart';
+import 'package:overcloud/utils/create_folder_bottomsheet.dart';
 import 'package:overcloud/utils/format_date_time.dart';
 import 'package:overcloud/utils/pick_one_file.dart';
 import 'package:overcloud/utils/show_pop_over.dart';
@@ -16,12 +19,12 @@ import 'package:overcloud/utils/show_pop_over.dart';
 class FoldersPage extends StatefulWidget {
   final String folderName;
   final String folderId;
-  final String? path;
+  final String parentId;
   const FoldersPage({
     super.key,
     required this.folderName,
     required this.folderId,
-    this.path,
+    required this.parentId,
   });
 
   @override
@@ -35,10 +38,12 @@ class _FoldersPageState extends State<FoldersPage> {
 
   final ValueNotifier<int> _fileCount = ValueNotifier<int>(0);
 
-  final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
+  // final ValueNotifier<bool> _isShowDial = ValueNotifier(false);
+  bool _isShowDial = false;
 
   final PickOneFile _pickOneFile = PickOneFile();
   final ShowPopOver _popOver = ShowPopOver();
+  final FirestoreCreateOperations _create = FirestoreCreateOperations();
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +154,11 @@ class _FoldersPageState extends State<FoldersPage> {
                 SizedBox(height: 20),
 
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: _firestore.getFilesMetaDataList(uid, widget.folderId),
+                  stream: _firestore.getFilesMetaDataList(
+                    uid,
+                    widget.folderId,
+                    widget.parentId,
+                  ),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -221,23 +230,25 @@ class _FoldersPageState extends State<FoldersPage> {
                         };
 
                         String fileType = files[index]
-                            .data()['fileType']
+                            .data()['type']
                             .toString()
                             .toLowerCase();
-                        String fileTypeLogo =
-                            fileIcons[fileType] ?? "unknown.svg";
+                        String icon = fileIcons[fileType] ?? "unknown.svg";
 
                         return fileStructure(
-                                context,
-                                files[index]['fileName'],
-                                formatDateTime(files[index].data()['modifiedOn']),
-                                files[index].data()['fileType'],
-                                files[index].data()['fileSize'],
-                          fileTypeLogo,
+                          context,
+                          files[index].data()["id"],
+                          files[index].data()['parentId'],
+                          icon,
+                          files[index]['name'],
+                          files[index].data()['type'],
 
-                          files[index].data()['fileId'],
-                          files[index].data()['path'],
+                          files[index].data()['type'] != "folder"
+                              ? files[index].data()['size']
+                              : 0,
                           files[index].data()['isStarred'],
+                          // files[index].data()['isTrashed'],
+                          formatDateTime(files[index].data()['modifiedOn']),
                         );
                       },
                     );
@@ -248,21 +259,19 @@ class _FoldersPageState extends State<FoldersPage> {
           ),
         ),
       ),
-      floatingActionButton: _getFloatingActionButton(
-        widget.folderId,
-        widget.path ?? "",
-      ),
+      floatingActionButton: _getFloatingActionButton(widget.folderId),
     );
   }
 
-  Widget _getFloatingActionButton(String folderId, String path) {
+  Widget _getFloatingActionButton(String folderId) {
     return SpeedDialMenuButton(
       mainFABPosX: 5,
       //if needed to close the menu after clicking sub-FAB
-      isShowSpeedDial: _isShowDial.value,
+      isShowSpeedDial: _isShowDial,
       updateSpeedDialStatus: (isShow) {
-        //return any open or close change within the widget
-        _isShowDial.value = isShow;
+        setState(() {
+          _isShowDial = isShow;
+        });
       },
       isEnableAnimation: true,
 
@@ -288,23 +297,30 @@ class _FoldersPageState extends State<FoldersPage> {
             PlatformFile? file = await _pickOneFile.pickFile(folderId);
 
             if (file != null) {
-              
-              _firestore.createFileMetaData(
+              _create.createFile(
                 uid,
-                widget.folderId,
+                widget.parentId,
                 file.name,
-                file.extension,
+                file.extension!,
                 file.size,
-                path,
-                file,
-                false,
+                context,
               );
 
-              
+              // _firestore.createFileMetaData(
+              //   uid,
+              //   widget.folderId,
+              //   file.name,
+              //   file.extension,
+              //   file.size,
+              //   path,
+              //   file,
+              //   false,
+              // );
             }
 
-            _isShowDial.value = false;
-            setState(() {});
+            setState(() {
+              _isShowDial = false;
+            });
           },
           backgroundColor: Colors.deepOrange,
           child: FaIcon(FontAwesomeIcons.fileArrowUp, color: Colors.white),
@@ -318,31 +334,30 @@ class _FoldersPageState extends State<FoldersPage> {
           child: FaIcon(FontAwesomeIcons.cameraRetro, color: Colors.white),
         ),
         FloatingActionButton(
-          heroTag: "gallery",
+          heroTag: "newFolder",
           onPressed: () async {
-            PlatformFile? file = await _pickOneFile.pickFile("photos");
+            // PlatformFile? file = await _pickOneFile.pickFile("photos");
 
-            if (file != null) {
-              _firestore.createFileMetaData(
-                uid,
-                widget.folderId,
-                file.name,
-                file.extension,
-                file.size,
-                path,
-                file,
-                false,
-              );
-            }
-            _isShowDial.value = false;
-            setState(() {});
+            // if (file != null) {
+            //   _firestore.createFileMetaData(
+            //     uid,
+            //     widget.folderId,
+            //     file.name,
+            //     file.extension,
+            //     file.size,
+            //     "path",
+            //     file,
+            //     false,
+            //   );
+            // }
+            createFolderBottomSheet(context, uid, widget.parentId);
+            setState(() {
+              _isShowDial = false;
+            });
           },
           backgroundColor: Colors.deepOrange,
           shape: CircleBorder(),
-          child: const FaIcon(
-            FontAwesomeIcons.solidImages,
-            color: Colors.white,
-          ),
+          child: const FaIcon(FontAwesomeIcons.folderPlus, color: Colors.white),
         ),
       ],
       isSpeedDialFABsMini: false,
@@ -352,27 +367,40 @@ class _FoldersPageState extends State<FoldersPage> {
 
   Widget fileStructure(
     BuildContext context,
-    String fileName,
-    String date,
-    String filetype,
-    int fileSize,
-    String fileTypeLogo,
-    String fileId,
-    String path,
+    String id,
+    String parentId,
+    String icon,
+    String name,
+    String type,
+    int size,
     bool isStarred,
+    String modifiedOn,
   ) {
     // if (filetype == "Folder" ){
 
     // }
     return GestureDetector(
-      onTap: () async{
-       await DownloadService.downloadFile(
-  uid: uid,
-  folderId: widget.folderId,
-  fileId: "$fileId.$filetype",
-  fileName: fileName,
-  
-);
+      onTap: () async {
+        if (type == "folder") {
+          setState(() {
+            _isShowDial = false;
+          });
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  FoldersPage(folderName: name, folderId: id, parentId: id),
+            ),
+          );
+        } else {
+          await DownloadService.downloadFile(
+            uid: uid,
+            folderId: widget.folderId,
+            fileId: "$id.$type",
+            fileName: name,
+          );
+        }
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 10.0),
@@ -383,7 +411,13 @@ class _FoldersPageState extends State<FoldersPage> {
               children: [
                 Row(
                   children: [
-                    SvgPicture.asset("assets/icons/$fileTypeLogo", height: 40),
+                    type != "folder"
+                        ? SvgPicture.asset("assets/icons/$icon", height: 40)
+                        : FaIcon(
+                            FontAwesomeIcons.solidFolder,
+                            color: const Color.fromRGBO(255, 196, 87, 1),
+                            size: 30,
+                          ),
                     SizedBox(width: 15),
                     SizedBox(
                       width: 215,
@@ -392,7 +426,7 @@ class _FoldersPageState extends State<FoldersPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            fileName,
+                            name,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.urbanist(
                               color: Colors.white,
@@ -402,7 +436,7 @@ class _FoldersPageState extends State<FoldersPage> {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            date,
+                            modifiedOn,
                             style: GoogleFonts.urbanist(
                               color: Colors.white70,
                               fontSize: 13,
@@ -413,7 +447,7 @@ class _FoldersPageState extends State<FoldersPage> {
                     ),
                   ],
                 ),
-      
+
                 Row(
                   children: [
                     isStarred
@@ -431,19 +465,19 @@ class _FoldersPageState extends State<FoldersPage> {
                             color: Colors.white70,
                             size: 18,
                           ),
-      
+
                           onPressed: () {
                             _popOver.popOverFoldersPage(
                               buttonContext,
                               context,
                               uid,
                               widget.folderId,
-                              fileId,
-      
-                              fileName,
-                              filetype,
-                              fileSize,
-                              path,
+                              id,
+
+                              name,
+                              type,
+                              size,
+                              "path",
                               widget.folderId,
                               false,
                               isStarred,

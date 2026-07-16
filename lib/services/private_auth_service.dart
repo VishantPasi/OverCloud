@@ -16,12 +16,14 @@ class PrivateAuthService extends StatefulWidget {
   final bool isPFEnabled;
   final String folderName;
   final String folderId;
+  final String parentId;
   const PrivateAuthService({
     super.key,
     required this.uid,
     required this.isPFEnabled,
     required this.folderName,
     required this.folderId,
+    required this.parentId
   });
 
   @override
@@ -143,6 +145,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
           builder: (context) => PrivateFolderPage(
             folderName: widget.folderName,
             folderId: widget.folderId,
+            parentId: widget.parentId,
           ),
         ),
       );
@@ -217,6 +220,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
             builder: (context) => PrivateFolderPage(
               folderName: widget.folderName,
               folderId: widget.folderId,
+              parentId: widget.parentId,
             ),
           ),
         );
@@ -502,6 +506,7 @@ class _PrivateAuthServiceState extends State<PrivateAuthService> {
                         builder: (context) => PrivateFolderPage(
                           folderName: widget.folderName,
                           folderId: widget.folderId,
+                          parentId: widget.parentId,
                         ),
                       ),
                     );

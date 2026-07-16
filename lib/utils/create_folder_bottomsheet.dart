@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/firebase/firestore_create_operations.dart';
 
-Future<String?> createFolderBottomSheet(BuildContext context,String uid) async {
+Future<String?> createFolderBottomSheet(BuildContext context,String uid, String parentId) async {
   final TextEditingController folderController = TextEditingController();
-  final FirebaseFirestoreService firestore = FirebaseFirestoreService();
+  final FirestoreCreateOperations firestore = FirestoreCreateOperations();
 
   return await showModalBottomSheet<String>(
     context: context,
@@ -100,7 +100,7 @@ Future<String?> createFolderBottomSheet(BuildContext context,String uid) async {
                 ),
                 onPressed: () {
                   if(folderController.text.isNotEmpty){
-                    firestore.createFolder(uid, folderController.text.trim(), context);
+                    firestore.createFolder(uid, parentId, folderController.text.trim(), context);
                   }
                   
                   Navigator.pop(

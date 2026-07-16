@@ -374,7 +374,7 @@ class _FilesContentState extends State<FilesContent> {
                         ),
                         SizedBox(width: 10),
                         GestureDetector(
-                          onTap: () => createFolderBottomSheet(context, uid),
+                          onTap: () => createFolderBottomSheet(context, uid, ""),
                           child: Container(
                             width: 35,
                             height: 35,
@@ -412,7 +412,7 @@ class _FilesContentState extends State<FilesContent> {
 
                     if (!snapshot.hasData ||
                         snapshot.data!.docs.isEmpty ||
-                        snapshot.data!.docs.length == 6) {
+                        snapshot.data!.docs.length <= 6) {
                       return Container(
                         height: 150,
                         width: size.width,
@@ -439,18 +439,16 @@ class _FilesContentState extends State<FilesContent> {
                     }
 
                     final excludedFolders = [
-                      "Photos",
-                      "Documents",
-                      "Videos",
-                      "Music",
-                      "Starred",
-                      "Private",
+                      "photos",
+                      "documents",
+                      "videos",
+                      "music",
+                      "starred",
+                      "private",
                     ];
 
                     final folders = snapshot.data!.docs.where((doc) {
-                      return !excludedFolders.contains(
-                        doc.data()['folderName'],
-                      );
+                      return !excludedFolders.contains(doc.data()['name']);
                     }).toList();
 
                     return ListView.builder(
@@ -459,14 +457,16 @@ class _FilesContentState extends State<FilesContent> {
                       itemCount: folders.length,
                       itemBuilder: (context, index) {
                         return folderStructure(
-                          folders[index].id,
-                          folders[index].data()['folderName'],
+                          folders[index].data()['id'],
+                          
+
+                          folders[index].data()['name'],
                           formatDateTime(
                             folders[index].data()['modifiedOn'],
                           ).toString(),
-                          folders[index].reference.path,
-                          folders[index].id,
+
                           folders[index].data()['isStarred'],
+
                         );
                       },
                     );
@@ -480,25 +480,18 @@ class _FilesContentState extends State<FilesContent> {
     );
   }
 
-  Widget folderStructure(
-    String folderId,
-    String folderName,
-    String date,
-    String path,
-    String currentFolderId,
-    bool isStarred,
-  ) {
+  Widget folderStructure(String id, String name, String date, bool isStarred) {
     return GestureDetector(
-      onTap: () => Navigator.push(
+      onTap: () {
+
+        // print("parentId: $parentId");
+        Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => FoldersPage(
-            folderName: folderName,
-            folderId: folderId,
-            path: path,
-          ),
+          builder: (context) => FoldersPage(folderName: name, folderId: id, parentId: id),
         ),
-      ),
+      );
+      },
       child: Column(
         children: [
           Padding(
@@ -520,11 +513,16 @@ class _FilesContentState extends State<FilesContent> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            folderName,
-                            style: GoogleFonts.urbanist(
-                              color: Colors.white,
-                              fontSize: 14,
+                          SizedBox(
+                            width: 200,
+                            child: Text(
+                              name,
+                              style: GoogleFonts.urbanist(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           Text(
@@ -562,10 +560,10 @@ class _FilesContentState extends State<FilesContent> {
                                 buttonContext,
                                 context,
                                 uid,
-                                folderId,
-                                folderName,
-                                path,
-                                currentFolderId,
+                                id,
+                                name,
+                                "path",
+                                "currentFolderId",
                                 true,
                                 isStarred,
                               );
@@ -596,6 +594,7 @@ class _FilesContentState extends State<FilesContent> {
     String title,
     String subTitle,
     String folderId,
+ 
   ) {
     return GestureDetector(
       onTap: () {
@@ -603,7 +602,7 @@ class _FilesContentState extends State<FilesContent> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                FoldersPage(folderName: title, folderId: folderId),
+                FoldersPage(folderName: title, folderId: folderId, parentId: "",),
           ),
         );
       },
@@ -683,7 +682,7 @@ class _FilesContentState extends State<FilesContent> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                FoldersPage(folderName: title, folderId: folderId),
+                FoldersPage(folderName: title, folderId: folderId, parentId: "",),
           ),
         );
       },
