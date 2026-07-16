@@ -12,7 +12,7 @@ abstract class AppEnvironment {
 
     switch (_environment) {
       case Environment.dev:
-        baseUrl = "http://192.168.7.12:8000";
+        baseUrl = "http://192.168.7.15:8000";
         environmentName = "DEV";
         break;
 

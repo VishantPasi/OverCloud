@@ -10,7 +10,9 @@ import 'package:overcloud/models/RequestModels/delete_folder_request_model.dart'
 import 'package:overcloud/retrofit/retro_service.dart';
 import 'package:overcloud/services/secure_storage_service.dart';
 import 'package:overcloud/services/upload_file_service.dart';
+import 'package:overcloud/utils/error_dialog.dart';
 import 'package:overcloud/utils/file_category.dart';
+import 'package:path/path.dart';
 
 class FirebaseFirestoreService {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
@@ -79,8 +81,28 @@ class FirebaseFirestoreService {
     }
   }
 
-  void createFolder(String uid, String folderName) async {
+  void isFolderExists(String uid, String folderName, BuildContext context) async {
     try {
+      DocumentSnapshot existingFolders = await _firebaseFirestore
+          .collection("users")
+          .doc(uid)
+          .collection("folders")
+          .doc(folderName)
+          .get();
+
+      if (existingFolders.exists) {
+        errorMessage("Folder Already Exists", "A folder with the same name already exists.", context);
+      } else {
+        debugPrint("Folder does not exist.");
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void createFolder(String uid, String folderName, BuildContext context) async {
+    try {
+      isFolderExists(uid, folderName,context);
       DateTime dateTime = DateTime.now();
       DocumentReference folder = _firebaseFirestore
           .collection('users')
@@ -89,7 +111,7 @@ class FirebaseFirestoreService {
           .doc();
       RetrofitService.getClient()
           .createFolder(
-            CreateFolderRequestModel(uid: uid, folderName: folder.id),
+            CreateFolderRequestModel(uid: uid, folderName: folderName),
           )
           .then((_) {
             return folder.set({

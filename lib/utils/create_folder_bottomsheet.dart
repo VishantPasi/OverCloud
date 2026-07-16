@@ -100,7 +100,7 @@ Future<String?> createFolderBottomSheet(BuildContext context,String uid) async {
                 ),
                 onPressed: () {
                   if(folderController.text.isNotEmpty){
-                    firestore.createFolder(uid, folderController.text.trim());
+                    firestore.createFolder(uid, folderController.text.trim(), context);
                   }
                   
                   Navigator.pop(
