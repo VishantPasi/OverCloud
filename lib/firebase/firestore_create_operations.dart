@@ -1,14 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:overcloud/models/RequestModels/create_folder_request_model.dart';
 import 'package:overcloud/retrofit/retro_service.dart';
 import 'package:overcloud/utils/error_dialog.dart';
-import 'package:overcloud/utils/file_category.dart';
+
 
 class FirestoreCreateOperations {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
-  final FileCategory _category = FileCategory();
 
   void isFolderExists(
     String uid,
@@ -24,7 +22,6 @@ class FirestoreCreateOperations {
           .get();
 
       if (existingFolders.exists) {
-        print(existingFolders.data());
         errorMessage(
           "Folder Already Exists",
           "A folder with the same name already exists.",
@@ -38,7 +35,7 @@ class FirestoreCreateOperations {
     }
   }
 
-  void createFolder(String uid, String parentId, String folderName, BuildContext context) async {
+  void createFolder(String uid, String parentId, String folderName, String? folderPath, BuildContext context) async {
     try {
       isFolderExists(uid, folderName, context);
       DateTime dateTime = DateTime.now();
@@ -51,7 +48,7 @@ class FirestoreCreateOperations {
 
       RetrofitService.getClient()
           .createFolder(
-            CreateFolderRequestModel(uid: uid, folderName: folderName),
+            CreateFolderRequestModel(uid: uid, folderName: folderName, folderPath: folderPath),
           )
           .then((_) {
             return folder.set({

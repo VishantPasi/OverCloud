@@ -374,7 +374,7 @@ class _FilesContentState extends State<FilesContent> {
                         ),
                         SizedBox(width: 10),
                         GestureDetector(
-                          onTap: () => createFolderBottomSheet(context, uid, "",),
+                          onTap: () => createFolderBottomSheet(context, uid, "", ""),
                           child: Container(
                             width: 35,
                             height: 35,

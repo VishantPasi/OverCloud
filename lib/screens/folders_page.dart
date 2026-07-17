@@ -8,7 +8,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
-import 'package:overcloud/firebase/firebase_internal_folders_operations.dart';
 import 'package:overcloud/firebase/firestore_create_operations.dart';
 import 'package:overcloud/services/download_file_service.dart';
 import 'package:overcloud/utils/create_folder_bottomsheet.dart';
@@ -373,7 +372,7 @@ class _FoldersPageState extends State<FoldersPage> {
             //     false,
             //   );
             // }
-            createFolderBottomSheet(context, uid, widget.parentId);
+            createFolderBottomSheet(context, uid, widget.parentId, widget.currentPath);
             setState(() {
               _isShowDial = false;
             });
@@ -494,19 +493,18 @@ class _FoldersPageState extends State<FoldersPage> {
                           ),
 
                           onPressed: () {
-                            _popOver.popOverFoldersPage(
+                            _popOver.popOverFoldersPage2(
                               buttonContext,
                               context,
                               uid,
-                              widget.folderId,
                               id,
-
-                              name,
                               type,
-                              size,
-                              "path",
-                              widget.folderId,
-                              false,
+                              // name,
+                              // type,
+                              // size,
+                              // "path",
+                              // widget.folderId,
+                              // false,
                               isStarred,
                             );
                           },

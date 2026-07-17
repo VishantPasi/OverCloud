@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firestore_create_operations.dart';
 
-Future<String?> createFolderBottomSheet(BuildContext context,String uid, String parentId) async {
+Future<String?> createFolderBottomSheet(BuildContext context,String uid, String parentId, String folderPath) async {
   final TextEditingController folderController = TextEditingController();
   final FirestoreCreateOperations firestore = FirestoreCreateOperations();
 
@@ -100,7 +100,7 @@ Future<String?> createFolderBottomSheet(BuildContext context,String uid, String 
                 ),
                 onPressed: () {
                   if(folderController.text.isNotEmpty){
-                    firestore.createFolder(uid, parentId, folderController.text.trim(), context);
+                    firestore.createFolder(uid, parentId, folderController.text.trim(), folderPath, context);
                   }
                   
                   Navigator.pop(

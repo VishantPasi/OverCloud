@@ -3,7 +3,7 @@ class CreateFolderRequestModel {
   String? folderName;
   String? folderPath;
 
-  CreateFolderRequestModel({this.uid, this.folderName});
+  CreateFolderRequestModel({this.uid, this.folderName, this.folderPath});
 
   CreateFolderRequestModel.fromJson(Map<String, dynamic> json) {
     uid = json['uid'];

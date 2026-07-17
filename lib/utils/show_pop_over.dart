@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overcloud/firebase/firebase_firestore_service.dart';
+import 'package:overcloud/firebase/firestore_delete_operations.dart';
 import 'package:overcloud/utils/rename_file_bottomsheet.dart';
 import 'package:overcloud/utils/rename_folder_bottomsheet.dart';
 import 'package:popover/popover.dart';
@@ -494,11 +495,11 @@ class ShowPopOver {
                   onTap: () {
                     Navigator.pop(context);
                     isFolder
-                        ? firestoreService.deleteFolder(
+                        ? FirestoreDeleteOperations().deleteFolder(
                             uid,
                             folderId!,
-                            folderName!,
-                            isStarred,
+                            "",
+                            ""
                           )
                         : firestoreService.deleteFileMetaData(
                             uid,
@@ -1368,4 +1369,241 @@ class ShowPopOver {
       ),
     );
   }
+
+  Future<Object?> popOverFoldersPage2(
+    BuildContext buttonContext,
+    BuildContext context,
+    String uid,
+    String id,
+    String type,
+    bool isStarred,
+  ) {
+    return showPopover(
+      context: buttonContext,
+      bodyBuilder: (_) => Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+        child: menuItemsFoldersPage2(
+          context,
+          uid,
+          id,
+          type,
+          isStarred,
+        ),
+      ),
+      width: id == "starred" ? 130 : 150,
+      height: id == "starred" ? 155 : 210,
+      direction: PopoverDirection.bottom,
+      radius: 20,
+      backgroundColor: Color.fromRGBO(50, 50, 50, 0.945),
+    );
+  }
+
+  Widget menuItemsFoldersPage2(
+    BuildContext context,
+    String uid,
+    String id,
+    String type,
+    bool isStarred,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
+      child: Column(
+        children: [
+          // GestureDetector(
+          //   onTap: () {
+          //     Navigator.pop(context);
+          //     renameFileBottomSheet(
+          //       context,
+          //       uid,
+          //       folderId!,
+          //       fileId!,
+          //       fileName!,
+          //       fileType!,
+          //       path,
+          //     );
+          //   },
+          //   child: SizedBox(
+          //     height: 40,
+
+          //     child: Row(
+          //       children: [
+          //         Icon(Icons.edit, color: Colors.white70, size: 23),
+          //         SizedBox(width: 15),
+          //         Text(
+          //           "Rename",
+          //           style: GoogleFonts.urbanist(
+          //             color: Colors.white70,
+          //             fontSize: 14,
+          //             fontWeight: FontWeight.bold,
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
+          // SizedBox(height: 5),
+          // GestureDetector(
+          //   onTap: () {
+          //     if (isStarred) {
+          //       firestoreService.removeFromStarred(
+          //         uid,
+          //         folderId,
+          //         fileId,
+          //         path,
+          //         fileSize,
+          //         fileType,
+          //         isFolder,
+          //       );
+
+          //       Navigator.pop(context);
+          //     } else {
+          //       firestoreService.addToStarred(
+          //         uid,
+          //         folderId!,
+          //         null,
+          //         fileId,
+          //         fileName,
+          //         fileType,
+          //         fileSize,
+          //         path,
+          //         false,
+          //       );
+
+          //       Navigator.pop(context);
+          //     }
+          //   },
+          //   child: SizedBox(
+          //     height: 40,
+
+          //     child: Row(
+          //       children: [
+          //         isStarred
+          //             ? Icon(
+          //                 Icons.star_border_outlined,
+          //                 color: Colors.white70,
+          //                 size: 23,
+          //               )
+          //             : Row(
+          //                 children: [
+          //                   SizedBox(width: 4),
+          //                   FaIcon(
+          //                     FontAwesomeIcons.solidStar,
+          //                     color: Colors.white70,
+          //                     size: 16,
+          //                   ),
+          //                 ],
+          //               ),
+          //         SizedBox(width: 15),
+          //         isStarred
+          //             ? Text(
+          //                 "Unstar",
+          //                 style: GoogleFonts.urbanist(
+          //                   color: Colors.white70,
+          //                   fontSize: 14,
+          //                   fontWeight: FontWeight.bold,
+          //                 ),
+          //               )
+          //             : Text(
+          //                 "Starred",
+          //                 style: GoogleFonts.urbanist(
+          //                   color: Colors.white70,
+          //                   fontSize: 14,
+          //                   fontWeight: FontWeight.bold,
+          //                 ),
+          //               ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
+          // SizedBox(height: 5),
+          // SizedBox(
+          //   height: 40,
+
+          //   child: Row(
+          //     children: [
+          //       Icon(
+          //         Icons.info_outline_rounded,
+          //         color: Colors.white70,
+          //         size: 23,
+          //       ),
+          //       SizedBox(width: 15),
+          //       Text(
+          //         "Details",
+          //         style: GoogleFonts.urbanist(
+          //           color: Colors.white70,
+          //           fontSize: 14,
+          //           fontWeight: FontWeight.bold,
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          // currentFolderId != "starred" ? SizedBox(height: 10) : SizedBox(),
+          // currentFolderId != "starred"
+          //     ? Divider(
+          //         color: Colors.white.withValues(alpha: 0.1),
+          //         height: 2,
+          //         thickness: 2,
+          //       )
+          //     : SizedBox(),
+          // currentFolderId != "starred" ? SizedBox(height: 5) : SizedBox(),
+          id != "starred"
+              ? GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    
+                    // type == "folder" ? 
+                    FirestoreDeleteOperations().deleteFolder(uid, id,"","");
+                    // firestoreService.deleteFileMetaData(
+                    //   uid,
+                    //   id!,
+                    //   fileId!,
+                    //   fileType!,
+                    //   fileSize!,
+                    //   path,
+                    //   isStarred,
+                    // );
+                  },
+                  child: Row(
+                    children: [
+                      SizedBox(width: 5),
+                      SizedBox(
+                        height: 40,
+
+                        child: Row(
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.trashCan,
+                              color: Colors.red,
+                              size: 18,
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              "Delete",
+                              style: GoogleFonts.urbanist(
+                                color: Colors.red,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : SizedBox(),
+        ],
+      ),
+    );
+  }
+
+
 }
